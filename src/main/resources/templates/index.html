@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Construction Materials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+
+<a href="/" class="transition hover:opacity-80">
+<img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain"></a>
+    
+    <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <div class="flex space-x-2 border-r pr-6 border-gray-100">
+            <a href="?lang=en" class="hover:text-blue-600 transition">EN</a>
+            <span class="text-gray-300">|</span>
+            <a href="?lang=wo" class="hover:text-blue-600 transition">WO</a>
+        </div>
+
+        <div th:if="${unreadCount != null}" class="relative group">
+            <button class="flex items-center hover:text-blue-600 transition">
+                <span th:text="#{nav.alerts}">ALERTS</span> 
+                <span th:if="${unreadCount > 0}" th:text="${unreadCount}" 
+                      class="ml-1 bg-red-600 text-white px-1.5 py-0.5 rounded-full text-[7px] animate-pulse">
+                </span>
+            </button>
+            
+            <div class="absolute right-0 mt-2 w-72 bg-white shadow-2xl border border-gray-100 hidden group-hover:block p-6 z-[100]">
+                <h4 class="text-[8px] font-black border-b pb-3 mb-4 tracking-widest text-gray-400 uppercase">Updates</h4>
+                <div class="max-h-60 overflow-y-auto space-y-4">
+                    <div th:each="n : ${notifications}" class="border-b border-gray-50 pb-3 last:border-0">
+                        <p th:text="${n.message}" class="text-[9px] leading-relaxed text-gray-700 normal-case"></p>
+                        <span th:text="${#temporals.format(n.createdAt, 'dd MMM, HH:mm')}" class="text-[7px] text-gray-300 block mt-1"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="hover:text-blue-600 transition" th:text="#{nav.home}">Home</a>
+        <a href="/buyer/dashboard" class="hover:text-blue-600 transition" th:text="#{nav.orders}">My Orders</a>
+        <a href="/login" class="hover:text-blue-600 transition" th:text="#{nav.login}">Login</a>
+        <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition" th:text="#{nav.join}">Join Us</a>
+    </div>
+</nav>
+
+    <main class="max-w-7xl mx-auto px-12 py-16">
+        
+        <section class="mb-20 text-center">
+            <h2 class="text-4xl font-light tracking-tight mb-8">Build your <span class="font-bold italic text-blue-600">Future.</span></h2>
+            
+            <div class="mb-10 max-w-xl mx-auto">
+                <form th:action="@{/}" method="get" class="flex gap-2">
+                    <input type="text" name="keyword" th:value="${keyword}" 
+                           placeholder="Search materials (e.g. Cement, Tiles...)" 
+                           class="w-full border-b-2 border-gray-100 py-3 px-4 focus:border-black outline-none transition text-sm bg-white shadow-sm">
+                    <button type="submit" class="bg-black text-white px-8 py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition">Search</button>
+                    <a th:if="${keyword != null}" href="/" class="py-3 px-4 text-xs text-gray-400 hover:text-black self-center">Clear</a>
+                </form>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="/" 
+                   class="px-6 py-2 text-[9px] uppercase tracking-widest border transition"
+                   th:classappend="${selectedCategory == null ? 'bg-black text-white border-black' : 'text-gray-400 border-gray-100 hover:border-black hover:text-black'}">
+                    All Materials
+                </a>
+                <a th:each="cat : ${ {'Roofing', 'Plumbing', 'Electrical', 'Cement', 'Steel', 'Hardware'} }"
+                   th:href="@{/(category=${cat})}"
+                   th:text="${cat}"
+                   class="px-6 py-2 text-[9px] uppercase tracking-widest border transition"
+                   th:classappend="${selectedCategory == cat ? 'bg-black text-white border-black' : 'text-gray-400 border-gray-100 hover:border-black hover:text-black'}">
+                </a>
+            </div>
+        </section>
+
+        <div th:if="${products != null && !products.empty}" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div th:each="p : ${products}" class="group bg-white border border-gray-100 hover:shadow-xl transition duration-300">
+        
+        <div class="relative aspect-square overflow-hidden bg-gray-50">
+            <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/400x400'}" 
+                 class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            
+            <span class="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5">NEW</span>
+        </div>
+
+        <div class="p-4 space-y-2">
+            <h3 th:text="${p.name}" class="text-xs font-medium text-gray-800 line-clamp-2 h-8">Material Name</h3>
+            
+            <div class="flex items-center justify-between mt-2">
+                <p class="text-blue-600 font-bold text-sm">GMD <span th:text="${p.price}">0.00</span></p>
+                <span class="text-[8px] text-gray-400 uppercase" th:text="${p.category}">Category</span>
+            </div>
+
+            <div class="flex items-center gap-1 mt-1">
+                <span class="text-yellow-400 text-[10px]">★★★★★</span>
+                <span class="text-[8px] text-gray-400">30k+ sold</span>
+            </div>
+
+            <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post" class="mt-4">
+<input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />            
+
+    <button type="submit" class="w-full py-2 bg-white border border-blue-600 text-blue-600 text-[10px] font-bold uppercase hover:bg-blue-600 hover:text-white transition">
+        Add to Cart
+    </button>
+</form>
+        </div>
+    </div>
+</div>
+
+        <div th:if="${products == null || products.empty}" class="text-center py-40 bg-white border border-gray-100">
+            <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 mb-6 font-bold">No materials found.</p>
+            <a href="/" class="text-xs font-bold underline hover:text-blue-600 transition">View All Products</a>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 px-12 py-20 mt-20 text-center">
+        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
+    </footer>
+
+</body>
+</html>

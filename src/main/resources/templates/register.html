@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-md bg-white p-12 shadow-xl border border-gray-100">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black tracking-tighter mb-2 text-blue-600">LUMOO</h1>
+            <h2 class="text-xs font-medium uppercase tracking-[0.3em] text-gray-400">Create New Account</h2>
+        </div>
+
+        <form th:action="@{/register}" method="post" class="space-y-6">
+            
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Username</label>
+                <input type="text" name="username" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="syahmiuzair" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Email Address</label>
+                <input type="email" name="email" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="hello@lumoo.com" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Password</label>
+                <input type="password" name="password" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="••••••••" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Account Type</label>
+                <select name="role" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent cursor-pointer">
+                    <option value="USER">Buyer / User</option>
+                    <option value="VENDOR">Vendor / Supplier</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition duration-500 mt-4 shadow-xl">
+                Create Account
+            </button>
+        </form>
+
+        <div class="mt-10 pt-8 border-t border-gray-50 text-center">
+            <p class="text-[11px] text-gray-400 tracking-wide">
+                Already have an account? 
+                <a href="/login" class="text-black font-bold underline ml-1">Login Here</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

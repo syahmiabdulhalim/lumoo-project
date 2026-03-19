@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Vendor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+        <a href="/">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-12 w-auto object-contain">
+        </a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/vendor/add-product" class="bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition">+ Add Material</a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="text-red-600 hover:text-red-800 transition">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-12 py-16">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <h2 class="text-3xl font-light tracking-tight">Vendor <span class="font-bold italic text-blue-600">Dashboard</span></h2>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-2">Manage your inventory and sales</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[8px] text-gray-400 uppercase font-black">Total Materials</p>
+                <p class="text-2xl font-bold" th:text="${products.size()}">0</p>
+            </div>
+        </div>
+
+        <section class="bg-white shadow-2xl border-t-4 border-blue-600">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="text-gray-400 uppercase text-[8px] border-b">
+                        <th class="p-6">Product Info</th>
+                        <th>Category</th>
+                        <th>Price (GMD)</th>
+                        <th class="text-right p-6">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${products}" class="border-b last:border-0 hover:bg-gray-50 transition">
+                        <td class="p-6">
+                            <div class="flex items-center space-x-4">
+                                <img th:src="${p.imageUrl}" class="w-10 h-10 object-cover bg-gray-100">
+                                <span class="font-bold text-xs uppercase tracking-tight" th:text="${p.name}"></span>
+                            </div>
+                        </td>
+                        <td class="text-[10px] text-gray-500 font-medium uppercase" th:text="${p.category}"></td>
+                        <td class="text-xs font-bold text-blue-600" th:text="${p.price}">0.00</td>
+                        <td class="p-6 text-right space-x-4">
+                            <a th:href="@{/vendor/edit-product/{id}(id=${p.id})}" class="text-[10px] font-black text-blue-600 hover:underline uppercase">Edit</a>
+                            <a th:href="@{/vendor/delete-product/{id}(id=${p.id})}" 
+                               onclick="return confirm('Are you sure you want to delete this material?')"
+                               class="text-[10px] font-black text-red-600 hover:underline uppercase">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${products.empty}" class="py-20 text-center">
+                <p class="text-[10px] text-gray-300 uppercase tracking-[0.3em]">No materials listed under your account.</p>
+                <a href="/vendor/add-product" class="text-blue-600 font-bold text-xs underline mt-4 block">List your first material now</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-10">
+        <p class="text-[9px] text-gray-300 uppercase tracking-widest">© 2026 LUMOO Vendor Portal</p>
+    </footer>
+
+</body>
+</html>
