@@ -8,52 +8,51 @@ import java.time.LocalDateTime;
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String customerName;
+    private String address; // TAMBAH INI supaya tally dengan Controller
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     private LocalDateTime orderDate;
-
     private String status;
     private double totalAmount;
     private double adminCommission;
     private double vendorEarnings;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // Guna mappedBy supaya JPA tahu OrderItem yang pegang foreign key
     private List<OrderItem> items;
 
-    // Getters & Setters
-    public void setUser(User user) { this.user = user; }
+    // --- GETTERS & SETTERS (BETUL) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public User getUser() { return user; } // PULANGKAN 'User', BUKAN 'Object'
+    public void setUser(User user) { this.user = user; }
+
+    public double getTotalAmount() { return totalAmount; }
+    public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
     public LocalDateTime getOrderDate() { return orderDate; }
     public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }
-    public Object getUser() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUser'");
-    }
-    public double getAdminCommission() {
-        return adminCommission;
-    }
 
-    public void setAdminCommission(double adminCommission) {
-        this.adminCommission = adminCommission;
-    }
+    public double getAdminCommission() { return adminCommission; }
+    public void setAdminCommission(double adminCommission) { this.adminCommission = adminCommission; }
 
-    public double getVendorEarnings() {
-        return vendorEarnings;
-    }
-
-    public void setVendorEarnings(double vendorEarnings) {
-        this.vendorEarnings = vendorEarnings;
-    }
+    public double getVendorEarnings() { return vendorEarnings; }
+    public void setVendorEarnings(double vendorEarnings) { this.vendorEarnings = vendorEarnings; }
 }

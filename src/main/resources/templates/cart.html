@@ -23,13 +23,11 @@
             </tr>
         </table>
 
-        <div class="text-right">
-            <p class="text-gray-400 text-xs uppercase">Total Amount</p>
-            <h2 class="text-3xl font-black mb-6" th:text="${'GMD ' + total}"></h2>
-            <button class="bg-black text-white px-12 py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800">
-                Checkout Now
-            </button>
-        </div>
+        <form th:action="@{/checkout}" method="get" class="text-right">
+    <button type="submit" class="bg-blue-600 text-white px-12 py-4 text-xs font-bold uppercase tracking-widest hover:bg-blue-700 transition">
+        Proceed to Checkout
+    </button>
+</form>
     </div>
 </body>
 </html>

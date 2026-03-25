@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-12 font-['Inter']">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-8 shadow-sm">
+            <h2 class="text-xl font-black mb-6 uppercase">Shipping Details</h2>
+            <form th:action="@{/order/place}" method="post" class="space-y-4">
+                
+                <input type="text" name="address" placeholder="Delivery Address (e.g. Banjul, Gambia)" 
+                       class="w-full border p-3 text-sm focus:border-blue-600 outline-none" required>
+                
+                <select name="paymentMethod" class="w-full border p-3 text-sm focus:border-blue-600 outline-none">
+                    <option value="COD">Cash on Delivery</option>
+                    <option value="TRANSFER">Bank Transfer</option>
+                </select>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-blue-700">
+                    Place Order & Pay
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white p-8 shadow-sm border-t-4 border-blue-600">
+            <h2 class="text-xl font-black mb-6 uppercase">Summary</h2>
+            <div class="space-y-4">
+                <div th:each="item : ${cart}" class="flex justify-between text-sm">
+                    <span th:text="${item.name + ' x' + item.quantity}"></span>
+                    <span th:text="${'GMD ' + (item.price * item.quantity)}"></span>
+                </div>
+                <hr>
+                <div class="flex justify-between font-black text-lg">
+                    <span>Total Amount</span>
+                    <span class="text-blue-600" th:text="${'GMD ' + total}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,22 +1,40 @@
 package com.example.lumoo.model;
 
+import jakarta.persistence.*;
+
+@Entity // <--- PENTING: Tanpa ini, ralat tadi akan keluar
+@Table(name = "cart_items")
 public class CartItem {
-    private Long productId;
-    private String name;
-    private Double price;
-    private Integer quantity;
 
-    public CartItem(Long productId, String name, Double price, Integer quantity) {
-        this.productId = productId;
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // Getters & Setters
-    public Long getProductId() { return productId; }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    private int quantity;
+    
+    // Tambah nama dan harga supaya tally dengan Cart HTML anda
+    private String name; 
+    private double price;
+
+    // --- GETTERS & SETTERS ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { this.product = product; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
     public String getName() { return name; }
-    public Double getPrice() { return price; }
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public void setName(String name) { this.name = name; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
 }

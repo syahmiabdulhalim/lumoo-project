@@ -1,4 +1,6 @@
 package com.example.lumoo.model;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 @Entity @Table(name = "users")
@@ -8,6 +10,8 @@ public class User {
     private String username;
     private String password;
     private String email;
+    private String resetToken;
+private LocalDateTime tokenExpiry;
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean verified;
@@ -23,6 +27,10 @@ private User vendor;
     public void setEmail(String email) { this.email = email; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+    public String getResetToken() { return resetToken; }
+public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+public LocalDateTime getTokenExpiry() { return tokenExpiry; }
+public void setTokenExpiry(LocalDateTime tokenExpiry) { this.tokenExpiry = tokenExpiry; }
 public Long getId() {
         return id;
     }

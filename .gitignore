@@ -38,3 +38,11 @@ build/
 /out/
 .DS_Store
 .mvn/wrapper/
+application.properties
+
+# Local environment variables
+.env
+.local.properties
+
+# Log files
+*.log
