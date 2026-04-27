@@ -13,6 +13,9 @@ public class OrderItem {
     private String productName;
     private Integer quantity;
     private Double price;
+    @ManyToOne // <--- WAJIB ADA INI
+@JoinColumn(name = "product_id")
+    private Product product;
 @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
@@ -22,7 +25,11 @@ public class OrderItem {
     public Integer getQuantity() { return quantity; }
     public Double getPrice() { return price; }
     public Order getOrder() { return order; }
+// --- TAMBAH INI DI BAHAGIAN GETTERS ---
+public Product getProduct() { return product; }
 
+// --- TAMBAH INI DI BAHAGIAN SETTERS ---
+public void setProduct(Product product) { this.product = product; }
     // --- SETTERS ---
     public void setId(Long id) { this.id = id; }
     public void setProductName(String productName) { this.productName = productName; }
