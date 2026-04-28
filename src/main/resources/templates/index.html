@@ -4,117 +4,276 @@
     <title>LUMOO | Construction Materials</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <style>
+        .swiper { width: 100%; height: 520px; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .swiper-pagination-bullet { background: white; opacity: 0.6; }
+        .swiper-pagination-bullet-active { background: white; opacity: 1; }
+        .swiper-button-next, .swiper-button-prev { color: white; }
+    </style>
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
+    <!-- NAV -->
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
-    <a href="/" class="transition hover:opacity-80">
-        <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
-    </a>
-    
-    <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-    
-    <a href="/" class="hover:text-blue-600 transition">Home</a>
-
-    <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-        <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
-        
-        <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
-        <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
-        <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-
-       <form th:action="@{/logout}" method="post" class="inline">
-    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
-</form>
-    </div>
-
-    <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-        <a href="/login" class="hover:text-blue-600 transition">Login</a>
-        <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
-    </div>
-</div>
-</nav>
-
-   <main class="max-w-7xl mx-auto px-12 py-20">
-    
-    <section class="mb-32">
-        <div class="flex flex-col md:flex-row items-end justify-between gap-8">
-            <div class="max-w-3xl text-left">
-                <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block">Gambia's Premier Supply</span>
-                <h2 class="text-7xl font-light tracking-tighter leading-none text-gray-900">
-                    Build your <br>
-                    <span class="font-black italic">Future.</span>
-                </h2>
-            </div>
-            <div class="w-full md:w-96">
-                <form th:action="@{/}" method="get" class="relative border-b-2 border-black py-2">
-                    <input type="text" name="keyword" th:value="${keyword}" 
-                           placeholder="Search collection..." 
-                           class="w-full bg-transparent outline-none text-sm uppercase tracking-widest font-bold placeholder-gray-300">
-                    <button type="submit" class="absolute right-0 top-1/2 -translate-y-1/2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </button>
+        <a href="/" class="transition hover:opacity-80">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+        </a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-blue-600 transition">Home</a>
+            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
                 </form>
             </div>
+            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+                <a href="/login" class="hover:text-blue-600 transition">Login</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+            </div>
         </div>
-    </section>
+    </nav>
 
-    <section class="mb-16 border-b border-gray-100 pb-8">
-        <div class="flex flex-wrap gap-8 items-center">
-            <a href="/" class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-               th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-               All
-            </a>
-            <a th:each="cat : ${ {'Roofing', 'Plumbing', 'Electrical', 'Cement', 'Steel', 'Hardware'} }"
-               th:href="@{/(category=${cat})}"
-               th:text="${cat}"
-               class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-               th:classappend="${selectedCategory == cat ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-            </a>
+    <!-- HERO SLIDESHOW -->
+    <div class="swiper relative">
+        <div class="swiper-wrapper">
+
+            <!-- Slide 1 -->
+            <div class="swiper-slide relative">
+                <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80" alt="Construction">
+                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                    <div class="text-white max-w-xl">
+                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Gambia's Premier Supply</span>
+                        <h1 class="text-6xl font-light tracking-tighter leading-none">
+                            Build your <br><span class="font-black italic">Future.</span>
+                        </h1>
+                        <a href="/category/building" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                            Shop Building →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="swiper-slide relative">
+                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80" alt="Roofing">
+                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                    <div class="text-white max-w-xl">
+                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Premium Roofing Solutions</span>
+                        <h1 class="text-6xl font-light tracking-tighter leading-none">
+                            Protect what <br><span class="font-black italic">Matters.</span>
+                        </h1>
+                        <a href="/category/roofing" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                            Shop Roofing →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="swiper-slide relative">
+                <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="Cement">
+                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                    <div class="text-white max-w-xl">
+                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Quality Cement & Concrete</span>
+                        <h1 class="text-6xl font-light tracking-tighter leading-none">
+                            Strong <br><span class="font-black italic">Foundations.</span>
+                        </h1>
+                        <a href="/category/cement" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                            Shop Cement →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
-    </section>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
 
-    <div th:if="${products != null && !products.empty}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-        <div th:each="p : ${products}" class="group relative">
-            
-            <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-                <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/000?text=' + p.name}" 
-                     class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition duration-700">
-                
-                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                    <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
-                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <button type="submit" class="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-colors">
-                            Quick Add +
+    <main class="max-w-7xl mx-auto px-12 py-20">
+
+        <!-- HERO TEXT + SEARCH -->
+        <section class="mb-20">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-8">
+                <div class="max-w-3xl text-left">
+                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block">Everything You Need To Build</span>
+                    <h2 class="text-5xl font-light tracking-tighter leading-none text-gray-900">
+                        Browse our <span class="font-black italic">Collection.</span>
+                    </h2>
+                </div>
+                <div class="w-full md:w-96">
+                    <form th:action="@{/}" method="get" class="relative border-b-2 border-black py-2">
+                        <input type="text" name="keyword" th:value="${keyword}"
+                               placeholder="Search collection..."
+                               class="w-full bg-transparent outline-none text-sm uppercase tracking-widest font-bold placeholder-gray-300">
+                        <button type="submit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-0 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
                         </button>
                     </form>
                 </div>
             </div>
+        </section>
 
-            <div class="space-y-1">
-                <div class="flex justify-between items-baseline">
-                    <h3 th:text="${p.name}" class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">Material Name</h3>
-                    <span class="text-[9px] text-gray-400 font-medium" th:text="${p.category}">Category</span>
+        <!-- CATEGORY CARDS -->
+        <section class="mb-20">
+            <h2 class="text-[10px] uppercase tracking-[0.5em] font-black text-gray-400 mb-10">Shop By Category</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                <a href="/category/roofing" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏠 Roofing</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Decra, Corrugated & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/cement" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🧱 Cement</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Portland, Ready-mix & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/electrical" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">⚡ Electrical</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Wiring, Cables & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/plumbing" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔧 Plumbing</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Pipes, Fittings & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/building" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏗️ Building</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Bricks, Blocks & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/timber" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🪵 Timber</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Hardwood, Softwood & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/paint" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🎨 Paint</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Interior, Exterior & more</span>
+                    </div>
+                </a>
+
+                <a href="/category/hardware" class="group relative aspect-square overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80"
+                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 flex flex-col justify-end p-6">
+                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔩 Hardware</span>
+                        <span class="text-gray-300 text-[8px] mt-1">Tools, Bolts & more</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- FILTER TABS -->
+        <section class="mb-10 border-b border-gray-100 pb-8">
+            <div class="flex flex-wrap gap-8 items-center">
+                <a href="/"
+                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
+                   th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+                    All Products
+                </a>
+                <a th:each="cat : ${ {'Roofing', 'Plumbing', 'Electrical', 'Cement', 'Steel', 'Hardware', 'Timber', 'Paint', 'Building'} }"
+                   th:href="@{/(category=${cat})}"
+                   th:text="${cat}"
+                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
+                   th:classappend="${selectedCategory == cat ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+                </a>
+            </div>
+        </section>
+
+        <!-- PRODUCTS GRID -->
+        <div th:if="${products != null && !products.empty}"
+             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+            <div th:each="p : ${products}" class="group relative">
+                <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                    <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/000?text=' + p.name}"
+                         class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition duration-700">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                        <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
+                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit" class="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-colors">
+                                Quick Add +
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                <p class="text-sm font-light text-gray-500 italic">
-                    GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
-                </p>
+                <div class="space-y-1">
+                    <div class="flex justify-between items-baseline">
+                        <h3 th:text="${p.name}" class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">Material Name</h3>
+                        <span class="text-[9px] text-gray-400 font-medium" th:text="${p.category}">Category</span>
+                    </div>
+                    <p class="text-sm font-light text-gray-500 italic">
+                        GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div th:if="${products == null || products.empty}" class="py-40 text-center border-y border-gray-100">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold">The collection is currently empty.</p>
-    </div>
+        <div th:if="${products == null || products.empty}" class="py-40 text-center border-y border-gray-100">
+            <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold">The collection is currently empty.</p>
+        </div>
 
-</main>
+    </main>
 
+    <!-- FOOTER -->
     <footer class="bg-white border-t border-gray-100 px-12 py-20 mt-20 text-center">
         <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
     </footer>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        new Swiper('.swiper', {
+            loop: true,
+            autoplay: { delay: 5000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            effect: 'fade',
+            fadeEffect: { crossFade: true }
+        });
+    </script>
+
+    <div th:replace="~{fragments/loading :: loading}"></div>
 
 </body>
 </html>

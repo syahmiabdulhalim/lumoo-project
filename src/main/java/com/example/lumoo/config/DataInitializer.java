@@ -18,20 +18,15 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initData() {
         return args -> {
-            // Semak jika Admin sudah wujud
-            if (userRepository.findByUsername("admin").isEmpty()) {
-                User admin = new User();
-                admin.setUsername("admin");
-                
-                // Kata laluan akan di-encrypt: "admin123"
-                admin.setPassword(passwordEncoder.encode("admin123"));
-                
-                // PENTING: Role mesti bermula dengan "ROLE_" untuk Spring Security
-                admin.setRole(Role.ADMIN); 
-                
-                userRepository.save(admin);
-                System.out.println(">>> [LUMOO] Admin account created: admin / admin123");
-            }
+            if (userRepository.findByEmail("admin@lumoo.my").isEmpty()) {
+    User admin = new User();
+    admin.setUsername("admin@lumoo.my");
+    admin.setEmail("admin@lumoo.my");
+    admin.setPassword(passwordEncoder.encode(System.getenv("ADMIN_PASSWORD")));
+    admin.setRole(Role.ADMIN);
+    userRepository.save(admin);
+    // System.out.println(">>> Admin created: admin@lumoo.my / " + System.getenv("ADMIN_PASSWORD"));
+}
         };
     }
 }

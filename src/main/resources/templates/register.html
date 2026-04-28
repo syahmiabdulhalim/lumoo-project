@@ -12,13 +12,21 @@
             <h1 class="text-3xl font-black tracking-tighter mb-2 text-blue-600">LUMOO</h1>
             <h2 class="text-xs font-medium uppercase tracking-[0.3em] text-gray-400">Create New Account</h2>
         </div>
+        <div th:if="${param.success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
+    Registration successful!
+</div>
+
+<div th:if="${param.error}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
+    Registration failed. Please try again.
+</div>
+
+<div th:if="${param.email_taken}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
+    This email is already registered. Please use another.
+</div>
 
         <form th:action="@{/register}" method="post" class="space-y-6">
             
-            <div>
-                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Username</label>
-                <input type="text" name="username" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="syahmiuzair" required>
-            </div>
+           
 
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Email Address</label>
@@ -50,5 +58,7 @@
             </p>
         </div>
     </div>
+    <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
+
 </html>

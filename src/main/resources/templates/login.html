@@ -18,32 +18,36 @@
         </div>
 
         <div th:if="${param.success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
-            Pendaftaran berjaya! Sila log masuk.
+            Please log in.
         </div>
 
         <div th:if="${param.error}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
-            Username atau password salah.
+            Incorrect email or password.
         </div>
 
         <div th:if="${param.logout}" class="mb-6 p-4 bg-blue-50 border-l-2 border-blue-500 text-blue-700 text-[10px] uppercase tracking-widest font-bold">
-            Anda telah log keluar.
+            You have been logged out.
         </div>
+
+        
+            <div th:if="${param.reset_success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
+                Password updated successfully! 
+            </div>
 
         <form th:action="@{/login}" method="post" class="space-y-8">
             
-            <div>
-                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Username</label>
-                <input type="text" name="username" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="Enter your username" required>
-            </div>
+            <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+    Email Address
+</label>
+<input type="email" name="username" 
+    class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" 
+    placeholder="Enter your email" required>
 
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Password</label>
                 <input type="password" name="password" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="••••••••" required>
             </div>
 
-            <div th:if="${param.reset_success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
-                Kata laluan berjaya dikemaskini! Sila log masuk.
-            </div>
 
             <div class="flex justify-end">
                 <a th:href="@{/forgot-password}" class="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition">
@@ -65,4 +69,5 @@
     </div>
 
 </body>
+<div th:replace="~{fragments/loading :: loading}"></div>
 </html>

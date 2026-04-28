@@ -62,7 +62,7 @@ public class WebController {
     @GetMapping("/buyer/dashboard")
     public String buyerDashboard(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
-        User user = userRepository.findByUsername(principal.getName()).orElse(null);
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user != null) {
             List<Order> myOrders = orderRepository.findByUserOrderByOrderDateDesc(user);
             if (myOrders != null) myOrders.removeIf(Objects::isNull);
@@ -82,7 +82,7 @@ public class WebController {
     public String orderDetails(@PathVariable Long id, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
         
-        User currentUser = userRepository.findByUsername(principal.getName()).orElse(null);
+        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
         Order order = orderRepository.findById(id).orElse(null);
 
         // PEMBETULAN: Security check tanpa ralat casting
@@ -99,7 +99,7 @@ public class WebController {
         if (principal == null) return "redirect:/login";
         
         Order order = orderRepository.findById(id).orElse(null);
-        User currentUser = userRepository.findByUsername(principal.getName()).orElse(null);
+        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
 
         // PEMBETULAN: Security check tanpa ralat casting
         if (order != null && ((User) order.getUser()).getId().equals(currentUser.getId())) {

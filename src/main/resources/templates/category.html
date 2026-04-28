@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="'LUMOO | ' + ${categoryName}">LUMOO | Category</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <!-- NAV (same as index.html) -->
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+        <a href="/" class="transition hover:opacity-80">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+        </a>
+
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-blue-600 transition">Home</a>
+
+            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+                </form>
+            </div>
+
+            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+                <a href="/login" class="hover:text-blue-600 transition">Login</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-12 py-20">
+
+        <!-- BREADCRUMB -->
+        <div class="mb-12 flex items-center gap-3 text-[10px] uppercase tracking-widest text-gray-400">
+            <a href="/" class="hover:text-black transition">Home</a>
+            <span>/</span>
+            <span class="text-black font-bold" th:text="${categoryName}">Category</span>
+        </div>
+
+        <!-- CATEGORY HEADER -->
+        <section class="mb-20 pb-12 border-b border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block"
+                          th:text="${icon + ' ' + categoryName}">
+                        Category
+                    </span>
+                    <h1 class="text-7xl font-light tracking-tighter leading-none text-gray-900">
+                        <span th:text="${categoryName}" class="font-black italic">Category</span><br>
+                        <span class="font-light">Collection.</span>
+                    </h1>
+                    <p class="mt-6 text-sm text-gray-500 max-w-xl leading-relaxed" th:text="${description}">
+                        Category description here.
+                    </p>
+                </div>
+
+                <!-- PRODUCT COUNT -->
+                <div class="text-right">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-400">Available Products</p>
+                    <p class="text-5xl font-black" th:text="${productCount}">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ALL CATEGORIES NAV -->
+        <section class="mb-16 border-b border-gray-100 pb-8">
+            <div class="flex flex-wrap gap-8 items-center">
+                <a href="/" class="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400 hover:text-black transition">
+                    All
+                </a>
+                <a th:each="cat : ${ {'Roofing', 'Plumbing', 'Electrical', 'Cement', 'Steel', 'Hardware', 'Timber', 'Paint'} }"
+                   th:href="@{/category/{name}(name=${cat.toLowerCase()})}"
+                   th:text="${cat}"
+                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
+                   th:classappend="${cat.equalsIgnoreCase(categoryName) ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+                </a>
+            </div>
+        </section>
+
+        <!-- PRODUCTS GRID -->
+        <div th:if="${products != null && !products.empty}"
+             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+
+            <div th:each="p : ${products}" class="group relative">
+
+                <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                    <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/000?text=' + p.name}"
+                         class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition duration-700"
+                         th:alt="${p.name}">
+
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                        <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
+                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit"
+                                    class="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-colors">
+                                Quick Add +
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between items-baseline">
+                        <h3 th:text="${p.name}"
+                            class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">
+                            Material Name
+                        </h3>
+                        <span class="text-[9px] text-gray-400 font-medium" th:text="${p.category}">Category</span>
+                    </div>
+                    <p class="text-sm font-light text-gray-500 italic">
+                        GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div th:if="${products == null || products.empty}" class="py-40 text-center border-y border-gray-100">
+            <p class="text-5xl mb-6" th:text="${icon}">📦</p>
+            <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2"
+               th:text="'No ' + ${categoryName} + ' products available yet.'">
+            </p>
+            <p class="text-[10px] text-gray-300">Check back soon — vendors are adding products daily.</p>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-100 px-12 py-20 mt-20 text-center">
+        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
+    </footer>
+
+    <!-- LOADING FRAGMENT -->
+    <div th:replace="~{fragments/loading :: loading}"></div>
+
+</body>
+</html>

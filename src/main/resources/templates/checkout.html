@@ -8,7 +8,7 @@
     <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         <div class="bg-white p-8 shadow-sm">
             <h2 class="text-xl font-black mb-6 uppercase">Shipping Details</h2>
-            <form th:action="@{/order/place}" method="post" class="space-y-4">
+            <form th:action="@{/order/place}" method="post">
                 
                 <input type="text" name="address" placeholder="Delivery Address (e.g. Banjul, Gambia)" 
                        class="w-full border p-3 text-sm focus:border-blue-600 outline-none" required>
@@ -40,4 +40,5 @@
         </div>
     </div>
 </body>
+<div th:replace="~{fragments/loading :: loading}"></div>
 </html>

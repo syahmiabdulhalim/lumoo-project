@@ -13,38 +13,33 @@ public class AuthController {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
+    private static final org.slf4j.Logger log = 
+    org.slf4j.LoggerFactory.getLogger(AuthController.class);
+
     @GetMapping("/login")
     public String loginPage() { return "login"; }
-
-    @PostMapping("/login")
-    public String processLogin(@RequestParam String username, @RequestParam String password) {
-        var userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent() && passwordEncoder.matches(password, userOpt.get().getPassword())) {
-            if (userOpt.get().getRole() == Role.VENDOR) return "redirect:/vendor/add-product";
-            return "redirect:/";
-        }
-        return "redirect:/login?error";
-    }
 
     @GetMapping("/register")
     public String registerPage() { return "register"; }
 
-    @PostMapping("/register")
+@PostMapping("/register")
 public String processRegister(@ModelAttribute RegisterRequest req) {
     try {
+        if (userRepository.findByEmail(req.email()).isPresent()) {
+            return "redirect:/register?email_taken";
+        }
+
         User user = new User();
-        user.setUsername(req.username());
+        user.setUsername(req.email());
         user.setEmail(req.email());
         user.setPassword(passwordEncoder.encode(req.password()));
-        // Guna toUpperCase() untuk elakkan ralat enum
-        user.setRole(Role.valueOf(req.role().toUpperCase()));
+        user.setRole(Role.USER);
         userRepository.save(user);
         return "redirect:/login?success";
     } catch (Exception e) {
-        System.err.println("REGISTER ERROR: " + e.getMessage());
-        return "redirect:/register?error";
-    }
+    log.error("Registration failed for {}: {}", req.email(), e.getMessage());
+    return "redirect:/register?error";
 }
-
+}
     
 }

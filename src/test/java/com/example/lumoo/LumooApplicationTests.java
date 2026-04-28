@@ -17,7 +17,7 @@ class LumooApplicationTests {
     void testAdminExists() {
         // Ini akan menguji jika akaun admin yang kita buat dalam 
         // DataInitializer.java benar-benar wujud dalam database.
-        assertNotNull(userRepository.findByUsername("admin").orElse(null), 
+        assertNotNull(userRepository.findByEmail("admin").orElse(null), 
             "Admin account should be initialized on startup");
     }
 }

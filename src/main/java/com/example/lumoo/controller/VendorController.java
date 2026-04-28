@@ -27,7 +27,7 @@ public class VendorController {
 
     @GetMapping("/dashboard")
     public String vendorDashboard(Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        User vendor = userRepository.findByUsername(currentUser.getUsername()).orElseThrow();
+        User vendor = userRepository.findByEmail(currentUser.getUsername()).orElseThrow();
         List<Product> products = productRepository.findByVendor(vendor);
         List<Order> vendorOrders = orderRepository.findOrdersByVendorId(vendor.getId());
 
@@ -54,21 +54,22 @@ public class VendorController {
         return "vendor/add-product";
     }
 
-    @PostMapping("/add-product")
-    public String saveProduct(@ModelAttribute Product product, Principal principal) {
-        if (principal == null) return "redirect:/login";
-        User currentVendor = userRepository.findByUsername(principal.getName()).orElse(null);
-        if (currentVendor != null) {
-            product.setVendor(currentVendor); 
-            productRepository.save(product);
-        }
-        return "redirect:/vendor/dashboard?success_add";
+   @PostMapping("/add-product")
+public String saveProduct(@ModelAttribute Product product, Principal principal) {
+    if (principal == null) return "redirect:/login";
+    User currentVendor = userRepository.findByEmail(principal.getName()).orElse(null);
+    if (currentVendor != null) {
+        product.setVendor(currentVendor);
+        product.setApproved(false); // ← wajib pending dulu
+        productRepository.save(product);
     }
+    return "redirect:/vendor/dashboard?success_add";
+}
 
     @GetMapping("/edit-product/{id}")
     public String editProductPage(@PathVariable Long id, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
-        User currentUser = userRepository.findByUsername(principal.getName()).orElse(null);
+        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
         Product product = productRepository.findById(id).orElse(null);
 
         if (product == null || !product.getVendor().getId().equals(currentUser.getId())) {
@@ -82,7 +83,7 @@ public class VendorController {
     @PostMapping("/edit-product/{id}")
     public String updateProduct(@PathVariable Long id, @ModelAttribute("product") Product product, Principal principal) {
         if (principal == null) return "redirect:/login";
-        User currentUser = userRepository.findByUsername(principal.getName()).orElse(null);
+        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
         Product existing = productRepository.findById(id).orElse(null);
 
         if (existing == null || !existing.getVendor().getId().equals(currentUser.getId())) {
@@ -98,7 +99,7 @@ public class VendorController {
     @GetMapping("/delete-product/{id}")
     public String deleteProduct(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";
-        User currentUser = userRepository.findByUsername(principal.getName()).orElse(null);
+        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
         Product existing = productRepository.findById(id).orElse(null);
 
         if (existing != null && existing.getVendor().getId().equals(currentUser.getId())) {

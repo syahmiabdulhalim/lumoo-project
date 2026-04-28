@@ -1,6 +1,7 @@
 package com.example.lumoo.controller;
 
 import com.example.lumoo.model.Order;
+import com.example.lumoo.model.Product;
 import com.example.lumoo.repository.*; // Import semua repository dengan mudah
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,22 +20,38 @@ public class AdminController {
     @Autowired private InquiryRepository inquiryRepository;
 
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
-        List<Order> orders = orderRepository.findAll();
-        
-        model.addAttribute("totalOrders", orders.size());
-        model.addAttribute("totalRevenue", orders.stream().mapToDouble(Order::getTotalAmount).sum());
-        model.addAttribute("totalCommission", orders.stream().mapToDouble(Order::getAdminCommission).sum()); // Untuk Multi-Vendor Commission
-        
-        model.addAttribute("products", productRepository.findAll());
-        model.addAttribute("users", userRepository.findAll());
-        model.addAttribute("orders", orders);
-        
-        // GUNAKAN METHOD SUSUNAN MASA (Created At)
-        model.addAttribute("inquiries", inquiryRepository.findAllByOrderByCreatedAtDesc());
-        
-        return "admin/dashboard";
-    }
+public String adminDashboard(Model model) {
+    List<Order> orders = orderRepository.findAll();
+
+    model.addAttribute("totalOrders", orders.size());
+    model.addAttribute("totalRevenue", orders.stream().mapToDouble(Order::getTotalAmount).sum());
+    model.addAttribute("totalCommission", orders.stream().mapToDouble(Order::getAdminCommission).sum());
+    model.addAttribute("products", productRepository.findAll());
+    model.addAttribute("users", userRepository.findAll());
+    model.addAttribute("orders", orders);
+    model.addAttribute("inquiries", inquiryRepository.findAllByOrderByCreatedAtDesc());
+
+    // Pending products untuk moderation
+    model.addAttribute("pendingProducts", productRepository.findByApproved(false));
+
+    return "admin/dashboard";
+}
+
+// Approve product
+@GetMapping("/approve-product/{id}")
+public String approveProduct(@PathVariable Long id) {
+    Product product = productRepository.findById(id).orElseThrow();
+    product.setApproved(true);
+    productRepository.save(product);
+    return "redirect:/admin/dashboard?approved#moderation";
+}
+
+// Reject & delete product
+@GetMapping("/reject-product/{id}")
+public String rejectProduct(@PathVariable Long id) {
+    productRepository.deleteById(id);
+    return "redirect:/admin/dashboard?rejected#moderation";
+}
 
     // CRUD: Delete Product
     @GetMapping("/delete-product/{id}")

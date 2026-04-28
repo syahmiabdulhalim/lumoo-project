@@ -11,12 +11,9 @@ import java.util.Optional;
 @Repository
 public interface CartRepository extends JpaRepository<CartItem, Long> {
     
-    // Cari semua barang dalam bakul milik seorang user sahaja
     List<CartItem> findByUser(User user);
     
-    // Cari jika produk yang sama sudah ada dalam bakul user (supaya kita cuma update quantity)
     Optional<CartItem> findByUserAndProduct(User user, Product product);
     
-    // Padam semua barang dalam bakul selepas user berjaya 'Checkout'
     void deleteByUser(User user);
 }

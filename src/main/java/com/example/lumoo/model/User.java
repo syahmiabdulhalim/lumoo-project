@@ -9,7 +9,8 @@ public class User {
     private Long id;
     private String username;
     private String password;
-    private String email;
+    @Column(unique = true)
+private String email;
     private String resetToken;
 private LocalDateTime tokenExpiry;
     @Enumerated(EnumType.STRING)

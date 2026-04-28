@@ -31,7 +31,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         )
         .formLogin(form -> form
             .loginPage("/login")
-            // TAMBAH LOGIK DI BAWAH INI:
+            .usernameParameter("username")
             .successHandler(customSuccessHandler)
             .permitAll()
         )

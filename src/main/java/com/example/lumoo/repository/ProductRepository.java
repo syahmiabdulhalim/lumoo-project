@@ -11,4 +11,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByVendor(User vendor);
     // Tambah ini untuk penapisan kategori
     List<Product> findByCategory(String category);
+    List<Product> findByApproved(boolean approved);
+    List<Product> findByCategoryAndApproved(String category, boolean approved);
 }

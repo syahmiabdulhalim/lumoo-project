@@ -10,6 +10,11 @@ public class Product {
     private String name;
     private String category;
     private Double price;
+    private Boolean approved = false;
+    @Column(name = "approved")
+
+public boolean isApproved() { return approved; }
+public void setApproved(boolean approved) { this.approved = approved; }
     
     @Column(name = "image_url")
     private String imageUrl;

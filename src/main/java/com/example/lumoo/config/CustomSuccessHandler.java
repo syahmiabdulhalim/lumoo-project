@@ -16,15 +16,17 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         
-        System.out.println("DEBUG LOGIN: Berjaya Authenticate! Menentukan hala tuju untuk: " + authentication.getName());
+        // System.out.println("DEBUG LOGIN: Berjaya Authenticate! Menentukan hala tuju untuk: " + authentication.getName());
 
         // 1. Check jika ada request yang tersangkut (macam klik Add to Cart sebelum login)
         SavedRequest savedRequest = new HttpSessionRequestCache().getRequest(request, response);
         if (savedRequest != null) {
             String targetUrl = savedRequest.getRedirectUrl();
-            System.out.println("DEBUG LOGIN: Menghantar user ke URL asal: " + targetUrl);
-            response.sendRedirect(targetUrl);
-            return;
+            if (!targetUrl.contains("/error") && !targetUrl.contains("/login")) {
+                // System.out.println("DEBUG LOGIN: Menghantar user ke URL asal: " + targetUrl);
+                response.sendRedirect(targetUrl);
+                return;
+            }
         }
 
         // 2. Tentukan Redirect URL berdasarkan Role
@@ -33,7 +35,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
         for (var authority : authorities) {
             String role = authority.getAuthority();
-            System.out.println("DEBUG LOGIN: Menyemak Authority -> " + role);
+            // System.out.println("DEBUG LOGIN: Menyemak Authority -> " + role);
 
             if (role.equals("ROLE_ADMIN")) {
                 redirectUrl = "/admin/dashboard";
@@ -47,7 +49,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             }
         }
 
-        System.out.println("DEBUG LOGIN: Redirecting ke -> " + redirectUrl);
+        // System.out.println("DEBUG LOGIN: Redirecting ke -> " + redirectUrl);
         response.sendRedirect(redirectUrl);
     }
 }

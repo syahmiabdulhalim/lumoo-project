@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="loading">
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center" style="display:none !important">
+        <div class="text-center">
+            <div class="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-[9px] uppercase tracking-[0.3em] font-bold text-gray-400">Loading...</p>
+        </div>
+    </div>
+    <script>
+        const loading = document.getElementById('loading');
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', () => {
+                loading.style.cssText = 'display:flex !important';
+            });
+        });
+        document.querySelectorAll('a[href]').forEach(link => {
+            link.addEventListener('click', function() {
+                const href = this.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('mailto')) {
+                    loading.style.cssText = 'display:flex !important';
+                }
+            });
+        });
+        window.addEventListener('pageshow', () => {
+            loading.style.cssText = 'display:none !important';
+        });
+    </script>
+</div>
+
+</body>
+</html>
