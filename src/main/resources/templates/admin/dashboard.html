@@ -1,278 +1,398 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>LUMOO | Admin Control</title>
+    <title>LUMOO | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        .mono { font-family: 'DM Mono', monospace; }
+        .sidebar-link { transition: all 0.15s ease; }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(255,255,255,0.08);
+            padding-left: 1.25rem;
+        }
+        .stat-card { transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        .stat-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .badge-pending   { background:#fef9c3; color:#854d0e; }
+        .badge-paid      { background:#dcfce7; color:#166534; }
+        .badge-shipped   { background:#dbeafe; color:#1e40af; }
+        .badge-delivered { background:#d1fae5; color:#065f46; }
+        .badge-cancelled { background:#fee2e2; color:#991b1b; }
+        .badge-admin  { background:#ede9fe; color:#5b21b6; }
+        .badge-vendor { background:#dbeafe; color:#1e40af; }
+        .badge-user   { background:#f1f5f9; color:#475569; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .table-row { transition: background 0.1s ease; }
+        .table-row:hover { background: #f8fafc; }
+    </style>
 </head>
-<body class="bg-gray-50 font-sans text-xs">
+<body class="bg-slate-50 text-slate-800">
 
-    <div class="flex min-h-screen">
+<div class="flex min-h-screen">
 
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-black text-white p-10 fixed h-full overflow-y-auto">
-            <h1 class="text-2xl font-black tracking-tighter text-blue-600 mb-12">LUMOO.</h1>
-            <nav class="space-y-8 uppercase tracking-[0.2em] font-bold text-[9px]">
-                <a href="#stats" class="block hover:text-blue-600">Overview</a>
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-slate-900 text-slate-300 fixed h-full flex flex-col z-30">
+        <!-- Logo -->
+        <div class="px-6 py-6 border-b border-slate-800">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">L</span>
+                </div>
+                <div>
+                    <p class="text-white font-semibold text-sm tracking-tight">Lumoo</p>
+                    <p class="text-slate-500 text-xs">Admin Panel</p>
+                </div>
+            </div>
+        </div>
 
-                <!-- Moderation dengan badge -->
-                <a href="#moderation" class="flex items-center justify-between hover:text-blue-600">
-                    <span>Moderation</span>
-                    <span th:if="${pendingProducts != null && pendingProducts.size() > 0}"
-                          class="bg-red-500 text-white px-2 py-0.5 rounded-full text-[8px]"
-                          th:text="${pendingProducts.size()}">
-                    </span>
+        <!-- Nav -->
+        <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <p class="text-slate-600 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">Main</p>
+
+            <a href="#stats" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white active">
+                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                Overview
+            </a>
+            <a href="#orders" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Orders
+            </a>
+            <a href="#inventory" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Products
+            </a>
+            <a href="#users" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Users
+            </a>
+            <a href="#inquiries" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                Inquiries
+            </a>
+
+            <div class="pt-4 mt-4 border-t border-slate-800">
+                <p class="text-slate-600 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">Account</p>
+                <a href="/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    Back to Store
                 </a>
+                <a href="/logout" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Logout
+                </a>
+            </div>
+        </nav>
 
-                <a href="#inventory" class="block hover:text-blue-600">Inventory</a>
-                <a href="#users" class="block hover:text-blue-600">User Management</a>
-                <a href="#orders" class="block hover:text-blue-600">Transactions</a>
-                <a href="#inquiries" class="block hover:text-blue-600">Inquiries</a>
-                <a href="/" class="block text-gray-500 pt-10">← Back to Store</a>
-            </nav>
-        </aside>
+        <!-- Admin badge -->
+        <div class="px-4 py-4 border-t border-slate-800">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
+                <div>
+                    <p class="text-white text-xs font-medium">Admin</p>
+                    <p class="text-slate-500 text-[10px]">admin@lumoo.com</p>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-        <main class="flex-1 ml-64 p-16">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 ml-64 min-h-screen">
 
-            <!-- STATS -->
-            <section id="stats" class="grid grid-cols-4 gap-8 mb-20">
-                <div class="bg-white p-8 shadow-sm border-t-2 border-blue-600">
-                    <p class="text-gray-400 uppercase mb-2">Total Sales</p>
-                    <h2 class="text-2xl font-black" th:text="${'GMD ' + totalRevenue}">0.00</h2>
-                </div>
-                <div class="bg-white p-8 shadow-sm border-t-2 border-black">
-                    <p class="text-gray-400 uppercase mb-2">Orders</p>
-                    <h2 class="text-2xl font-black" th:text="${totalOrders}">0</h2>
-                </div>
-                <div class="bg-white p-8 shadow-sm border-t-2 border-red-500">
-                    <p class="text-gray-400 uppercase mb-2">Pending Approval</p>
-                    <h2 class="text-2xl font-black"
-                        th:text="${pendingProducts != null ? pendingProducts.size() : 0}">0</h2>
-                </div>
-                <div class="bg-white p-8 shadow-sm border-t-2 border-green-500">
-                    <p class="text-gray-400 uppercase mb-2">Commission</p>
-                    <h2 class="text-2xl font-black" th:text="${'GMD ' + totalCommission}">0.00</h2>
+        <!-- Top bar -->
+        <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
+            <div>
+                <h1 class="text-base font-semibold text-slate-800">Dashboard</h1>
+                <p class="text-xs text-slate-400">Welcome back, Admin</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-slate-400 mono" th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}">Today</span>
+                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span class="text-xs text-slate-500">System Online</span>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8">
+
+            <!-- STAT CARDS -->
+            <section id="stats">
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">Overview</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+                    <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-medium text-slate-500">Total Revenue</span>
+                            <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-slate-800 mono" th:text="${'GMD ' + #numbers.formatDecimal(totalRevenue, 1, 2)}">GMD 0.00</p>
+                        <p class="text-xs text-slate-400 mt-1">All time sales</p>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-medium text-slate-500">Total Orders</span>
+                            <div class="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-slate-800 mono" th:text="${totalOrders}">0</p>
+                        <p class="text-xs text-slate-400 mt-1">Transactions placed</p>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-medium text-slate-500">Commission Earned</span>
+                            <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-slate-800 mono" th:text="${'GMD ' + #numbers.formatDecimal(totalCommission, 1, 2)}">GMD 0.00</p>
+                        <p class="text-xs text-slate-400 mt-1">10% platform fee</p>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-medium text-slate-500">Registered Users</span>
+                            <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-slate-800 mono" th:text="${#lists.size(users)}">0</p>
+                        <p class="text-xs text-slate-400 mt-1">Total accounts</p>
+                    </div>
+
                 </div>
             </section>
 
-            <!-- MODERATION — letakkan selepas stats, paling atas -->
-            <section id="moderation" class="mb-20 bg-white p-10 shadow-sm border-t-8 border-red-500">
-                <h3 class="font-black uppercase tracking-widest mb-2 border-b pb-4 flex items-center justify-between">
-                    <span>Product Moderation</span>
-                    <span th:if="${pendingProducts != null && pendingProducts.size() > 0}"
-                          class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px]"
-                          th:text="${pendingProducts.size() + ' Pending'}">
-                    </span>
-                </h3>
-
-                <!-- Notification -->
-                <div th:if="${param.approved}"
-                     class="mb-6 p-3 bg-green-50 border-l-2 border-green-500 text-green-700 text-[9px] uppercase tracking-widest font-bold">
-                    ✅ Product approved successfully.
-                </div>
-                <div th:if="${param.rejected}"
-                     class="mb-6 p-3 bg-red-50 border-l-2 border-red-500 text-red-700 text-[9px] uppercase tracking-widest font-bold">
-                    ❌ Product rejected and removed.
-                </div>
-
-                <!-- No pending -->
-                <div th:if="${pendingProducts == null || pendingProducts.empty}"
-                     class="text-center py-10 text-gray-300 uppercase text-[9px] tracking-widest">
-                    ✅ No pending products. All clear!
-                </div>
-
-                <!-- Pending products list -->
-                <div th:each="product : ${pendingProducts}"
-                     class="flex items-center justify-between border border-gray-100 p-4 mb-3 hover:shadow-sm transition">
-                    <div class="flex items-center gap-4">
-                        <img th:if="${product.imageUrl != null}" th:src="${product.imageUrl}"
-                             class="w-20 h-20 object-cover border border-gray-100">
-                        <div th:unless="${product.imageUrl != null}"
-                             class="w-20 h-20 bg-gray-100 flex items-center justify-center text-gray-300 text-[9px] uppercase">
-                            No Image
-                        </div>
+            <!-- ORDERS TABLE -->
+            <section id="orders">
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
-                            <p class="font-bold text-sm" th:text="${product.name}"></p>
-                            <p class="text-[9px] text-blue-600 uppercase tracking-widest font-bold mt-1"
-                               th:text="${product.category}"></p>
-                            <p class="text-[10px] text-gray-500 mt-1"
-                               th:text="'GMD ' + ${product.price}"></p>
-                            <p class="text-[9px] text-gray-400 mt-1"
-                               th:text="'By: ' + ${product.vendor.email}"></p>
+                            <h2 class="text-sm font-semibold text-slate-800">Orders</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Manage and update order statuses</p>
+                        </div>
+                        <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(orders)} + ' total'">0 total</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order ID</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Update</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="o : ${orders}" class="table-row">
+                                    <td class="px-6 py-4">
+                                        <span class="mono text-xs text-slate-400" th:text="${'#LMO-' + o.id}">#LMO-0</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-sm font-medium text-slate-700" th:text="${o.user != null ? o.user.email : 'Unknown'}">Customer</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="mono text-sm font-semibold text-slate-800" th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}">GMD 0.00</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                                              th:text="${o.status}"
+                                              th:classappend="${o.status == 'DELIVERED' ? 'badge-delivered' :
+                                                               o.status == 'SHIPPED'   ? 'badge-shipped' :
+                                                               o.status == 'PAID'      ? 'badge-paid' :
+                                                               o.status == 'CANCELLED' ? 'badge-cancelled' : 'badge-pending'}">
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <form th:action="@{/admin/update-order-status}" method="post" class="flex items-center gap-2">
+                                            <input type="hidden" name="orderId" th:value="${o.id}">
+                                            <select name="status" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                <option value="PENDING"   th:selected="${o.status == 'PENDING'}">Pending</option>
+                                                <option value="PAID"      th:selected="${o.status == 'PAID'}">Paid</option>
+                                                <option value="SHIPPED"   th:selected="${o.status == 'SHIPPED'}">Shipped</option>
+                                                <option value="DELIVERED" th:selected="${o.status == 'DELIVERED'}">Delivered</option>
+                                                <option value="CANCELLED" th:selected="${o.status == 'CANCELLED'}">Cancelled</option>
+                                            </select>
+                                            <button type="submit" class="text-xs bg-slate-800 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                                Save
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <a th:href="@{/admin/delete-order/{id}(id=${o.id})}"
+                                           onclick="return confirm('Delete this order?')"
+                                           class="text-slate-300 hover:text-red-500 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div th:if="${orders == null || orders.empty}" class="text-center py-16">
+                            <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            <p class="text-sm text-slate-400">No orders yet</p>
                         </div>
                     </div>
-                    <div class="flex gap-3">
-                        <a th:href="@{/admin/approve-product/{id}(id=${product.id})}"
-                           class="bg-black text-white px-5 py-2 text-[9px] uppercase tracking-widest font-bold hover:bg-green-600 transition">
-                            ✓ Approve
-                        </a>
-                        <a th:href="@{/admin/reject-product/{id}(id=${product.id})}"
-                           onclick="return confirm('Reject and permanently delete this product?')"
-                           class="border border-red-300 text-red-500 px-5 py-2 text-[9px] uppercase tracking-widest font-bold hover:bg-red-50 transition">
-                            ✕ Reject
-                        </a>
-                    </div>
                 </div>
             </section>
 
-            <!-- INVENTORY -->
-            <section id="inventory" class="mb-20 bg-white p-10 shadow-sm">
-                <h3 class="font-black uppercase tracking-widest mb-8 border-b pb-4">Product Inventory</h3>
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="text-gray-400 uppercase text-[8px] border-b">
-                            <th class="py-4">Product Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="p : ${products}" class="border-b hover:bg-gray-50">
-                            <td th:text="${p.name}" class="py-4 font-bold"></td>
-                            <td th:text="${p.category}"></td>
-                            <td th:text="${'GMD ' + p.price}"></td>
-                            <td>
-                                <span th:if="${p.approved}"
-                                      class="px-2 py-1 bg-green-100 text-green-700 text-[7px] font-black uppercase rounded-full">
-                                    Approved
-                                </span>
-                                <span th:unless="${p.approved}"
-                                      class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[7px] font-black uppercase rounded-full">
-                                    Pending
-                                </span>
-                            </td>
-                            <td>
-                                <a th:href="@{/admin/delete-product/{id}(id=${p.id})}"
-                                   onclick="return confirm('Remove this product?')"
-                                   class="text-red-600 font-bold hover:underline">Remove</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div th:if="${products == null || products.empty}"
-                     class="text-center py-10 text-gray-300 uppercase text-[9px]">
-                    No products found.
-                </div>
-            </section>
-
-            <!-- USERS -->
-            <section id="users" class="mb-20 bg-white p-10 shadow-sm border-l-8 border-black">
-                <h3 class="font-black uppercase tracking-widest mb-8 border-b pb-4">User Management</h3>
-                <div class="grid grid-cols-3 gap-6">
-                    <div th:each="u : ${users}" class="p-4 border border-gray-100 flex justify-between items-center">
+            <!-- PRODUCTS TABLE -->
+            <section id="inventory">
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
-                            <p th:text="${u.email}" class="font-bold"></p>
-                            <p th:text="${u.role}" class="text-[8px] text-blue-600 uppercase mt-1"></p>
+                            <h2 class="text-sm font-semibold text-slate-800">Products</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">All listed products on the platform</p>
                         </div>
-                        <a th:href="@{/admin/delete-user/{id}(id=${u.id})}"
-                           onclick="return confirm('Delete this user?')"
-                           class="text-gray-300 hover:text-red-600 text-[9px] font-bold uppercase">Delete</a>
+                        <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(products)} + ' items'">0 items</span>
                     </div>
-                </div>
-                <div th:if="${users == null || users.empty}"
-                     class="text-center py-10 text-gray-300 uppercase text-[9px]">
-                    No users found.
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="p : ${products}" class="table-row">
+                                    <td class="px-6 py-4 font-medium text-slate-800" th:text="${p.name}">Product Name</td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md" th:text="${p.category}">Category</span>
+                                    </td>
+                                    <td class="px-6 py-4 mono text-sm font-semibold text-slate-700" th:text="${'GMD ' + p.price}">GMD 0</td>
+                                    <td class="px-6 py-4 text-xs text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '—'}">vendor</td>
+                                    <td class="px-6 py-4">
+                                        <a th:href="@{/admin/delete-product/{id}(id=${p.id})}"
+                                           onclick="return confirm('Remove this product?')"
+                                           class="text-slate-300 hover:text-red-500 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div th:if="${products == null || products.empty}" class="text-center py-16">
+                            <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            <p class="text-sm text-slate-400">No products listed</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <!-- ORDERS -->
-            <section id="orders" class="mb-20 bg-white p-10 shadow-sm border-t-8 border-blue-600">
-                <h3 class="font-black uppercase tracking-widest mb-8 border-b pb-4">Transaction & Order Tracking</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-gray-400 uppercase text-[8px] border-b">
-                                <th class="py-4 px-2">Order ID</th>
-                                <th>Customer</th>
-                                <th>Total Amount</th>
-                                <th>Status</th>
-                                <th>Update Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="o : ${orders}" class="border-b hover:bg-gray-50 transition">
-                                <td class="py-6 px-2 font-mono text-gray-400" th:text="${'#LMO-' + o.id}"></td>
-                                <td class="font-bold" th:text="${o.user.email}">Customer</td>
-                                <td class="font-medium" th:text="${'GMD ' + o.totalAmount}">0.00</td>
-                                <td>
-                                    <span th:text="${o.status}"
-                                          class="px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-tighter"
-                                          th:classappend="${o.status == 'DELIVERED' ? 'bg-green-100 text-green-700' : o.status == 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">
-                                    </span>
-                                </td>
-                                <td>
-                                    <form th:action="@{/admin/update-order-status}" method="post" class="flex items-center gap-2">
-                                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <input type="hidden" name="orderId" th:value="${o.id}">
-                                        <select name="status" class="bg-gray-50 border border-gray-200 p-1 text-[9px] outline-none focus:border-black">
-                                            <option value="PENDING" th:selected="${o.status == 'PENDING'}">PENDING</option>
-                                            <option value="SHIPPED" th:selected="${o.status == 'SHIPPED'}">SHIPPED</option>
-                                            <option value="DELIVERED" th:selected="${o.status == 'DELIVERED'}">DELIVERED</option>
-                                            <option value="CANCELLED" th:selected="${o.status == 'CANCELLED'}">CANCELLED</option>
-                                        </select>
-                                        <button type="submit" class="bg-black text-white px-3 py-1 text-[7px] font-bold uppercase hover:bg-blue-600 transition">
-                                            Update
-                                        </button>
-                                    </form>
-                                </td>
-                                <td>
-                                    <a th:href="@{/admin/delete-order/{id}(id=${o.id})}"
-                                       onclick="return confirm('Delete this order?')"
-                                       class="text-red-400 hover:text-red-700 font-bold text-[9px] uppercase">
-                                        Delete
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div th:if="${orders == null || orders.empty}"
-                     class="text-center py-20 text-gray-300 uppercase tracking-widest text-[9px]">
-                    No transactions recorded yet.
+            <!-- USERS TABLE -->
+            <section id="users">
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Users</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">All registered accounts</p>
+                        </div>
+                        <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(users)} + ' accounts'">0 accounts</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Verified</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr th:each="u : ${users}" class="table-row">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs font-bold"
+                                                 th:text="${#strings.toUpperCase(#strings.substring(u.email, 0, 1))}">A</div>
+                                            <span class="text-sm text-slate-700" th:text="${u.email}">user@email.com</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                                              th:text="${u.role}"
+                                              th:classappend="${u.role.name() == 'ADMIN'  ? 'badge-admin' :
+                                                               u.role.name() == 'VENDOR' ? 'badge-vendor' : 'badge-user'}">
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span th:if="${u.verified}" class="text-xs text-emerald-600 font-medium">✓ Verified</span>
+                                        <span th:unless="${u.verified}" class="text-xs text-slate-400">Unverified</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <a th:href="@{/admin/delete-user/{id}(id=${u.id})}"
+                                           onclick="return confirm('Delete this user?')"
+                                           class="text-slate-300 hover:text-red-500 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
             <!-- INQUIRIES -->
-            <section id="inquiries" class="mb-20 bg-white p-10 shadow-sm border-l-8 border-blue-600">
-                <h3 class="font-black uppercase tracking-widest mb-8 border-b pb-4">Customer Inquiries</h3>
-                <div class="space-y-6">
-                    <div th:each="inq : ${inquiries}" class="p-6 border border-gray-100 hover:shadow-md transition">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 th:text="${inq.subject}" class="font-bold text-sm uppercase text-blue-600">Subject</h4>
-                                <p class="text-[9px] text-gray-400 font-bold uppercase"
-                                   th:text="'From: ' + ${inq.buyerName} + ' (' + ${inq.email} + ')'"></p>
-                            </div>
-                            <span th:text="${#temporals.format(inq.createdAt, 'dd MMM, HH:mm')}"
-                                  class="text-[8px] text-gray-300"></span>
+            <section id="inquiries">
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-semibold text-slate-800">Inquiries</h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Customer messages and support requests</p>
                         </div>
-                        <p th:text="${inq.message}"
-                           class="text-[10px] leading-relaxed text-gray-600 bg-gray-50 p-4 mb-4 italic"></p>
-                        <div class="flex gap-4">
-                            <a th:href="'mailto:' + ${inq.email} + '?subject=Re: ' + ${inq.subject}"
-                               class="bg-black text-white px-6 py-2 text-[8px] font-black uppercase tracking-widest hover:bg-blue-600 transition">
-                                Reply via Email
-                            </a>
-                            <a th:href="@{/admin/delete-inquiry/{id}(id=${inq.id})}"
-                               onclick="return confirm('Archive this inquiry?')"
-                               class="text-gray-300 hover:text-red-600 self-center font-bold uppercase text-[8px]">
-                                Archive
-                            </a>
-                        </div>
+                        <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(inquiries)} + ' messages'">0 messages</span>
                     </div>
-                    <div th:if="${inquiries == null || inquiries.empty}"
-                         class="text-center py-10 text-gray-300 uppercase text-[9px]">
-                        No pending inquiries.
+                    <div class="divide-y divide-slate-100">
+                        <div th:each="inq : ${inquiries}" class="table-row px-6 py-5">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-3 mb-1">
+                                        <p class="text-sm font-semibold text-slate-800" th:text="${inq.subject}">Subject</p>
+                                        <span class="mono text-[10px] text-slate-400"
+                                              th:text="${#temporals.format(inq.createdAt, 'dd MMM, HH:mm')}">Date</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mb-3"
+                                       th:text="${inq.buyerName + ' · ' + inq.email}">From</p>
+                                    <p class="text-sm text-slate-600 bg-slate-50 rounded-lg px-4 py-3 leading-relaxed"
+                                       th:text="${inq.message}">Message</p>
+                                </div>
+                                <div class="flex flex-col gap-2 shrink-0">
+                                    <a th:href="${'mailto:' + inq.email + '?subject=Re: ' + inq.subject}"
+                                       class="text-xs bg-slate-800 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center">
+                                        Reply
+                                    </a>
+                                    <a th:href="@{/admin/delete-inquiry/{id}(id=${inq.id})}"
+                                       onclick="return confirm('Archive this inquiry?')"
+                                       class="text-xs text-slate-400 hover:text-red-500 transition-colors text-center font-medium">
+                                        Archive
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${inquiries == null || inquiries.empty}" class="text-center py-16">
+                            <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                            <p class="text-sm text-slate-400">No pending inquiries</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
-        </main>
-    </div>
-
-    <div th:replace="~{fragments/loading :: loading}"></div>
-
+        </div>
+    </main>
+</div>
+<div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>
