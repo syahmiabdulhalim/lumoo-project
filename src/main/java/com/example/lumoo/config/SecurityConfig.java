@@ -23,6 +23,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
             .requestMatchers("/cart/**").authenticated()
             .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/vendor/apply").authenticated()
             .requestMatchers("/vendor/**").hasRole("VENDOR")
             .requestMatchers("/buyer/**", "/cart/**").hasRole("USER")
             .requestMatchers("/.well-known/**").permitAll()

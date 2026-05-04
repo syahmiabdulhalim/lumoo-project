@@ -12,53 +12,68 @@
             <h1 class="text-3xl font-black tracking-tighter mb-2 text-blue-600">LUMOO</h1>
             <h2 class="text-xs font-medium uppercase tracking-[0.3em] text-gray-400">Create New Account</h2>
         </div>
-        <div th:if="${param.success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
-    Registration successful!
-</div>
 
-<div th:if="${param.error}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
-    Registration failed. Please try again.
-</div>
-
-<div th:if="${param.email_taken}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
-    This email is already registered. Please use another.
-</div>
-
-        <form th:action="@{/register}" method="post" class="space-y-6">
-            
-           
+        <form th:action="@{/register}" method="post" class="space-y-6" id="registerForm">
 
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Email Address</label>
-                <input type="email" name="email" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="hello@lumoo.com" required>
+                <input type="email" name="email" id="email"
+                       class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent"
+                       placeholder="hello@lumoo.com" required>
             </div>
 
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Password</label>
-                <input type="password" name="password" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent" placeholder="••••••••" required>
+                <input type="password" name="password" id="password"
+                       class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent"
+                       placeholder="••••••••" required>
             </div>
 
             <div>
-                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Account Type</label>
-                <select name="role" class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent cursor-pointer">
-                    <option value="USER">Buyer / User</option>
-                    <option value="VENDOR">Vendor / Supplier</option>
-                </select>
+                <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Confirm Password</label>
+                <input type="password" id="confirmPassword"
+                       class="w-full border-b border-gray-200 py-2 focus:border-black outline-none transition text-sm bg-transparent"
+                       placeholder="••••••••" required>
+                <p id="matchError" class="text-red-500 text-[10px] mt-1 hidden">Password tidak sepadan.</p>
             </div>
 
-            <button type="submit" class="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition duration-500 mt-4 shadow-xl">
+            <button type="submit" id="submitBtn"
+                    class="w-full bg-black text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition duration-500 mt-4 shadow-xl">
                 Create Account
             </button>
         </form>
 
         <div class="mt-10 pt-8 border-t border-gray-50 text-center">
             <p class="text-[11px] text-gray-400 tracking-wide">
-                Already have an account? 
+                Already have an account?
                 <a href="/login" class="text-black font-bold underline ml-1">Login Here</a>
             </p>
         </div>
     </div>
-    <div th:replace="~{fragments/loading :: loading}"></div>
-</body>
 
+    <script>
+        const password = document.getElementById('password');
+        const confirm = document.getElementById('confirmPassword');
+        const error   = document.getElementById('matchError');
+        const btn     = document.getElementById('submitBtn');
+
+        function validate() {
+            const mismatch = confirm.value && password.value !== confirm.value;
+            error.classList.toggle('hidden', !mismatch);
+            btn.disabled = mismatch;
+            btn.classList.toggle('opacity-40', mismatch);
+            btn.classList.toggle('cursor-not-allowed', mismatch);
+        }
+
+        password.addEventListener('input', validate);
+        confirm.addEventListener('input', validate);
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            if (password.value !== confirm.value) {
+                e.preventDefault();
+                validate();
+            }
+        });
+    </script>
+</body>
 </html>

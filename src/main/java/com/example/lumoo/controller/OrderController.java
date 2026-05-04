@@ -23,9 +23,11 @@ public class OrderController {
     public String checkoutPage(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
 
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
-        List<CartItem> cartItems = cartRepository.findByUser(user);
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+if (user == null) return "redirect:/login";
+if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
 
+        List<CartItem> cartItems = cartRepository.findByUser(user);
         if (cartItems.isEmpty()) return "redirect:/cart";
 
         double total = cartItems.stream()
@@ -45,8 +47,16 @@ public class OrderController {
         // 1. Pastikan user login
         if (principal == null) return "redirect:/login";
 
+        if (address == null || address.trim().isEmpty())
+        return "redirect:/checkout?error=address_required";
+
+          if (!paymentMethod.equals("COD") && !paymentMethod.equals("TRANSFER"))
+        return "redirect:/checkout?error=invalid_payment";
+
         // 2. Load user
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+if (user == null) return "redirect:/login";
+if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
 
         // 3. Load cart dari DB
         List<CartItem> cartItems = cartRepository.findByUser(user);

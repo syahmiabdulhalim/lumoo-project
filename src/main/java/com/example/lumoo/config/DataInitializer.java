@@ -22,7 +22,10 @@ public class DataInitializer {
     User admin = new User();
     admin.setUsername("admin@lumoo.my");
     admin.setEmail("admin@lumoo.my");
-    admin.setPassword(passwordEncoder.encode(System.getenv("ADMIN_PASSWORD")));
+    String adminPassword = System.getenv("ADMIN_PASSWORD");
+if (adminPassword == null) adminPassword = "admin123"; // fallback
+
+admin.setPassword(passwordEncoder.encode(adminPassword));
     admin.setRole(Role.ADMIN);
     userRepository.save(admin);
     // System.out.println(">>> Admin created: admin@lumoo.my / " + System.getenv("ADMIN_PASSWORD"));

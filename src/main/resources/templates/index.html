@@ -204,54 +204,9 @@
             </div>
         </section>
 
-        <!-- FILTER TABS -->
-        <section class="mb-10 border-b border-gray-100 pb-8">
-            <div class="flex flex-wrap gap-8 items-center">
-                <a href="/"
-                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-                   th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-                    All Products
-                </a>
-                <a th:each="cat : ${ {'Roofing', 'Plumbing', 'Electrical', 'Cement', 'Steel', 'Hardware', 'Timber', 'Paint', 'Building'} }"
-                   th:href="@{/(category=${cat})}"
-                   th:text="${cat}"
-                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-                   th:classappend="${selectedCategory == cat ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-                </a>
-            </div>
-        </section>
+      
 
-        <!-- PRODUCTS GRID -->
-        <div th:if="${products != null && !products.empty}"
-             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-            <div th:each="p : ${products}" class="group relative">
-                <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-                    <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/000?text=' + p.name}"
-                         class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition duration-700">
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                        <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
-                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-colors">
-                                Quick Add +
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                <div class="space-y-1">
-                    <div class="flex justify-between items-baseline">
-                        <h3 th:text="${p.name}" class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">Material Name</h3>
-                        <span class="text-[9px] text-gray-400 font-medium" th:text="${p.category}">Category</span>
-                    </div>
-                    <p class="text-sm font-light text-gray-500 italic">
-                        GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div th:if="${products == null || products.empty}" class="py-40 text-center border-y border-gray-100">
-            <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold">The collection is currently empty.</p>
-        </div>
+        
 
     </main>
 

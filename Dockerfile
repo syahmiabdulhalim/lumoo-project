@@ -1,9 +1,32 @@
-FROM eclipse-temurin:17-jdk-alpine
+# ================================
+# Stage 1: Build
+# ================================
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
+ 
 WORKDIR /app
-COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw dependency:go-offline
+ 
+# Copy pom.xml dulu — supaya dependency cache tak rebuild setiap kali code berubah
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+ 
+# Copy source code & build
 COPY src ./src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests -q
+ 
+# ================================
+# Stage 2: Run
+# ================================
+FROM eclipse-temurin:21-jre-alpine
+ 
+WORKDIR /app
+ 
+# Salin JAR dari stage build
+COPY --from=builder /app/target/*.jar app.jar
+ 
+# Port Spring Boot
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"]
+ 
+# Jalankan app
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+
+ 

@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: lumoo-app
+    ports:
+      - "8080:8080"
+    mem_limit: 512m        # ← kena kat sini, bukan dalam depends_on
+    environment:
+      JAVA_OPTS: "-Xms128m -Xmx384m"
+      ADMIN_PASSWORD: admin123
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/lumoo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: lumoo_user
+      SPRING_DATASOURCE_PASSWORD: lumoo_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: lumoo-db
+    mem_limit: 256m        # ← sama, kat level service
+    environment:
+      MYSQL_DATABASE: lumoo
+      MYSQL_USER: lumoo_user
+      MYSQL_PASSWORD: lumoo_pass
+      MYSQL_ROOT_PASSWORD: root_pass
+    volumes:
+      - lumoo_db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  lumoo_db_data:

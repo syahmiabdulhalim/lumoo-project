@@ -10,7 +10,7 @@ public class Product {
     private String name;
     private String category;
     private Double price;
-    private Boolean approved = false;
+    private Boolean approved;
     @Column(name = "approved")
 
 public boolean isApproved() { return approved; }

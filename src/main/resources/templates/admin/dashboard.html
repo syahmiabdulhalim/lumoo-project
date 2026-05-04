@@ -69,6 +69,13 @@
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 Users
             </a>
+            <a href="#vendor-applications" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+    <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+    Vendor Applications
+    <span th:if="${vendorApplications != null and #lists.size(vendorApplications) > 0}"
+          class="ml-auto bg-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+          th:text="${#lists.size(vendorApplications)}">0</span>
+</a>
             <a href="#inquiries" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Inquiries
@@ -243,6 +250,61 @@
                     </div>
                 </div>
             </section>
+
+            <!-- VENDOR APPLICATIONS -->
+<section id="vendor-applications">
+    <div class="bg-white rounded-xl border border-violet-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-violet-100 flex items-center justify-between bg-violet-50">
+            <div>
+                <h2 class="text-sm font-semibold text-violet-800">Vendor Applications</h2>
+                <p class="text-xs text-violet-600 mt-0.5">Users requesting to become vendors</p>
+            </div>
+            <span class="bg-violet-100 text-violet-700 text-xs font-mono px-2 py-1 rounded-md"
+                  th:text="${#lists.size(vendorApplications)} + ' pending'">0 pending</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Applicant</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Business</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reason</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="app : ${vendorApplications}" class="table-row">
+                        <td class="px-6 py-4 text-sm text-slate-700" th:text="${app.user.email}">email</td>
+                        <td class="px-6 py-4 font-medium text-slate-800" th:text="${app.businessName}">Business</td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md" th:text="${app.businessType}">Type</span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.phone}">Phone</td>
+                        <td class="px-6 py-4 text-xs text-slate-500 max-w-xs truncate" th:text="${app.reason}">Reason</td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
+                                   class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                    Approve
+                                </a>
+                                <a th:href="@{/admin/reject-vendor/{id}(id=${app.id})}"
+                                   onclick="return confirm('Reject this application?')"
+                                   class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                    Reject
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${vendorApplications == null || vendorApplications.empty}" class="text-center py-12">
+                <p class="text-sm text-slate-400">No pending vendor applications</p>
+            </div>
+        </div>
+    </div>
+</section>
 
             <!-- PRODUCTS TABLE -->
             <section id="inventory">

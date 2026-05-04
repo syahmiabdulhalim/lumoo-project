@@ -20,6 +20,7 @@ public class WebController {
     @Autowired private OrderRepository orderRepository;
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private ReviewRepository reviewRepository;
+    @Autowired private VendorApplicationRepository vendorApplicationRepository;
 
     // --- HOME PAGE & SEARCH ---
     @GetMapping("/")
@@ -65,6 +66,8 @@ public class WebController {
         User user = userRepository.findByEmail(principal.getName()).orElse(null);
         if (user != null) {
             List<Order> myOrders = orderRepository.findByUserOrderByOrderDateDesc(user);
+            boolean alreadyApplied = vendorApplicationRepository.existsByUserAndStatus(user, "PENDING");
+            model.addAttribute("alreadyApplied", alreadyApplied);
             if (myOrders != null) myOrders.removeIf(Objects::isNull);
             model.addAttribute("orders", myOrders);
             
@@ -85,26 +88,71 @@ public class WebController {
         User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
         Order order = orderRepository.findById(id).orElse(null);
 
-        // PEMBETULAN: Security check tanpa ralat casting
-        if (order == null || !((User) order.getUser()).getId().equals(currentUser.getId())) {
+        if (order == null || currentUser == null || 
+    !order.getUser().getId().equals(currentUser.getId())) {
     return "redirect:/buyer/dashboard?error=unauthorized";
+
 }
 
         model.addAttribute("order", order);
         return "buyer/order-details";
     }
 
-    @PostMapping("/buyer/order/delete/{id}")
-    public String deleteOrder(@PathVariable Long id, Principal principal) {
-        if (principal == null) return "redirect:/login";
-        
-        Order order = orderRepository.findById(id).orElse(null);
-        User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
+   @PostMapping("/buyer/order/delete/{id}")
+public String deleteOrder(@PathVariable Long id, Principal principal) {
+    if (principal == null) return "redirect:/login";
 
-        // PEMBETULAN: Security check tanpa ralat casting
-        if (order != null && ((User) order.getUser()).getId().equals(currentUser.getId())) {
+    User currentUser = userRepository.findByEmail(principal.getName()).orElse(null);
+    if (currentUser == null) return "redirect:/login";
+
+    Order order = orderRepository.findById(id).orElse(null);
+    if (order == null) return "redirect:/buyer/dashboard?error=not_found";
+
+    if (!order.getUser().getId().equals(currentUser.getId()))
+        return "redirect:/buyer/dashboard?error=unauthorized";
+
+    // Can only cancel PENDING orders
+    if (!order.getStatus().equals("PENDING"))
+        return "redirect:/buyer/dashboard?error=cannot_cancel";
+
     orderRepository.delete(order);
+    return "redirect:/buyer/dashboard?order_cancelled";
 }
-        return "redirect:/buyer/dashboard?order_cancelled";
-    }
+@GetMapping("/product/{id}")
+public String productDetail(@PathVariable Long id, Model model) {
+    Product product = productRepository.findById(id).orElse(null);
+    if (product == null) return "redirect:/?error=not_found";
+
+    List<Review> reviews = reviewRepository.findByProduct(product);
+
+    double avgRating = reviews.isEmpty() ? 0 :
+        reviews.stream().mapToInt(Review::getRating).average().orElse(0);
+
+    model.addAttribute("product", product);
+    model.addAttribute("reviews", reviews);
+    model.addAttribute("avgRating", avgRating);
+    return "product-detail";
+}
+
+@PostMapping("/product/{id}/review")
+public String addReview(@PathVariable Long id,
+                        @RequestParam String reviewerName,
+                        @RequestParam int rating,
+                        @RequestParam String comment,
+                        Principal principal) {
+    if (principal == null) return "redirect:/login";
+    if (rating < 1 || rating > 5) return "redirect:/product/" + id + "?error=invalid_rating";
+    if (comment == null || comment.trim().isEmpty()) return "redirect:/product/" + id + "?error=empty_comment";
+
+    productRepository.findById(id).ifPresent(product -> {
+        Review review = new Review();
+        review.setReviewerName(reviewerName);
+        review.setRating(rating);
+        review.setComment(comment.trim());
+        review.setProduct(product);
+        review.setCreatedAt(LocalDateTime.now());
+        reviewRepository.save(review);
+    });
+    return "redirect:/product/" + id + "?review_success";
+}
 }
