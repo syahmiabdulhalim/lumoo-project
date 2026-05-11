@@ -20,6 +20,10 @@ public class VendorApplicationService {
     @Autowired private UserRepository userRepository;
     @Autowired private NotificationRepository notificationRepository;
 
+    public java.util.Optional<VendorApplication> findById(Long id) {
+        return applicationRepository.findById(id);
+    }
+
     public List<VendorApplication> getByUser(User user) {
         return applicationRepository.findByUserOrderByAppliedAtDesc(user);
     }
@@ -40,13 +44,8 @@ public class VendorApplicationService {
         return false;
     }
 
-    public void apply(User user, String businessName, String businessType, String phone, String reason) {
-        VendorApplication app = new VendorApplication();
+    public void apply(User user, VendorApplication app) {
         app.setUser(user);
-        app.setBusinessName(businessName.trim());
-        app.setBusinessType(businessType.trim());
-        app.setPhone(phone.trim());
-        app.setReason(reason.trim());
         applicationRepository.save(app);
     }
 

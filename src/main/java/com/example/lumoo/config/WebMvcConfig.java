@@ -18,5 +18,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         String avatarDir = uploadDir.replace("/products", "/avatars");
         registry.addResourceHandler("/uploads/avatars/**")
                 .addResourceLocations("file:" + avatarDir + "/");
+        String kycDir = uploadDir.replace("/products", "/kyc");
+        registry.addResourceHandler("/uploads/kyc/**")
+                .addResourceLocations("file:" + kycDir + "/");
     }
 }

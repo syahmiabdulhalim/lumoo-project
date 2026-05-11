@@ -1,6 +1,7 @@
 package com.example.lumoo.controller;
 
 import com.example.lumoo.model.Order;
+import com.example.lumoo.model.VendorApplication;
 import com.example.lumoo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -93,6 +94,14 @@ public class AdminController {
     public String rejectImage(@PathVariable Long id) {
         productService.rejectImage(id);
         return "redirect:/admin/dashboard?image_rejected#images";
+    }
+
+    @GetMapping("/application/{id}")
+    public String applicationDetail(@PathVariable Long id, Model model) {
+        VendorApplication app = vendorApplicationService.findById(id).orElse(null);
+        if (app == null) return "redirect:/admin/dashboard#vendor-applications";
+        model.addAttribute("app", app);
+        return "admin/application-detail";
     }
 
     @GetMapping("/approve-vendor/{id}")

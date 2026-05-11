@@ -290,33 +290,58 @@
                     <tr class="bg-slate-50 border-b border-slate-100">
                         <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Applicant</th>
                         <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Business</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Reason</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Owner</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Region</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Turnover</th>
+                        <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Docs</th>
                         <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     <tr th:each="app : ${vendorApplications}" class="table-row">
-                        <td class="px-6 py-4 text-sm text-slate-700" th:text="${app.user.email}">email</td>
-                        <td class="px-6 py-4 font-medium text-slate-800" th:text="${app.businessName}">Business</td>
                         <td class="px-6 py-4">
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md" th:text="${app.businessType}">Type</span>
+                            <p class="text-sm text-slate-700" th:text="${app.user.email}">email</p>
+                            <p class="text-xs text-slate-400" th:text="${app.phone}">phone</p>
                         </td>
-                        <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.phone}">Phone</td>
-                        <td class="px-6 py-4 text-xs text-slate-500 max-w-xs truncate" th:text="${app.reason}">Reason</td>
                         <td class="px-6 py-4">
-                            <div class="flex gap-2">
+                            <p class="font-medium text-slate-800 text-sm" th:text="${app.businessName}">Business</p>
+                            <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md" th:text="${app.businessType}">Type</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-xs font-medium text-slate-700" th:text="${app.ownerFullName}">Owner</p>
+                            <p class="text-xs text-slate-400" th:text="${app.ownerIdType}">ID Type</p>
+                            <p class="text-xs text-slate-400 font-mono" th:text="${app.ownerIdNumber}">ID Number</p>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.businessRegion}">Region</td>
+                        <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.estimatedMonthlyTurnover}">Turnover</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-1">
+                                <a th:if="${app.nationalIdDocUrl != null}"
+                                   th:href="${app.nationalIdDocUrl}" target="_blank"
+                                   class="text-xs text-blue-600 hover:underline font-medium">View ID Doc</a>
+                                <span th:if="${app.nationalIdDocUrl == null}"
+                                      class="text-xs text-red-400 font-medium">No ID uploaded</span>
+                                <a th:if="${app.businessRegDocUrl != null}"
+                                   th:href="${app.businessRegDocUrl}" target="_blank"
+                                   class="text-xs text-slate-500 hover:underline">View Biz Reg</a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-2">
+                                <a th:href="@{/admin/application/{id}(id=${app.id})}"
+                                   class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
+                                    Full KYC
+                                </a>
                                 <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
-                                   class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                   class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
                                     Approve
                                 </a>
-                                <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post" class="inline"
+                                <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post"
                                       th:id="'reject-form-' + ${app.id}"
                                       onsubmit="return fillRejectNote(this)">
                                     <input type="hidden" name="note">
                                     <button type="submit"
-                                            class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                            class="w-full text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
                                         Reject
                                     </button>
                                 </form>

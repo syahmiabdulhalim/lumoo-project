@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | KYC Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Inter']">
+
+    <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <a href="/admin/dashboard#vendor-applications"
+               class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">
+                ← Back to Applications
+            </a>
+        </div>
+        <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">LUMOO Admin — KYC Review</span>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-12">
+
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-10">
+            <div>
+                <p class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">Application #<span th:text="${app.id}"></span></p>
+                <h1 class="text-3xl font-black tracking-tight" th:text="${app.businessName}">Business Name</h1>
+                <p class="text-sm text-slate-500 mt-1" th:text="${app.user.email}">email</p>
+                <p class="text-xs text-slate-400 mt-1"
+                   th:text="'Submitted: ' + ${#temporals.format(app.appliedAt, 'dd MMMM yyyy, HH:mm')}"></p>
+            </div>
+            <span class="px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-full"
+                  th:text="${app.status}"
+                  th:classappend="${app.status == 'APPROVED'} ? 'bg-green-100 text-green-700' :
+                                  (${app.status == 'REJECTED'} ? 'bg-red-100 text-red-600' :
+                                  'bg-yellow-100 text-yellow-700')">
+            </span>
+        </div>
+
+        <div class="space-y-6">
+
+            <!-- Section 1: Business Information -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">1 — Business Information</p>
+                </div>
+                <div class="p-6 grid grid-cols-2 gap-6">
+                    <div><p class="label">Business Name</p><p class="value" th:text="${app.businessName}">—</p></div>
+                    <div><p class="label">Business Type</p><p class="value" th:text="${app.businessType}">—</p></div>
+                    <div><p class="label">Reg. Certificate No.</p>
+                        <p class="value" th:text="${app.businessRegNumber != null ? app.businessRegNumber : 'Not provided'}">—</p></div>
+                    <div><p class="label">Tax ID (TIN)</p>
+                        <p class="value" th:text="${app.tinNumber != null ? app.tinNumber : 'Not provided'}">—</p></div>
+                    <div><p class="label">Years in Business</p><p class="value" th:text="${app.yearsInBusiness}">—</p></div>
+                    <div><p class="label">Est. Monthly Turnover</p><p class="value" th:text="${app.estimatedMonthlyTurnover}">—</p></div>
+                </div>
+            </div>
+
+            <!-- Section 2: Business Location -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">2 — Business Location &amp; Contact</p>
+                </div>
+                <div class="p-6 grid grid-cols-2 gap-6">
+                    <div class="col-span-2"><p class="label">Business Address</p><p class="value" th:text="${app.businessAddress}">—</p></div>
+                    <div><p class="label">Region / LGA</p><p class="value" th:text="${app.businessRegion}">—</p></div>
+                    <div><p class="label">Business Phone</p><p class="value" th:text="${app.phone}">—</p></div>
+                </div>
+            </div>
+
+            <!-- Section 3: Owner / Beneficial Owner -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">3 — Owner / Beneficial Owner</p>
+                </div>
+                <div class="p-6 grid grid-cols-2 gap-6">
+                    <div><p class="label">Full Legal Name</p><p class="value" th:text="${app.ownerFullName}">—</p></div>
+                    <div><p class="label">ID Type</p><p class="value" th:text="${app.ownerIdType}">—</p></div>
+                    <div><p class="label">ID Number</p><p class="value font-mono" th:text="${app.ownerIdNumber}">—</p></div>
+                    <div class="col-span-2"><p class="label">Residential Address</p><p class="value" th:text="${app.ownerAddress}">—</p></div>
+                </div>
+            </div>
+
+            <!-- Section 4: Banking -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">4 — Banking &amp; Payments</p>
+                </div>
+                <div class="p-6 grid grid-cols-2 gap-6">
+                    <div><p class="label">Bank</p><p class="value" th:text="${app.bankName}">—</p></div>
+                    <div><p class="label">Account Number</p><p class="value font-mono" th:text="${app.bankAccountNumber}">—</p></div>
+                    <div><p class="label">Account Holder Name</p><p class="value" th:text="${app.bankAccountName}">—</p></div>
+                    <div><p class="label">Mobile Money</p>
+                        <p class="value" th:text="${app.mobileMoneyNumber != null ? app.mobileMoneyNumber : 'Not provided'}">—</p></div>
+                </div>
+            </div>
+
+            <!-- Section 5: Products & Operations -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">5 — Products &amp; Operations</p>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div><p class="label">Products to Sell</p><p class="value" th:text="${app.productsToSell}">—</p></div>
+                    <div><p class="label">Why join LUMOO?</p><p class="value" th:text="${app.reason}">—</p></div>
+                </div>
+            </div>
+
+            <!-- Section 6: Documents -->
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div class="bg-slate-800 text-white px-6 py-3">
+                    <p class="text-xs font-bold uppercase tracking-widest">6 — Uploaded Documents</p>
+                </div>
+                <div class="p-6 space-y-5">
+                    <div>
+                        <p class="label">National ID / Passport</p>
+                        <div th:if="${app.nationalIdDocUrl != null}" class="mt-2">
+                            <a th:href="${app.nationalIdDocUrl}" target="_blank"
+                               class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline border border-blue-200 bg-blue-50 px-4 py-2 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Open ID Document
+                            </a>
+                            <img th:src="${app.nationalIdDocUrl}"
+                                 class="mt-3 max-h-64 border border-slate-200 rounded-lg object-contain"
+                                 onerror="this.style.display='none'"
+                                 alt="ID Document">
+                        </div>
+                        <p th:if="${app.nationalIdDocUrl == null}"
+                           class="text-xs text-red-500 font-bold mt-1">No document uploaded</p>
+                    </div>
+                    <div>
+                        <p class="label">Business Registration Certificate</p>
+                        <div th:if="${app.businessRegDocUrl != null}" class="mt-2">
+                            <a th:href="${app.businessRegDocUrl}" target="_blank"
+                               class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline border border-blue-200 bg-blue-50 px-4 py-2 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Open Business Reg. Doc
+                            </a>
+                            <img th:src="${app.businessRegDocUrl}"
+                                 class="mt-3 max-h-64 border border-slate-200 rounded-lg object-contain"
+                                 onerror="this.style.display='none'"
+                                 alt="Business Registration">
+                        </div>
+                        <p th:if="${app.businessRegDocUrl == null}"
+                           class="text-xs text-slate-400 mt-1">Not provided</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rejection note (if rejected) -->
+            <div th:if="${app.status == 'REJECTED' and app.rejectionNote != null}"
+                 class="bg-red-50 border border-red-200 rounded-xl p-6">
+                <p class="text-xs font-bold uppercase tracking-widest text-red-500 mb-2">Rejection Note</p>
+                <p class="text-sm text-red-700" th:text="${app.rejectionNote}"></p>
+            </div>
+
+            <!-- Actions (only for PENDING) -->
+            <div th:if="${app.status == 'PENDING'}"
+                 class="bg-white border border-slate-200 rounded-xl p-6 flex gap-4">
+                <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
+                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg">
+                    Approve Vendor
+                </a>
+                <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post"
+                      th:id="'reject-form-' + ${app.id}" onsubmit="return fillRejectNote(this)">
+                    <input type="hidden" name="note">
+                    <button type="submit"
+                            class="bg-red-50 hover:bg-red-100 text-red-600 px-8 py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg border border-red-200">
+                        Reject
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <style>
+        .label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin-bottom: 0.25rem; }
+        .value { font-size: 13px; color: #1e293b; }
+    </style>
+
+    <script>
+        function fillRejectNote(form) {
+            var note = prompt('Reason for rejection (shown to applicant):');
+            if (note === null) return false;
+            form.querySelector('[name="note"]').value = note;
+            return true;
+        }
+    </script>
+</body>
+</html>

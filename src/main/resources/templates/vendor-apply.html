@@ -8,13 +8,13 @@
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
     <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.gm</span>
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
-        <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
-        <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain"></a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
             <a href="/buyer/dashboard" class="hover:text-blue-600 transition">My Orders</a>
             <form th:action="@{/logout}" method="post" class="inline">
@@ -23,11 +23,11 @@
         </div>
     </nav>
 
-    <main class="max-w-5xl mx-auto px-6 md:px-12 py-12 md:py-20">
+    <main class="max-w-4xl mx-auto px-6 md:px-12 py-12 md:py-20">
 
         <header class="mb-12">
             <h2 class="text-4xl font-light tracking-tighter">Become a <span class="font-black italic text-blue-600">Vendor.</span></h2>
-            <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Join Gambia's premier construction marketplace</p>
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Join Gambia's premier construction marketplace — verified sellers only</p>
         </header>
 
         <!-- ── SUBMITTED FLASH ── -->
@@ -39,25 +39,25 @@
                     </svg>
                 </div>
                 <h2 class="text-2xl font-black tracking-tighter mb-2">Application Received</h2>
-                <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
-                    Our team will review your application within 1–2 business days.
-                </p>
-                <a href="/buyer/dashboard"
-                   class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2">Our compliance team will verify your documents within 2–3 business days.</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">You will be notified by email and in-app once a decision is made.</p>
+                <a href="/buyer/dashboard" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
                     Back to Dashboard →
                 </a>
             </div>
         </div>
 
-        <!-- ── MAIN CONTENT (not submitted flash) ── -->
+        <!-- ── MAIN CONTENT ── -->
         <div th:if="${!param.containsKey('submitted')}">
 
-            <!-- Error banner -->
-            <div th:if="${param.containsKey('error')}"
+            <!-- Error banners -->
+            <div th:if="${param.containsKey('error') and param.error[0] == 'doc_upload'}"
                  class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
-                <p class="text-xs font-bold text-red-600 uppercase tracking-widest">
-                    Please fill in all required fields.
-                </p>
+                <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Document upload failed. Please check the file size (max 5MB) and try again.</p>
+            </div>
+            <div th:if="${param.containsKey('error') and param.error[0] != 'doc_upload'}"
+                 class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
+                <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Please fill in all required fields.</p>
             </div>
 
             <!-- ── PENDING STATE ── -->
@@ -69,13 +69,8 @@
                         </svg>
                     </div>
                     <h2 class="text-2xl font-black tracking-tighter mb-2">Application Under Review</h2>
-                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
-                        We're reviewing your application. You'll be notified once a decision is made.
-                    </p>
-                    <a href="/buyer/dashboard"
-                       class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
-                        Back to Dashboard →
-                    </a>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">Our compliance team is verifying your documents. You'll be notified once a decision is made.</p>
+                    <a href="/buyer/dashboard" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">Back to Dashboard →</a>
                 </div>
             </div>
 
@@ -88,27 +83,19 @@
                         </svg>
                     </div>
                     <h2 class="text-2xl font-black tracking-tighter mb-2 text-red-700">Application Not Approved</h2>
-
-                    <!-- Rejection note if provided -->
                     <div th:if="${latest != null and latest.rejectionNote != null}"
                          class="bg-red-50 border border-red-200 px-6 py-4 mb-6 text-left">
-                        <p class="text-[8px] text-red-400 uppercase font-black tracking-widest mb-1">Reason from admin</p>
+                        <p class="text-[8px] text-red-400 uppercase font-black tracking-widest mb-1">Reason from compliance team</p>
                         <p class="text-sm text-red-700" th:text="${latest.rejectionNote}"></p>
                     </div>
-
-                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2">
-                        You may re-apply after:
-                    </p>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-2">You may re-apply after:</p>
                     <p class="text-sm font-bold text-gray-700 mb-8"
                        th:text="${canReapplyAt != null ? #temporals.format(canReapplyAt, 'dd MMM yyyy, HH:mm') : '—'}"></p>
-                    <a href="/buyer/dashboard"
-                       class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
-                        Back to Dashboard →
-                    </a>
+                    <a href="/buyer/dashboard" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">Back to Dashboard →</a>
                 </div>
             </div>
 
-            <!-- ── APPLICATION HISTORY TABLE (shown when there are past applications) ── -->
+            <!-- ── APPLICATION HISTORY ── -->
             <div th:if="${applications != null and !#lists.isEmpty(applications)}" class="mb-12">
                 <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Application History</h3>
                 <div class="bg-white border border-gray-100 shadow-sm overflow-x-auto">
@@ -117,8 +104,7 @@
                             <tr class="text-[8px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
                                 <th class="px-6 py-4 font-bold">#</th>
                                 <th class="px-6 py-4 font-bold">Business</th>
-                                <th class="px-6 py-4 font-bold">Type</th>
-                                <th class="px-6 py-4 font-bold">Phone</th>
+                                <th class="px-6 py-4 font-bold">Owner</th>
                                 <th class="px-6 py-4 font-bold">Applied</th>
                                 <th class="px-6 py-4 font-bold">Reviewed</th>
                                 <th class="px-6 py-4 font-bold">Status</th>
@@ -128,13 +114,15 @@
                         <tbody class="divide-y divide-gray-50">
                             <tr th:each="app : ${applications}" class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 text-[10px] text-gray-400 font-mono" th:text="${app.id}"></td>
-                                <td class="px-6 py-4 font-bold text-xs" th:text="${app.businessName}"></td>
-                                <td class="px-6 py-4 text-[10px] text-gray-500" th:text="${app.businessType}"></td>
-                                <td class="px-6 py-4 text-[10px] text-gray-500" th:text="${app.phone}"></td>
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-xs" th:text="${app.businessName}"></p>
+                                    <p class="text-[9px] text-gray-400" th:text="${app.businessType}"></p>
+                                </td>
+                                <td class="px-6 py-4 text-[10px] text-gray-500" th:text="${app.ownerFullName}"></td>
                                 <td class="px-6 py-4 text-[10px] text-gray-400"
-                                    th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy HH:mm')}"></td>
+                                    th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy')}"></td>
                                 <td class="px-6 py-4 text-[10px] text-gray-400"
-                                    th:text="${app.reviewedAt != null ? #temporals.format(app.reviewedAt, 'dd MMM yyyy HH:mm') : '—'}"></td>
+                                    th:text="${app.reviewedAt != null ? #temporals.format(app.reviewedAt, 'dd MMM yyyy') : '—'}"></td>
                                 <td class="px-6 py-4">
                                     <span th:text="${app.status}"
                                           class="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded"
@@ -151,101 +139,369 @@
                 </div>
             </div>
 
-            <!-- ── FORM STATE (new or after 12h cooldown) ── -->
+            <!-- ── FORM STATE ── -->
             <div th:if="${state == 'FORM'}">
 
-                <!-- Benefits -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-                    <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
-                        <p class="text-2xl mb-4">📦</p>
-                        <p class="text-[9px] font-black uppercase tracking-widest mb-1">List Products</p>
-                        <p class="text-[9px] text-gray-400 leading-relaxed">Upload and manage your full product catalogue</p>
+                <!-- Compliance notice -->
+                <div class="border border-blue-100 bg-blue-50 px-8 py-6 mb-10 flex gap-5">
+                    <div class="shrink-0 mt-0.5">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                     </div>
-                    <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
-                        <p class="text-2xl mb-4">💰</p>
-                        <p class="text-[9px] font-black uppercase tracking-widest mb-1">Earn Revenue</p>
-                        <p class="text-[9px] text-gray-400 leading-relaxed">Keep 90% of every sale. We take 10% only.</p>
-                    </div>
-                    <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
-                        <p class="text-2xl mb-4">📊</p>
-                        <p class="text-[9px] font-black uppercase tracking-widest mb-1">Track Sales</p>
-                        <p class="text-[9px] text-gray-400 leading-relaxed">Full dashboard with orders and earnings</p>
+                    <div>
+                        <p class="text-[9px] font-black uppercase tracking-widest text-blue-700 mb-1">KYC / AML Compliance Required</p>
+                        <p class="text-[10px] text-blue-600 leading-relaxed">
+                            In accordance with the Gambia Financial Intelligence Unit (FIU) regulations and the Anti-Money Laundering Act,
+                            all vendors must complete identity and business verification before selling on LUMOO.
+                            Your information is kept strictly confidential and used for compliance purposes only.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Form -->
-                <div class="bg-white p-10 border border-gray-100 shadow-sm">
-                    <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-6 mb-10">
-                        Application Form
-                    </h3>
+                <form th:action="@{/buyer/vendorapply}" method="post" enctype="multipart/form-data" class="space-y-0">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-                    <form th:action="@{/buyer/vendorapply}" method="post" class="space-y-8">
-                        <input th:if="${_csrf != null}" type="hidden"
-                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- ─── SECTION 1: Business Information ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">1</span>
                             <div>
-                                <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
-                                    Business Name <span class="text-red-400">*</span>
-                                </label>
-                                <input type="text" name="businessName" required
-                                       class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-black outline-none transition placeholder-gray-300"
-                                       placeholder="e.g. Gambia Cement Supplies">
-                            </div>
-                            <div>
-                                <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
-                                    Business Type <span class="text-red-400">*</span>
-                                </label>
-                                <select name="businessType" required
-                                        class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-black outline-none">
-                                    <option value="">Select type...</option>
-                                    <option value="Manufacturer">Manufacturer</option>
-                                    <option value="Wholesaler">Wholesaler</option>
-                                    <option value="Retailer">Retailer</option>
-                                    <option value="Importer">Importer</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                <p class="text-xs font-black uppercase tracking-widest">Business Information</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Legal details about your business</p>
                             </div>
                         </div>
+                        <div class="p-8 space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Business Name <span class="text-red-400">*</span></label>
+                                    <input type="text" name="businessName" required
+                                           class="field-input" placeholder="e.g. Gambia Cement Supplies Ltd">
+                                </div>
+                                <div>
+                                    <label class="field-label">Business Type <span class="text-red-400">*</span></label>
+                                    <select name="businessType" required class="field-input">
+                                        <option value="">Select type...</option>
+                                        <option value="Manufacturer">Manufacturer</option>
+                                        <option value="Wholesaler">Wholesaler</option>
+                                        <option value="Retailer">Retailer</option>
+                                        <option value="Importer / Distributor">Importer / Distributor</option>
+                                        <option value="Building Contractor">Building Contractor</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Business Registration No. <span class="text-gray-300">(if registered)</span></label>
+                                    <input type="text" name="businessRegNumber"
+                                           class="field-input" placeholder="e.g. GR-2024-00123">
+                                    <p class="text-[8px] text-gray-400 mt-1">Issued by Ministry of Trade or GRA</p>
+                                </div>
+                                <div>
+                                    <label class="field-label">Tax Identification Number (TIN) <span class="text-gray-300">(if applicable)</span></label>
+                                    <input type="text" name="tinNumber"
+                                           class="field-input" placeholder="e.g. GRA-TIN-0001234">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Years in Business <span class="text-red-400">*</span></label>
+                                    <select name="yearsInBusiness" required class="field-input">
+                                        <option value="">Select...</option>
+                                        <option value="Less than 1 year">Less than 1 year</option>
+                                        <option value="1–2 years">1–2 years</option>
+                                        <option value="3–5 years">3–5 years</option>
+                                        <option value="6–10 years">6–10 years</option>
+                                        <option value="More than 10 years">More than 10 years</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="field-label">Estimated Monthly Turnover <span class="text-red-400">*</span></label>
+                                    <select name="estimatedMonthlyTurnover" required class="field-input">
+                                        <option value="">Select range...</option>
+                                        <option value="Less than GMD 50,000">Less than GMD 50,000</option>
+                                        <option value="GMD 50,000 – 200,000">GMD 50,000 – 200,000</option>
+                                        <option value="GMD 200,000 – 500,000">GMD 200,000 – 500,000</option>
+                                        <option value="GMD 500,000 – 1,000,000">GMD 500,000 – 1,000,000</option>
+                                        <option value="More than GMD 1,000,000">More than GMD 1,000,000</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div>
-                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
-                                Phone Number <span class="text-red-400">*</span>
+                    <!-- ─── SECTION 2: Business Location ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">2</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Business Location &amp; Contact</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Where your business operates</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-6">
+                            <div>
+                                <label class="field-label">Physical Business Address <span class="text-red-400">*</span></label>
+                                <textarea name="businessAddress" rows="2" required
+                                          class="field-input resize-none"
+                                          placeholder="Street / Compound, Area, Town"></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Region / Local Government Area <span class="text-red-400">*</span></label>
+                                    <select name="businessRegion" required class="field-input">
+                                        <option value="">Select region...</option>
+                                        <option value="Banjul City">Banjul City</option>
+                                        <option value="Kanifing Municipal">Kanifing Municipal (KMC)</option>
+                                        <option value="West Coast Region – Brikama">West Coast Region – Brikama</option>
+                                        <option value="North Bank Region – Kerewan">North Bank Region – Kerewan</option>
+                                        <option value="Lower River Region – Mansakonko">Lower River Region – Mansakonko</option>
+                                        <option value="Central River Region – Kuntaur">Central River Region – Kuntaur</option>
+                                        <option value="Central River Region – Janjanbureh">Central River Region – Janjanbureh</option>
+                                        <option value="Upper River Region – Basse">Upper River Region – Basse</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="field-label">Business Phone Number <span class="text-red-400">*</span></label>
+                                    <input type="tel" name="phone" required
+                                           class="field-input" placeholder="+220 XXX XXXX">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── SECTION 3: Owner / Beneficial Owner ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">3</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Owner / Beneficial Owner</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Required under AML beneficial ownership rules</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Owner's Full Legal Name <span class="text-red-400">*</span></label>
+                                    <input type="text" name="ownerFullName" required
+                                           class="field-input" placeholder="As it appears on your ID">
+                                </div>
+                                <div>
+                                    <label class="field-label">Government-Issued ID Type <span class="text-red-400">*</span></label>
+                                    <select name="ownerIdType" required class="field-input">
+                                        <option value="">Select ID type...</option>
+                                        <option value="National ID Card (NIN)">National ID Card (NIN)</option>
+                                        <option value="Gambian Passport">Gambian Passport</option>
+                                        <option value="Driver's License">Driver's License</option>
+                                        <option value="Foreign Passport">Foreign Passport (with residency)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">ID Number <span class="text-red-400">*</span></label>
+                                    <input type="text" name="ownerIdNumber" required
+                                           class="field-input" placeholder="As printed on the document">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">Owner's Residential Address <span class="text-red-400">*</span></label>
+                                <textarea name="ownerAddress" rows="2" required
+                                          class="field-input resize-none"
+                                          placeholder="Home address — may differ from business address"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── SECTION 4: Banking & Payments ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">4</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Banking &amp; Payments</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Where LUMOO will send your sales proceeds</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Bank Name <span class="text-red-400">*</span></label>
+                                    <select name="bankName" required class="field-input">
+                                        <option value="">Select bank...</option>
+                                        <option value="Trust Bank Gambia">Trust Bank Gambia</option>
+                                        <option value="GTBank Gambia">GTBank Gambia</option>
+                                        <option value="Guaranty Trust Bank">Guaranty Trust Bank</option>
+                                        <option value="Access Bank Gambia">Access Bank Gambia</option>
+                                        <option value="Ecobank Gambia">Ecobank Gambia</option>
+                                        <option value="FBNBank Gambia">FBNBank Gambia</option>
+                                        <option value="Standard Chartered Bank">Standard Chartered Bank</option>
+                                        <option value="First International Bank">First International Bank (FIB)</option>
+                                        <option value="Al Baraka Bank">Al Baraka Bank</option>
+                                        <option value="GCMB">Gambia Commercial &amp; Development Bank (GCDB)</option>
+                                        <option value="Reliance Financial Services">Reliance Financial Services</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="field-label">Account Number <span class="text-red-400">*</span></label>
+                                    <input type="text" name="bankAccountNumber" required
+                                           class="field-input" placeholder="e.g. 0123456789">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="field-label">Account Holder Name <span class="text-red-400">*</span></label>
+                                    <input type="text" name="bankAccountName" required
+                                           class="field-input" placeholder="As registered with the bank">
+                                </div>
+                                <div>
+                                    <label class="field-label">Mobile Money Number <span class="text-gray-300">(optional)</span></label>
+                                    <input type="tel" name="mobileMoneyNumber"
+                                           class="field-input" placeholder="Afrimoney or QMoney — +220 XXX XXXX">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── SECTION 5: Products & Operations ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">5</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Products &amp; Operations</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Tell us what you'll be selling</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-6">
+                            <div>
+                                <label class="field-label">What products do you plan to sell on LUMOO? <span class="text-red-400">*</span></label>
+                                <textarea name="productsToSell" rows="3" required
+                                          class="field-input resize-none"
+                                          placeholder="e.g. Portland cement (50kg bags), corrugated iron sheets, PVC pipes and fittings, electrical cables..."></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label">Why do you want to join LUMOO? <span class="text-red-400">*</span></label>
+                                <textarea name="reason" rows="3" required
+                                          class="field-input resize-none"
+                                          placeholder="Describe your business background, experience, and how joining LUMOO fits your goals..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── SECTION 6: Document Upload ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-1">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">6</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Document Upload</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">Scanned copies or clear photos — JPG, PNG or PDF, max 5MB each</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-8">
+                            <div class="border border-dashed border-gray-200 p-6 bg-gray-50">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-gray-700 mb-1">
+                                    National ID / Passport Photo
+                                    <span class="text-gray-300 font-normal normal-case tracking-normal ml-1">(required for AML verification)</span>
+                                </p>
+                                <p class="text-[8px] text-gray-400 mb-4">Upload a clear photo or scan of your National ID Card, Passport, or Driver's License (both sides if applicable).</p>
+                                <input type="file" name="nationalIdDoc" accept="image/*,application/pdf"
+                                       class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-black file:text-white hover:file:bg-blue-600 file:cursor-pointer file:transition">
+                            </div>
+
+                            <div class="border border-dashed border-gray-200 p-6 bg-gray-50">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-gray-700 mb-1">
+                                    Business Registration Certificate
+                                    <span class="text-gray-300 font-normal normal-case tracking-normal ml-1">(optional but recommended)</span>
+                                </p>
+                                <p class="text-[8px] text-gray-400 mb-4">Certificate issued by the Gambia Ministry of Trade or GRA. If your business is not formally registered, skip this field.</p>
+                                <input type="file" name="businessRegDoc" accept="image/*,application/pdf"
+                                       class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-black file:text-white hover:file:bg-blue-600 file:cursor-pointer file:transition">
+                            </div>
+
+                            <div class="border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3 items-start">
+                                <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                <p class="text-[9px] text-blue-700 leading-relaxed">
+                                    Documents are encrypted and stored securely. They are accessible only to LUMOO's compliance team and are never shared publicly or with third parties, except as required by Gambian law.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── SECTION 7: Legal Declaration ─── -->
+                    <div class="bg-white border border-gray-100 shadow-sm mb-8">
+                        <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
+                            <span class="text-[9px] font-black bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">7</span>
+                            <div>
+                                <p class="text-xs font-black uppercase tracking-widest">Legal Declaration</p>
+                                <p class="text-[8px] text-gray-400 tracking-wide">You must agree to all terms to proceed</p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-5">
+                            <label class="flex items-start gap-4 cursor-pointer group">
+                                <input type="checkbox" required id="decl1"
+                                       class="mt-0.5 w-4 h-4 border-gray-300 text-blue-600 shrink-0 cursor-pointer">
+                                <span class="text-[10px] text-gray-600 leading-relaxed group-hover:text-gray-900 transition">
+                                    I certify that all information and documents provided in this application are <strong>true, accurate, and complete</strong> to the best of my knowledge. I understand that submitting false or misleading information will result in immediate rejection and permanent account suspension.
+                                </span>
                             </label>
-                            <input type="tel" name="phone" required
-                                   class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-black outline-none transition placeholder-gray-300"
-                                   placeholder="e.g. +220 123 4567">
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
-                                Why do you want to sell on LUMOO? <span class="text-red-400">*</span>
+                            <label class="flex items-start gap-4 cursor-pointer group">
+                                <input type="checkbox" required id="decl2"
+                                       class="mt-0.5 w-4 h-4 border-gray-300 text-blue-600 shrink-0 cursor-pointer">
+                                <span class="text-[10px] text-gray-600 leading-relaxed group-hover:text-gray-900 transition">
+                                    I understand that LUMOO conducts <strong>KYC/AML verification</strong> in compliance with the Gambia Anti-Money Laundering Act and FIU regulations. I confirm that my business proceeds come from legitimate sources, and I am not involved in money laundering, terrorist financing, or any other illegal activity.
+                                </span>
                             </label>
-                            <textarea name="reason" rows="4" required
-                                      class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-black outline-none resize-none placeholder-gray-300"
-                                      placeholder="Tell us about your business and what products you plan to sell..."></textarea>
-                        </div>
+                            <label class="flex items-start gap-4 cursor-pointer group">
+                                <input type="checkbox" required id="decl3"
+                                       class="mt-0.5 w-4 h-4 border-gray-300 text-blue-600 shrink-0 cursor-pointer">
+                                <span class="text-[10px] text-gray-600 leading-relaxed group-hover:text-gray-900 transition">
+                                    I consent to LUMOO verifying my identity and business details with the <strong>Gambia Revenue Authority (GRA), Ministry of Trade, and other relevant Gambian authorities</strong> as part of its compliance obligations. I agree to cooperate with any additional verification requests.
+                                </span>
+                            </label>
 
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                            <a href="/buyer/dashboard"
-                               class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition">
-                                ← Cancel
-                            </a>
-                            <button type="submit"
-                                    class="bg-black text-white px-12 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-500">
-                                Submit Application →
-                            </button>
+                            <div class="pt-6 border-t border-gray-100 flex items-center justify-between">
+                                <a href="/buyer/dashboard"
+                                   class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition">
+                                    ← Cancel
+                                </a>
+                                <button type="submit" id="submitBtn"
+                                        class="bg-black text-white px-12 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-500 disabled:opacity-40 disabled:cursor-not-allowed">
+                                    Submit Application →
+                                </button>
+                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
+                    </div>
 
-        </div>
+                </form>
+            </div><!-- end FORM state -->
+
+        </div><!-- end not-submitted -->
     </main>
 
-    <footer class="bg-white border-t border-gray-100 px-12 py-16 mt-20 text-center">
-        <p class="text-[9px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
+    <footer class="bg-white border-t border-gray-100 px-12 py-10 text-center">
+        <p class="text-[9px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
     </footer>
+
+    <style>
+        .field-label { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af; margin-bottom: 0.5rem; }
+        .field-input { width: 100%; background: transparent; border-bottom: 1px solid #e5e7eb; padding: 0.625rem 0; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+        .field-input:focus { border-color: #1d4ed8; }
+        select.field-input { cursor: pointer; }
+    </style>
+
+    <script>
+        const checkboxes = document.querySelectorAll('#decl1, #decl2, #decl3');
+        const submitBtn  = document.getElementById('submitBtn');
+
+        function updateSubmit() {
+            const allChecked = Array.from(checkboxes).every(c => c.checked);
+            submitBtn.disabled = !allChecked;
+        }
+        checkboxes.forEach(c => c.addEventListener('change', updateSubmit));
+        updateSubmit();
+    </script>
 
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>

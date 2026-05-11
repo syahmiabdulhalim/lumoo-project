@@ -68,6 +68,19 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public String saveKycDoc(MultipartFile file) throws IOException {
+        String extension = "";
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            extension = original.substring(original.lastIndexOf("."));
+        }
+        String filename = UUID.randomUUID() + extension;
+        Path dir = Paths.get(uploadDir).getParent().resolve("kyc");
+        Files.createDirectories(dir);
+        Files.copy(file.getInputStream(), dir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+        return "/uploads/kyc/" + filename;
+    }
+
     public String saveAvatar(MultipartFile file) throws IOException {
         String extension = "";
         String original = file.getOriginalFilename();
