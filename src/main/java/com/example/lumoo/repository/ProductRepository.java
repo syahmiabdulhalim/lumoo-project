@@ -18,4 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategoryIgnoreCaseAndApproved(@org.springframework.data.repository.query.Param("category") String category);
 
     List<Product> findByApprovedTrueAndImageApprovedFalse();
+
+    List<Product> findByVendorAndApprovedTrue(User vendor);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT p.vendor FROM Product p WHERE p.approved = true AND p.vendor IS NOT NULL")
+    List<User> findDistinctVendorsWithApprovedProducts();
 }

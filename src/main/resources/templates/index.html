@@ -29,11 +29,13 @@
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
+            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
                 <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
                 <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>

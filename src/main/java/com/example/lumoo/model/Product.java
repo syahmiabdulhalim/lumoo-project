@@ -22,6 +22,9 @@ public class Product {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "vendor_id")
     private User vendor;
@@ -40,6 +43,8 @@ public class Product {
     public void setImageApproved(boolean imageApproved) { this.imageApproved = imageApproved; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public User getVendor() { return vendor; }
     public void setVendor(User vendor) { this.vendor = vendor; }
 }

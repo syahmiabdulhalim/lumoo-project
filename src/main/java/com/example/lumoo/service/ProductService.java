@@ -53,6 +53,14 @@ public class ProductService {
         return productRepository.findByApprovedTrueAndImageApprovedFalse();
     }
 
+    public List<Product> getApprovedByVendor(User vendor) {
+        return productRepository.findByVendorAndApprovedTrue(vendor);
+    }
+
+    public List<User> getVendorsWithProducts() {
+        return productRepository.findDistinctVendorsWithApprovedProducts();
+    }
+
     public Optional<Product> findById(Long id) {
         return productRepository.findById(id);
     }

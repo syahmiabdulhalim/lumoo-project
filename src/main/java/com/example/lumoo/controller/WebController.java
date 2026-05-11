@@ -20,6 +20,35 @@ public class WebController {
     @Autowired private ReviewService reviewService;
     @Autowired private VendorApplicationService vendorApplicationService;
 
+    @GetMapping("/stores")
+    public String stores(Model model) {
+        List<User> vendors = productService.getVendorsWithProducts();
+        model.addAttribute("vendors", vendors);
+        return "stores";
+    }
+
+    @GetMapping("/store/{vendorId}")
+    public String store(@PathVariable Long vendorId,
+                        @RequestParam(required = false) String category,
+                        Model model) {
+        User vendor = userService.findById(vendorId).orElse(null);
+        if (vendor == null) return "redirect:/stores";
+        List<Product> products = productService.getApprovedByVendor(vendor);
+        if (category != null && !category.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> category.equalsIgnoreCase(p.getCategory()))
+                    .toList();
+        }
+        List<String> categories = productService.getApprovedByVendor(vendor).stream()
+                .map(Product::getCategory)
+                .distinct().sorted().toList();
+        model.addAttribute("vendor", vendor);
+        model.addAttribute("products", products);
+        model.addAttribute("categories", categories);
+        model.addAttribute("selectedCategory", category);
+        return "store";
+    }
+
     @GetMapping("/")
     public String home(Model model,
                        @RequestParam(required = false) String keyword,

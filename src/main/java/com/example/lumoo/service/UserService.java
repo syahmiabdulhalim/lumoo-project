@@ -6,14 +6,25 @@ import com.example.lumoo.model.User;
 import com.example.lumoo.repository.NotificationRepository;
 import com.example.lumoo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
+
+    @Value("${app.upload.dir:/app/uploads/products}")
+    private String uploadDir;
 
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
@@ -21,6 +32,10 @@ public class UserService {
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
     public List<User> getAll() {
@@ -51,6 +66,19 @@ public class UserService {
         user.setPhone(phone);
         user.setAddress(address);
         userRepository.save(user);
+    }
+
+    public String saveAvatar(MultipartFile file) throws IOException {
+        String extension = "";
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            extension = original.substring(original.lastIndexOf("."));
+        }
+        String filename = UUID.randomUUID() + extension;
+        Path dir = Paths.get(uploadDir).getParent().resolve("avatars");
+        Files.createDirectories(dir);
+        Files.copy(file.getInputStream(), dir.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+        return "/uploads/avatars/" + filename;
     }
 
     public enum PasswordChangeResult { SUCCESS, WRONG_CURRENT, MISMATCH, TOO_SHORT }

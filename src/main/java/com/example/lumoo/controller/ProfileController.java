@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -26,10 +27,19 @@ public class ProfileController {
     public String updateProfile(@RequestParam String fullName,
                                 @RequestParam String phone,
                                 @RequestParam String address,
+                                @RequestParam(required = false) MultipartFile avatar,
                                 Authentication auth,
                                 RedirectAttributes redirectAttributes) {
         User user = userService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        if (avatar != null && !avatar.isEmpty()) {
+            try {
+                user.setProfilePicture(userService.saveAvatar(avatar));
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Failed to upload profile picture.");
+                return "redirect:/profile";
+            }
+        }
         userService.updateProfile(user, fullName, phone, address);
         redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
         return "redirect:/profile";

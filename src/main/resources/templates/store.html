@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${'LUMOO | ' + (vendor.fullName != null and !vendor.fullName.isEmpty() ? vendor.fullName : vendor.email)}">LUMOO | Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <!-- TOPBAR -->
+    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
+    <!-- NAV -->
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+        <a href="/" class="transition hover:opacity-80">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+        </a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-blue-600 transition">Home</a>
+            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
+            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+                </form>
+            </div>
+            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+                <a href="/login" class="hover:text-blue-600 transition">Login</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- STORE BANNER -->
+    <div class="bg-white border-b border-gray-100 px-12 py-16">
+        <div class="max-w-7xl mx-auto flex items-center gap-10">
+            <!-- Avatar -->
+            <div>
+                <div th:if="${vendor.profilePicture != null}"
+                     class="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-600 shadow-lg">
+                    <img th:src="${vendor.profilePicture}" class="w-full h-full object-cover" alt="Store">
+                </div>
+                <div th:if="${vendor.profilePicture == null}"
+                     class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white text-4xl font-black shadow-lg"
+                     th:text="${#strings.toUpperCase(#strings.substring(vendor.email, 0, 1))}">V</div>
+            </div>
+            <!-- Info -->
+            <div class="flex-1">
+                <p class="text-[8px] font-black uppercase tracking-[0.5em] text-blue-600 mb-2">Official Store</p>
+                <h1 class="text-4xl font-black tracking-tighter"
+                    th:text="${vendor.fullName != null and !vendor.fullName.isEmpty() ? vendor.fullName : vendor.email}">Store Name</h1>
+                <p class="text-[10px] text-gray-400 mt-2" th:text="${vendor.email}">email</p>
+                <p th:if="${vendor.phone != null}" class="text-[10px] text-gray-400" th:text="${vendor.phone}"></p>
+            </div>
+            <!-- Stats -->
+            <div class="text-right shrink-0">
+                <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Products</p>
+                <p class="text-4xl font-black text-blue-600" th:text="${#lists.size(products)}">0</p>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-12 py-16">
+
+        <!-- Breadcrumb -->
+        <div class="mb-10 flex items-center gap-3 text-[9px] uppercase tracking-widest text-gray-400">
+            <a href="/" class="hover:text-black transition">Home</a>
+            <span>/</span>
+            <a href="/stores" class="hover:text-black transition">Stores</a>
+            <span>/</span>
+            <span class="text-black font-bold"
+                  th:text="${vendor.fullName != null and !vendor.fullName.isEmpty() ? vendor.fullName : vendor.email}">Store</span>
+        </div>
+
+        <!-- Category filter -->
+        <div th:if="${categories != null and !#lists.isEmpty(categories)}"
+             class="mb-10 flex flex-wrap gap-4 border-b border-gray-100 pb-8">
+            <a th:href="@{/store/{id}(id=${vendor.id})}"
+               class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
+               th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+                All
+            </a>
+            <a th:each="cat : ${categories}"
+               th:href="@{/store/{id}(id=${vendor.id}, category=${cat})}"
+               th:text="${cat}"
+               class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all capitalize"
+               th:classappend="${cat == selectedCategory ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+            </a>
+        </div>
+
+        <!-- Products grid -->
+        <div th:if="${products != null and !#lists.isEmpty(products)}"
+             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
+
+            <div th:each="p : ${products}" class="group relative">
+                <a th:href="@{/product/{id}(id=${p.id})}">
+                    <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                        <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/999?text=No+Image'}"
+                             class="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition duration-700"
+                             th:alt="${p.name}">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-baseline">
+                            <h3 th:text="${p.name}" class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">Name</h3>
+                            <span class="text-[9px] text-gray-400 font-medium capitalize" th:text="${p.category}">Category</span>
+                        </div>
+                        <p class="text-sm font-light text-gray-500 italic">
+                            GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
+                        </p>
+                    </div>
+                </a>
+                <!-- Quick add (buyers only) -->
+                <div class="mt-3" sec:authorize="hasRole('USER')">
+                    <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
+                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit"
+                                class="w-full border border-gray-200 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white hover:border-black transition duration-300">
+                            Add to Cart +
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${products == null or #lists.isEmpty(products)}"
+             class="py-32 text-center border-y border-gray-100">
+            <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2">No products in this category yet.</p>
+            <a th:href="@{/store/{id}(id=${vendor.id})}"
+               class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">View All Products</a>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 px-12 py-16 mt-10 text-center">
+        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
+    </footer>
+
+    <div th:replace="~{fragments/loading :: loading}"></div>
+</body>
+</html>

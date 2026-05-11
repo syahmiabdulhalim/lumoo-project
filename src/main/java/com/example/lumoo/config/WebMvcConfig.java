@@ -15,5 +15,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/products/**")
                 .addResourceLocations("file:" + uploadDir + "/");
+        String avatarDir = uploadDir.replace("/products", "/avatars");
+        registry.addResourceHandler("/uploads/avatars/**")
+                .addResourceLocations("file:" + avatarDir + "/");
     }
 }

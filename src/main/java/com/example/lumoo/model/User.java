@@ -13,6 +13,7 @@ public class User {
     private String fullName;
     private String phone;
     private String address;
+    private String profilePicture;
     private String resetToken;
     private LocalDateTime tokenExpiry;
     @Enumerated(EnumType.STRING)
@@ -36,6 +37,8 @@ public class User {
     public void setAddress(String address) { this.address = address; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+    public String getProfilePicture() { return profilePicture; }
+    public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
     public String getResetToken() { return resetToken; }
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }
     public LocalDateTime getTokenExpiry() { return tokenExpiry; }
