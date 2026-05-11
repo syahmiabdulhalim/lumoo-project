@@ -20,16 +20,18 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     http
     .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
-            .requestMatchers("/cart/**").authenticated()
-            .requestMatchers("/admin/**").hasRole("ADMIN")
-            .requestMatchers("/vendor/apply").authenticated()
-            .requestMatchers("/vendor/**").hasRole("VENDOR")
-            .requestMatchers("/buyer/**", "/cart/**").hasRole("USER")
-            .requestMatchers("/.well-known/**").permitAll()
-            .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
-            .anyRequest().authenticated()
-        )
+    .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+    .requestMatchers("/.well-known/**").permitAll()
+    .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
+    .requestMatchers("/admin/**").hasRole("ADMIN")
+    .requestMatchers("/vendor/**").hasRole("VENDOR")
+
+    .requestMatchers("/buyer/vendorapply").authenticated()
+
+    .requestMatchers("/buyer/**").hasRole("USER")
+    .requestMatchers("/cart/**").authenticated()
+    .anyRequest().authenticated()
+)
         .formLogin(form -> form
             .loginPage("/login")
             .usernameParameter("username")

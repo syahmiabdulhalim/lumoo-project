@@ -16,8 +16,14 @@
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
+    <!-- CONTACT TOPBAR -->
+    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
     <!-- NAV -->
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
         </a>
@@ -46,7 +52,7 @@
 
             <!-- Slide 1 -->
             <div class="swiper-slide relative">
-                <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80" alt="Construction">
+                <img th:src="@{/images/bg1.jpg}" alt="Gambia Construction">
                 <div class="absolute inset-0 bg-black/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
                         <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Gambia's Premier Supply</span>
@@ -62,10 +68,10 @@
 
             <!-- Slide 2 -->
             <div class="swiper-slide relative">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=80" alt="Roofing">
+                <img th:src="@{/images/bg2.jpg}" alt="Gambia Roofing">
                 <div class="absolute inset-0 bg-black/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
-                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Premium Roofing Solutions</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Built for Gambia, Built to Last</span>
                         <h1 class="text-6xl font-light tracking-tighter leading-none">
                             Protect what <br><span class="font-black italic">Matters.</span>
                         </h1>
@@ -78,10 +84,10 @@
 
             <!-- Slide 3 -->
             <div class="swiper-slide relative">
-                <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1600&q=80" alt="Cement">
+                <img th:src="@{/images/bg-3.jpg}" alt="Gambia Materials">
                 <div class="absolute inset-0 bg-black/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
-                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Quality Cement & Concrete</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Quality Materials Across Gambia</span>
                         <h1 class="text-6xl font-light tracking-tighter leading-none">
                             Strong <br><span class="font-black italic">Foundations.</span>
                         </h1>

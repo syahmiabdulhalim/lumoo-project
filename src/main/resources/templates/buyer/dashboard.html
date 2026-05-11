@@ -6,7 +6,12 @@
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-sans">
 
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
         <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
@@ -38,25 +43,29 @@
                 <p th:each="n : ${notifications}" th:text="${n.message}" class="text-[10px] text-blue-700"></p>
             </div>
         </div>
-        <div class="mb-8 bg-white border border-dashed border-blue-200 p-6 flex items-center justify-between">
 
-<!-- To this — hide if already applied: -->
-<div th:unless="${alreadyApplied}" class="mb-8 bg-white border border-dashed border-blue-200 p-6 flex items-center justify-between">
-
-<!-- And add this below it for when they have applied: -->
-<div th:if="${alreadyApplied}" class="mb-8 bg-yellow-50 border border-dashed border-yellow-300 p-6 flex items-center justify-between">
-    <div>
-        <p class="text-xs font-black uppercase tracking-widest mb-1">Vendor Application Pending</p>
-        <p class="text-[9px] text-gray-400">Our team is reviewing your application. You'll be notified once approved.</p>
-    </div>
-    <span class="text-[9px] font-black uppercase tracking-widest text-yellow-600 shrink-0 ml-6">Under Review ⏳</span>
-</div>
-
+        <!-- Vendor banner — not yet applied -->
+        <div th:unless="${alreadyApplied}"
+             class="mb-8 bg-white border border-dashed border-blue-200 p-6 flex items-center justify-between">
             <div>
                 <p class="text-xs font-black uppercase tracking-widest mb-1">Want to sell on LUMOO?</p>
                 <p class="text-[9px] text-gray-400">Join our vendor program and reach thousands of buyers across Gambia.</p>
             </div>
-            <a href="/vendor/apply" class="text-[9px] font-bold uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1">Apply Now →</a>
+            <a href="/buyer/vendorapply"
+               class="text-[9px] font-bold uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-1 shrink-0 ml-6">
+                Apply Now →
+            </a>
+        </div>
+
+        <!-- Vendor banner — already applied -->
+        <div th:if="${alreadyApplied}"
+             class="mb-8 bg-yellow-50 border border-dashed border-yellow-300 p-6 flex items-center justify-between">
+            <div>
+                <p class="text-xs font-black uppercase tracking-widest mb-1">Vendor Application Pending</p>
+                <p class="text-[9px] text-gray-400">Our team is reviewing your application. You'll be notified once approved.</p>
+            </div>
+            <span class="text-[9px] font-black uppercase tracking-widest text-yellow-600 shrink-0 ml-6">Under Review ⏳</span>
+        </div>
 
         <!-- Orders grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" th:if="${orders != null and !#lists.isEmpty(orders)}">
@@ -80,7 +89,7 @@
                 <!-- Progress bar -->
                 <div class="mb-5" th:unless="${o.status == 'CANCELLED'}">
                     <div class="flex justify-between text-[7px] text-gray-300 uppercase font-black tracking-widest mb-1">
-                        <span th:classappend="${'text-blue-600'}">Ordered</span>
+                        <span class="text-blue-600">Ordered</span>
                         <span th:classappend="${o.status == 'PAID' or o.status == 'SHIPPED' or o.status == 'DELIVERED' ? 'text-blue-600' : ''}">Confirmed</span>
                         <span th:classappend="${o.status == 'SHIPPED' or o.status == 'DELIVERED' ? 'text-blue-600' : ''}">Shipped</span>
                         <span th:classappend="${o.status == 'DELIVERED' ? 'text-green-600' : ''}">Delivered</span>
@@ -100,7 +109,8 @@
                         <p class="text-[8px] text-gray-400 uppercase mb-1">Total Amount</p>
                         <p class="text-sm font-black" th:text="${'GMD ' + o.totalAmount}"></p>
                     </div>
-                    <a th:href="@{/buyer/order/{id}(id=${o.id})}" class="text-[9px] font-bold text-blue-600 uppercase border-b border-blue-600 pb-1">Details →</a>
+                    <a th:href="@{/buyer/order/{id}(id=${o.id})}"
+                       class="text-[9px] font-bold text-blue-600 uppercase border-b border-blue-600 pb-1">Details →</a>
                 </div>
 
             </div>

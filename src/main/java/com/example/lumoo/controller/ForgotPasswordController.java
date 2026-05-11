@@ -35,12 +35,14 @@ public String processForgot(@RequestParam String email, Model model) {
         user.setTokenExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        // GUNA RESEND SEKARANG!
-        emailService.sendResetEmail(user.getEmail(), token);
-
-        model.addAttribute("message", "A reset link has been sent to your email via Resend.");
+        boolean sent = emailService.sendResetEmail(user.getEmail(), token);
+        if (sent) {
+            model.addAttribute("message", "A reset link has been sent to your email. Please check your inbox (and spam folder).");
+        } else {
+            model.addAttribute("error", "We could not send the email right now. Please try again later or contact support at info@lumoo.gm.");
+        }
     } else {
-        model.addAttribute("error", "Email not found.");
+        model.addAttribute("error", "No account found with that email address.");
     }
     return "forgot-password";
 }

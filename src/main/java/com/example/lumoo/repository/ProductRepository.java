@@ -13,4 +13,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory(String category);
     List<Product> findByApproved(boolean approved);
     List<Product> findByCategoryAndApproved(String category, boolean approved);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true")
+    List<Product> findByCategoryIgnoreCaseAndApproved(@org.springframework.data.repository.query.Param("category") String category);
 }

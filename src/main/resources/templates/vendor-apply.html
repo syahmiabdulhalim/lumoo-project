@@ -3,88 +3,111 @@
 <head>
     <title>LUMOO | Become a Vendor</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-[#f9f9f9] text-gray-900 font-sans">
 
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
-        <a href="/"><h1 class="text-2xl font-black tracking-tighter">LUMOO</h1></a>
+    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+        <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
         <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/buyer/dashboard" class="text-gray-400 hover:text-black">My Orders</a>
+            <a href="/buyer/dashboard" class="hover:text-blue-600 transition">My Orders</a>
+            <a href="/logout" class="text-gray-400 hover:text-black transition">Logout</a>
         </div>
     </nav>
 
-    <main class="max-w-3xl mx-auto px-6 py-20">
+    <main class="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20">
 
-        <header class="mb-16">
-            <span class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block">Vendor Programme</span>
-            <h1 class="text-5xl font-light tracking-tighter leading-tight">
-                Sell on <span class="font-black italic">LUMOO.</span>
-            </h1>
-            <p class="text-xs text-gray-400 mt-4 leading-relaxed max-w-lg">
-                Join Gambia's premier construction materials marketplace. Reach thousands of builders and contractors across the country.
-            </p>
+        <header class="mb-12">
+            <h2 class="text-4xl font-light tracking-tighter">Become a <span class="font-black italic text-blue-600">Vendor.</span></h2>
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Join Gambia's premier construction marketplace</p>
         </header>
 
-        <!-- Already applied message -->
-        <div th:if="${param.already_applied}"
+        <!-- Already applied banner -->
+        <div th:if="${param.containsKey('already_applied')}"
              class="mb-8 border-l-4 border-yellow-400 bg-yellow-50 px-6 py-4">
             <p class="text-xs font-bold text-yellow-700 uppercase tracking-widest">
                 You already have a pending application. We'll notify you once reviewed.
             </p>
         </div>
 
-        <!-- Submitted success message -->
-        <div th:if="${param.submitted}"
-             class="mb-8 border-l-4 border-green-500 bg-green-50 px-6 py-4">
-            <p class="text-xs font-bold text-green-700 uppercase tracking-widest">
-                Application submitted! Our team will review it shortly.
-            </p>
-        </div>
-
-        <!-- Error message -->
-        <div th:if="${param.error}"
+        <!-- Error banner -->
+        <div th:if="${param.containsKey('error')}"
              class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
             <p class="text-xs font-bold text-red-600 uppercase tracking-widest">
                 Please fill in all required fields.
             </p>
         </div>
 
-        <!-- Hide form if already submitted -->
-        <div th:unless="${param.submitted or param.already_applied}">
+        <!-- Success state -->
+        <div th:if="${param.containsKey('submitted')}">
+            <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto">
+                <p class="text-5xl mb-6">✓</p>
+                <h2 class="text-2xl font-black tracking-tighter mb-2">Application Received</h2>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
+                    Our team will review your application within 1–2 business days.
+                </p>
+                <a href="/buyer/dashboard"
+                   class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
+                    Back to Dashboard →
+                </a>
+            </div>
+        </div>
+
+        <!-- Already applied full state -->
+        <div th:if="${param.containsKey('already_applied')}">
+            <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto mt-8">
+                <p class="text-5xl mb-6">⏳</p>
+                <h2 class="text-2xl font-black tracking-tighter mb-2">Application Under Review</h2>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
+                    We're reviewing your application. You'll be notified once a decision is made.
+                </p>
+                <a href="/buyer/dashboard"
+                   class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
+                    Back to Dashboard →
+                </a>
+            </div>
+        </div>
+
+        <!-- Application form — only show if no params -->
+        <div th:if="${!param.containsKey('submitted') and !param.containsKey('already_applied')}">
 
             <!-- Benefits -->
-            <div class="grid grid-cols-3 gap-6 mb-16">
-                <div class="bg-white p-6 border border-gray-100 shadow-sm">
-                    <p class="text-2xl mb-3">📦</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+                <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
+                    <p class="text-2xl mb-4">📦</p>
                     <p class="text-[9px] font-black uppercase tracking-widest mb-1">List Products</p>
-                    <p class="text-[9px] text-gray-400">Upload and manage your full product catalogue</p>
+                    <p class="text-[9px] text-gray-400 leading-relaxed">Upload and manage your full product catalogue</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-100 shadow-sm">
-                    <p class="text-2xl mb-3">💰</p>
+                <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
+                    <p class="text-2xl mb-4">💰</p>
                     <p class="text-[9px] font-black uppercase tracking-widest mb-1">Earn Revenue</p>
-                    <p class="text-[9px] text-gray-400">Keep 90% of every sale. We take 10% only.</p>
+                    <p class="text-[9px] text-gray-400 leading-relaxed">Keep 90% of every sale. We take 10% only.</p>
                 </div>
-                <div class="bg-white p-6 border border-gray-100 shadow-sm">
-                    <p class="text-2xl mb-3">📊</p>
+                <div class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500">
+                    <p class="text-2xl mb-4">📊</p>
                     <p class="text-[9px] font-black uppercase tracking-widest mb-1">Track Sales</p>
-                    <p class="text-[9px] text-gray-400">Full dashboard with orders and earnings</p>
+                    <p class="text-[9px] text-gray-400 leading-relaxed">Full dashboard with orders and earnings</p>
                 </div>
             </div>
 
-            <!-- Application form -->
+            <!-- Form -->
             <div class="bg-white p-10 border border-gray-100 shadow-sm">
-                <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-6 mb-8">
+                <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-6 mb-10">
                     Application Form
-                </h2>
+                </h3>
 
-                <form th:action="@{/vendor/apply}" method="post" class="space-y-8">
-                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <form th:action="@{/buyer/vendorapply}" method="post" class="space-y-8">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">
+                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
                                 Business Name <span class="text-red-400">*</span>
                             </label>
                             <input type="text" name="businessName" required
@@ -92,7 +115,7 @@
                                    placeholder="e.g. Gambia Cement Supplies">
                         </div>
                         <div>
-                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">
+                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
                                 Business Type <span class="text-red-400">*</span>
                             </label>
                             <select name="businessType" required
@@ -108,7 +131,7 @@
                     </div>
 
                     <div>
-                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
                             Phone Number <span class="text-red-400">*</span>
                         </label>
                         <input type="tel" name="phone" required
@@ -117,7 +140,7 @@
                     </div>
 
                     <div>
-                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
                             Why do you want to sell on LUMOO? <span class="text-red-400">*</span>
                         </label>
                         <textarea name="reason" rows="4" required
@@ -125,26 +148,24 @@
                                   placeholder="Tell us about your business and what products you plan to sell..."></textarea>
                     </div>
 
-                    <button type="submit"
-                            class="w-full bg-black text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-500">
-                        Submit Application →
-                    </button>
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <a href="/buyer/dashboard"
+                           class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition">
+                            ← Cancel
+                        </a>
+                        <button type="submit"
+                                class="bg-black text-white px-12 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-500">
+                            Submit Application →
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
 
-        <!-- Show this after submission -->
-        <div th:if="${param.submitted}" class="bg-white p-10 border border-gray-100 shadow-sm text-center">
-            <p class="text-4xl mb-6">✓</p>
-            <h2 class="text-xl font-black tracking-tighter mb-2">Application Received</h2>
-            <p class="text-xs text-gray-400 mb-8">We'll review your application and get back to you. This usually takes 1-2 business days.</p>
-            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">Back to Store →</a>
-        </div>
-
     </main>
 
-    <footer class="bg-white border-t border-gray-100 px-12 py-20 mt-20 text-center">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
+    <footer class="bg-white border-t border-gray-100 px-12 py-16 mt-20 text-center">
+        <p class="text-[9px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
     </footer>
 
     <div th:replace="~{fragments/loading :: loading}"></div>

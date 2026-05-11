@@ -1,10 +1,9 @@
 package com.example.lumoo.controller;
 
 import com.example.lumoo.model.User;
-import com.example.lumoo.repository.UserRepository;
+import com.example.lumoo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,65 +12,58 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class ProfileController {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private UserService userService;
 
     @GetMapping("/profile")
     public String showProfile(Authentication auth, Model model) {
-        User user = userRepository.findByEmail(auth.getName())
+        User user = userService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         model.addAttribute("user", user);
         return "profile";
     }
 
     @PostMapping("/profile/update")
-    public String updateProfile(
-            @RequestParam String fullName,
-            @RequestParam String phone,
-            @RequestParam String address,
-            Authentication auth,
-            RedirectAttributes redirectAttributes) {
-
-        User user = userRepository.findByEmail(auth.getName())
+    public String updateProfile(@RequestParam String fullName,
+                                @RequestParam String phone,
+                                @RequestParam String address,
+                                Authentication auth,
+                                RedirectAttributes redirectAttributes) {
+        User user = userService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        user.setFullName(fullName);
-        user.setPhone(phone);
-        user.setAddress(address);
-        userRepository.save(user);
-
-        redirectAttributes.addFlashAttribute("success", "Profil berjaya dikemaskini.");
+        userService.updateProfile(user, fullName, phone, address);
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
         return "redirect:/profile";
     }
 
     @PostMapping("/profile/change-password")
-    public String changePassword(
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword,
-            @RequestParam String confirmPassword,
-            Authentication auth,
-            RedirectAttributes redirectAttributes) {
-
-        User user = userRepository.findByEmail(auth.getName())
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 Authentication auth,
+                                 RedirectAttributes redirectAttributes) {
+        User user = userService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            redirectAttributes.addFlashAttribute("passwordError", "Password semasa tidak betul.");
-            return "redirect:/profile";
-        }
-        if (!newPassword.equals(confirmPassword)) {
-            redirectAttributes.addFlashAttribute("passwordError", "Password baru tidak sepadan.");
-            return "redirect:/profile";
-        }
-        if (newPassword.length() < 6) {
-            redirectAttributes.addFlashAttribute("passwordError", "Password baru mestilah sekurang-kurangnya 6 aksara.");
-            return "redirect:/profile";
-        }
+        UserService.PasswordChangeResult result =
+                userService.changePassword(user, currentPassword, newPassword, confirmPassword);
 
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        redirectAttributes.addFlashAttribute("passwordSuccess", "Password berjaya ditukar.");
-        return "redirect:/profile";
+        return switch (result) {
+            case SUCCESS -> {
+                redirectAttributes.addFlashAttribute("passwordSuccess", "Password changed successfully.");
+                yield "redirect:/profile";
+            }
+            case WRONG_CURRENT -> {
+                redirectAttributes.addFlashAttribute("passwordError", "Current password is incorrect.");
+                yield "redirect:/profile";
+            }
+            case MISMATCH -> {
+                redirectAttributes.addFlashAttribute("passwordError", "New passwords do not match.");
+                yield "redirect:/profile";
+            }
+            case TOO_SHORT -> {
+                redirectAttributes.addFlashAttribute("passwordError", "New password must be at least 6 characters.");
+                yield "redirect:/profile";
+            }
+        };
     }
 }

@@ -1,100 +1,59 @@
 package com.example.lumoo.controller;
 
-import com.example.lumoo.model.*;
-import com.example.lumoo.repository.*;
+import com.example.lumoo.model.CartItem;
+import com.example.lumoo.model.Order;
+import com.example.lumoo.model.Role;
+import com.example.lumoo.model.User;
+import com.example.lumoo.service.CartService;
+import com.example.lumoo.service.OrderService;
+import com.example.lumoo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class OrderController {
 
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private OrderItemRepository orderItemRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private CartRepository cartRepository;
+    @Autowired private OrderService orderService;
+    @Autowired private CartService cartService;
+    @Autowired private UserService userService;
+
+    private static final Set<String> VALID_PAYMENT_METHODS = Set.of("COD", "TRANSFER", "AFRIMONEY", "QMONEY");
 
     @GetMapping("/checkout")
     public String checkoutPage(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
-
-        User user = userRepository.findByEmail(principal.getName()).orElse(null);
-if (user == null) return "redirect:/login";
-if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
-
-        List<CartItem> cartItems = cartRepository.findByUser(user);
-        if (cartItems.isEmpty()) return "redirect:/cart";
-
-        double total = cartItems.stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
-
-        model.addAttribute("cart", cartItems);
-        model.addAttribute("total", total);
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
+        List<CartItem> items = cartService.getItems(user);
+        if (items.isEmpty()) return "redirect:/cart";
+        model.addAttribute("cart", items);
+        model.addAttribute("total", cartService.getTotal(items));
         return "checkout";
     }
 
-    @Transactional
     @PostMapping("/order/place")
     public String placeOrder(@RequestParam String address,
                              @RequestParam String paymentMethod,
                              Principal principal) {
-
-        // 1. Pastikan user login
         if (principal == null) return "redirect:/login";
+        if (address == null || address.trim().isEmpty()) return "redirect:/checkout?error=address_required";
+        if (!VALID_PAYMENT_METHODS.contains(paymentMethod)) return "redirect:/checkout?error=invalid_payment";
 
-        if (address == null || address.trim().isEmpty())
-        return "redirect:/checkout?error=address_required";
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
 
-          if (!paymentMethod.equals("COD") && !paymentMethod.equals("TRANSFER"))
-        return "redirect:/checkout?error=invalid_payment";
+        List<CartItem> items = cartService.getItems(user);
+        if (items.isEmpty()) return "redirect:/cart?error=empty";
 
-        // 2. Load user
-        User user = userRepository.findByEmail(principal.getName()).orElse(null);
-if (user == null) return "redirect:/login";
-if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
-
-        // 3. Load cart dari DB
-        List<CartItem> cartItems = cartRepository.findByUser(user);
-        if (cartItems.isEmpty()) return "redirect:/cart?error=empty";
-
-        // 4. Kira total
-        double total = cartItems.stream()
-                .mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
-
-        // 5. Kira commission & vendor earnings
-        double commission = total * 0.10;
-        double vendorEarnings = total - commission;
-
-        // 6. Bina Order
-        Order order = new Order();
-        order.setUser(user);
-        order.setAddress(address);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(paymentMethod.equals("COD") ? "PENDING" : "PAID");
-        order.setTotalAmount(total);
-        order.setAdminCommission(commission);
-        order.setVendorEarnings(vendorEarnings);
-
-        Order savedOrder = orderRepository.save(order);
-
-        // 7. Bina OrderItems
-        for (CartItem ci : cartItems) {
-            OrderItem oi = new OrderItem();
-            oi.setOrder(savedOrder);
-            oi.setProductName(ci.getName());
-            oi.setPrice(ci.getPrice());
-            oi.setQuantity(ci.getQuantity());
-            orderItemRepository.save(oi);
-        }
-
-        // 8. Kosongkan cart
-        cartRepository.deleteAll(cartItems);
-
-        return "redirect:/buyer/order/" + savedOrder.getId() + "?success";
+        Order saved = orderService.placeOrder(user, address, paymentMethod, items);
+        return "redirect:/buyer/order/" + saved.getId() + "?success";
     }
 }
