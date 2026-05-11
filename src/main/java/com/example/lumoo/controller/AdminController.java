@@ -77,6 +77,12 @@ public class AdminController {
         return "redirect:/admin/dashboard?deleted_inquiry#inquiries";
     }
 
+    @PostMapping("/order/{id}/resolve-return")
+    public String resolveReturn(@PathVariable Long id) {
+        orderService.resolveReturn(id);
+        return "redirect:/admin/dashboard?return_resolved#orders";
+    }
+
     @GetMapping("/approve-image/{id}")
     public String approveImage(@PathVariable Long id) {
         productService.approveImage(id);
@@ -95,9 +101,10 @@ public class AdminController {
         return "redirect:/admin/dashboard?vendor_approved";
     }
 
-    @GetMapping("/reject-vendor/{id}")
-    public String rejectVendor(@PathVariable Long id) {
-        vendorApplicationService.reject(id);
+    @PostMapping("/reject-vendor/{id}")
+    public String rejectVendor(@PathVariable Long id,
+                               @RequestParam(required = false) String note) {
+        vendorApplicationService.reject(id, note);
         return "redirect:/admin/dashboard?vendor_rejected";
     }
 }

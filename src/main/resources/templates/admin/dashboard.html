@@ -212,21 +212,26 @@
                                     <td class="px-6 py-4">
                                         <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
                                               th:text="${o.status}"
-                                              th:classappend="${o.status == 'DELIVERED' ? 'badge-delivered' :
-                                                               o.status == 'SHIPPED'   ? 'badge-shipped' :
-                                                               o.status == 'PAID'      ? 'badge-paid' :
-                                                               o.status == 'CANCELLED' ? 'badge-cancelled' : 'badge-pending'}">
+                                              th:classappend="${o.status == 'DELIVERED'        ? 'badge-delivered' :
+                                                               o.status == 'SHIPPED'           ? 'badge-shipped' :
+                                                               o.status == 'PAID'              ? 'badge-paid' :
+                                                               o.status == 'CANCELLED'         ? 'badge-cancelled' :
+                                                               o.status == 'RETURN_REQUESTED'  ? 'bg-orange-100 text-orange-700' :
+                                                               o.status == 'RETURNED'          ? 'bg-gray-100 text-gray-500' :
+                                                                                                 'badge-pending'}">
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <form th:action="@{/admin/update-order-status}" method="post" class="flex items-center gap-2">
                                             <input type="hidden" name="orderId" th:value="${o.id}">
                                             <select name="status" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                                <option value="PENDING"   th:selected="${o.status == 'PENDING'}">Pending</option>
-                                                <option value="PAID"      th:selected="${o.status == 'PAID'}">Paid</option>
-                                                <option value="SHIPPED"   th:selected="${o.status == 'SHIPPED'}">Shipped</option>
-                                                <option value="DELIVERED" th:selected="${o.status == 'DELIVERED'}">Delivered</option>
-                                                <option value="CANCELLED" th:selected="${o.status == 'CANCELLED'}">Cancelled</option>
+                                                <option value="PENDING"          th:selected="${o.status == 'PENDING'}">Pending</option>
+                                                <option value="PAID"             th:selected="${o.status == 'PAID'}">Paid</option>
+                                                <option value="SHIPPED"          th:selected="${o.status == 'SHIPPED'}">Shipped</option>
+                                                <option value="DELIVERED"        th:selected="${o.status == 'DELIVERED'}">Delivered</option>
+                                                <option value="CANCELLED"        th:selected="${o.status == 'CANCELLED'}">Cancelled</option>
+                                                <option value="RETURN_REQUESTED" th:selected="${o.status == 'RETURN_REQUESTED'}">Return Requested</option>
+                                                <option value="RETURNED"         th:selected="${o.status == 'RETURNED'}">Returned</option>
                                             </select>
                                             <button type="submit" class="text-xs bg-slate-800 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
                                                 Save
@@ -234,11 +239,28 @@
                                         </form>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <a th:href="@{/admin/delete-order/{id}(id=${o.id})}"
-                                           onclick="return confirm('Delete this order?')"
-                                           class="text-slate-300 hover:text-red-500 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </a>
+                                        <div class="flex items-center gap-3">
+                                            <!-- Resolve Return button -->
+                                            <form th:if="${o.status == 'RETURN_REQUESTED'}"
+                                                  th:action="@{/admin/order/{id}/resolve-return(id=${o.id})}" method="post">
+                                                <button type="submit"
+                                                        onclick="return confirm('Mark return as resolved?')"
+                                                        class="text-xs bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1.5 rounded-lg font-medium transition-colors">
+                                                    Resolve
+                                                </button>
+                                            </form>
+                                            <!-- Return reason tooltip -->
+                                            <span th:if="${o.returnReason != null}"
+                                                  class="text-[9px] text-orange-500 italic truncate max-w-[120px]"
+                                                  th:title="${o.returnReason}"
+                                                  th:text="${o.returnReason}">
+                                            </span>
+                                            <a th:href="@{/admin/delete-order/{id}(id=${o.id})}"
+                                               onclick="return confirm('Delete this order?')"
+                                               class="text-slate-300 hover:text-red-500 transition-colors ml-auto">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -289,11 +311,15 @@
                                    class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
                                     Approve
                                 </a>
-                                <a th:href="@{/admin/reject-vendor/{id}(id=${app.id})}"
-                                   onclick="return confirm('Reject this application?')"
-                                   class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
-                                    Reject
-                                </a>
+                                <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post" class="inline"
+                                      th:id="'reject-form-' + ${app.id}"
+                                      onsubmit="return fillRejectNote(this)">
+                                    <input type="hidden" name="note">
+                                    <button type="submit"
+                                            class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                        Reject
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -515,5 +541,13 @@
     </main>
 </div>
 <div th:replace="~{fragments/loading :: loading}"></div>
+<script>
+function fillRejectNote(form) {
+    var note = prompt('Reason for rejection (shown to applicant). Leave blank to skip:');
+    if (note === null) return false;
+    form.querySelector('input[name=note]').value = note;
+    return true;
+}
+</script>
 </body>
 </html>

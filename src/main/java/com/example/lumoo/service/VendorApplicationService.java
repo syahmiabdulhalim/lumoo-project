@@ -10,6 +10,7 @@ import com.example.lumoo.repository.VendorApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,8 +20,24 @@ public class VendorApplicationService {
     @Autowired private UserRepository userRepository;
     @Autowired private NotificationRepository notificationRepository;
 
+    public List<VendorApplication> getByUser(User user) {
+        return applicationRepository.findByUserOrderByAppliedAtDesc(user);
+    }
+
     public boolean hasAlreadyApplied(User user) {
         return applicationRepository.existsByUserAndStatus(user, "PENDING");
+    }
+
+    public boolean canReapply(User user) {
+        List<VendorApplication> apps = getByUser(user);
+        if (apps.isEmpty()) return true;
+        VendorApplication latest = apps.get(0);
+        if ("PENDING".equals(latest.getStatus())) return false;
+        if ("REJECTED".equals(latest.getStatus())) {
+            if (latest.getReviewedAt() == null) return true;
+            return latest.getReviewedAt().plusHours(12).isBefore(LocalDateTime.now());
+        }
+        return false;
     }
 
     public void apply(User user, String businessName, String businessType, String phone, String reason) {
@@ -40,6 +57,7 @@ public class VendorApplicationService {
     public void approve(Long id) {
         applicationRepository.findById(id).ifPresent(app -> {
             app.setStatus("APPROVED");
+            app.setReviewedAt(LocalDateTime.now());
             applicationRepository.save(app);
             User user = app.getUser();
             user.setRole(Role.VENDOR);
@@ -51,14 +69,16 @@ public class VendorApplicationService {
         });
     }
 
-    public void reject(Long id) {
+    public void reject(Long id, String note) {
         applicationRepository.findById(id).ifPresent(app -> {
             app.setStatus("REJECTED");
+            app.setReviewedAt(LocalDateTime.now());
+            if (note != null && !note.isBlank()) app.setRejectionNote(note.trim());
             applicationRepository.save(app);
-            notificationRepository.save(new Notification(
-                "Your vendor application has been reviewed. Unfortunately it was not approved at this time. Contact us at info@lumoo.gm for more information.",
-                app.getUser()
-            ));
+            String msg = "Your vendor application was not approved.";
+            if (note != null && !note.isBlank()) msg += " Reason: " + note.trim();
+            msg += " You may re-apply after 12 hours. Contact info@lumoo.gm for help.";
+            notificationRepository.save(new Notification(msg, app.getUser()));
         });
     }
 }

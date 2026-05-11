@@ -51,6 +51,77 @@
             </div>
         </div>
 
+        <!-- Flash messages -->
+        <div th:if="${param.containsKey('shipped')}" class="mb-6 border-l-4 border-green-500 bg-green-50 px-6 py-3">
+            <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Order marked as shipped.</p>
+        </div>
+        <div th:if="${param.containsKey('error')}" class="mb-6 border-l-4 border-red-400 bg-red-50 px-6 py-3">
+            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Action failed. Please try again.</p>
+        </div>
+
+        <!-- Orders Section -->
+        <section class="mb-12">
+            <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Incoming Orders</h3>
+            <div class="bg-white shadow-sm border border-gray-100 overflow-x-auto">
+                <table class="w-full text-left text-sm" th:if="${vendorOrders != null and !#lists.isEmpty(vendorOrders)}">
+                    <thead>
+                        <tr class="text-[8px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
+                            <th class="px-6 py-4 font-bold">Order #</th>
+                            <th class="px-6 py-4 font-bold">Customer</th>
+                            <th class="px-6 py-4 font-bold">Date</th>
+                            <th class="px-6 py-4 font-bold">Amount</th>
+                            <th class="px-6 py-4 font-bold">Status</th>
+                            <th class="px-6 py-4 font-bold">Tracking</th>
+                            <th class="px-6 py-4 font-bold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        <tr th:each="o : ${vendorOrders}" class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 text-[10px] text-gray-400 font-mono" th:text="${'#LMO-' + o.id}"></td>
+                            <td class="px-6 py-4 text-[10px] text-gray-600" th:text="${o.user != null ? o.user.email : '—'}"></td>
+                            <td class="px-6 py-4 text-[10px] text-gray-400"
+                                th:text="${o.orderDate != null ? #temporals.format(o.orderDate, 'dd MMM yyyy') : '—'}"></td>
+                            <td class="px-6 py-4 text-xs font-bold text-blue-600"
+                                th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}"></td>
+                            <td class="px-6 py-4">
+                                <span th:text="${o.status}"
+                                      class="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded"
+                                      th:classappend="${o.status == 'DELIVERED'}  ? 'bg-green-100 text-green-700' :
+                                                      (${o.status == 'SHIPPED'}   ? 'bg-purple-100 text-purple-700' :
+                                                      (${o.status == 'PAID'}      ? 'bg-emerald-100 text-emerald-700' :
+                                                      (${o.status == 'RETURN_REQUESTED'} ? 'bg-orange-100 text-orange-700' :
+                                                      (${o.status == 'RETURNED'}  ? 'bg-gray-100 text-gray-500' :
+                                                       'bg-blue-100 text-blue-700'))))">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-[10px] text-gray-400 font-mono"
+                                th:text="${o.trackingNumber != null ? o.trackingNumber : '—'}"></td>
+                            <td class="px-6 py-4">
+                                <!-- Ship button for PENDING or PAID orders -->
+                                <form th:if="${o.status == 'PENDING' or o.status == 'PAID'}"
+                                      th:action="@{/vendor/order/{id}/ship(id=${o.id})}" method="post"
+                                      class="flex items-center gap-2">
+                                    <input type="text" name="trackingNumber"
+                                           class="border border-gray-200 px-2 py-1 text-[9px] w-28 focus:border-blue-400 outline-none"
+                                           placeholder="Tracking no.">
+                                    <button type="submit"
+                                            class="bg-blue-600 text-white px-3 py-1.5 text-[8px] font-black uppercase tracking-widest hover:bg-blue-700 transition">
+                                        Ship
+                                    </button>
+                                </form>
+                                <span th:if="${o.status != 'PENDING' and o.status != 'PAID'}"
+                                      class="text-[9px] text-gray-300 uppercase tracking-widest">—</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${vendorOrders == null or #lists.isEmpty(vendorOrders)}" class="py-16 text-center">
+                    <p class="text-[10px] text-gray-300 uppercase tracking-[0.3em]">No orders yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
         <section class="bg-white shadow-2xl border-t-4 border-blue-600">
             <table class="w-full text-left">
                 <thead>

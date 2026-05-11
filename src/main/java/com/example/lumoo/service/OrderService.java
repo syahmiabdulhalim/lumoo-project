@@ -75,6 +75,57 @@ public class OrderService {
         return CancelResult.CANCELLED;
     }
 
+    public enum ShipResult { SHIPPED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
+
+    public ShipResult markShipped(Long orderId, Long vendorId, String trackingNumber) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) return ShipResult.NOT_FOUND;
+        boolean isVendorOrder = order.getItems() != null && order.getItems().stream()
+                .anyMatch(i -> i.getProduct() != null
+                        && i.getProduct().getVendor() != null
+                        && i.getProduct().getVendor().getId().equals(vendorId));
+        if (!isVendorOrder) return ShipResult.UNAUTHORIZED;
+        String s = order.getStatus();
+        if (!s.equals("PENDING") && !s.equals("PAID")) return ShipResult.INVALID_STATUS;
+        order.setStatus("SHIPPED");
+        if (trackingNumber != null && !trackingNumber.isBlank())
+            order.setTrackingNumber(trackingNumber.trim());
+        orderRepository.save(order);
+        return ShipResult.SHIPPED;
+    }
+
+    public enum DeliverResult { DELIVERED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
+
+    public DeliverResult markDelivered(Long orderId, Long userId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) return DeliverResult.NOT_FOUND;
+        if (!order.getUser().getId().equals(userId)) return DeliverResult.UNAUTHORIZED;
+        if (!order.getStatus().equals("SHIPPED")) return DeliverResult.INVALID_STATUS;
+        order.setStatus("DELIVERED");
+        orderRepository.save(order);
+        return DeliverResult.DELIVERED;
+    }
+
+    public enum ReturnResult { REQUESTED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
+
+    public ReturnResult requestReturn(Long orderId, Long userId, String reason) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) return ReturnResult.NOT_FOUND;
+        if (!order.getUser().getId().equals(userId)) return ReturnResult.UNAUTHORIZED;
+        if (!order.getStatus().equals("DELIVERED")) return ReturnResult.INVALID_STATUS;
+        order.setStatus("RETURN_REQUESTED");
+        if (reason != null && !reason.isBlank()) order.setReturnReason(reason.trim());
+        orderRepository.save(order);
+        return ReturnResult.REQUESTED;
+    }
+
+    public void resolveReturn(Long orderId) {
+        orderRepository.findById(orderId).ifPresent(o -> {
+            o.setStatus("RETURNED");
+            orderRepository.save(o);
+        });
+    }
+
     public void updateStatus(Long orderId, String status) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setStatus(status);

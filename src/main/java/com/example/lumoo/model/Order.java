@@ -12,6 +12,8 @@ public class Order {
     private String customerName;
     private String address;
     private String paymentMethod;
+    private String trackingNumber;
+    private String returnReason;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -41,6 +43,12 @@ private LocalDateTime createdAt;
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getTrackingNumber() { return trackingNumber; }
+    public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
+
+    public String getReturnReason() { return returnReason; }
+    public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
 
     public User getUser() { return user; } // PULANGKAN 'User', BUKAN 'Object'
     public void setUser(User user) { this.user = user; }

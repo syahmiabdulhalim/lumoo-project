@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface VendorApplicationRepository extends JpaRepository<VendorApplication, Long> {
     List<VendorApplication> findByStatusOrderByAppliedAtDesc(String status);
+    List<VendorApplication> findByUserOrderByAppliedAtDesc(User user);
     Optional<VendorApplication> findByUserAndStatus(User user, String status);
     boolean existsByUserAndStatus(User user, String status);
 }

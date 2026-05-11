@@ -24,11 +24,13 @@
                 </div>
                 <span class="px-4 py-1 text-[10px] font-black uppercase rounded-full"
                       th:text="${order.status}"
-                      th:classappend="${order.status == 'DELIVERED' ? 'bg-green-100 text-green-700' :
-                                       order.status == 'SHIPPED'   ? 'bg-purple-100 text-purple-700' :
-                                       order.status == 'CANCELLED' ? 'bg-red-100 text-red-600' :
-                                       order.status == 'PAID'      ? 'bg-emerald-100 text-emerald-700' :
-                                                                      'bg-blue-50 text-blue-600'}">
+                      th:classappend="${order.status == 'DELIVERED'        ? 'bg-green-100 text-green-700' :
+                                       order.status == 'SHIPPED'          ? 'bg-purple-100 text-purple-700' :
+                                       order.status == 'CANCELLED'        ? 'bg-red-100 text-red-600' :
+                                       order.status == 'PAID'             ? 'bg-emerald-100 text-emerald-700' :
+                                       order.status == 'RETURN_REQUESTED' ? 'bg-orange-100 text-orange-700' :
+                                       order.status == 'RETURNED'         ? 'bg-gray-100 text-gray-600' :
+                                                                             'bg-blue-50 text-blue-600'}">
                 </span>
             </div>
 
@@ -86,15 +88,96 @@
                 </div>
             </div>
 
-            <!-- Cancel button (only if pending) -->
-            <div th:if="${order.status == 'PENDING'}" class="mt-8 pt-6 border-t border-dashed border-gray-100">
-                <form th:action="@{/buyer/order/delete/{id}(id=${order.id})}" method="post"
-                      onsubmit="return confirm('Are you sure you want to cancel this order?')">
-                    <button type="submit"
-                            class="text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition border-b border-red-300 pb-0.5">
-                        Cancel Order
-                    </button>
-                </form>
+            <!-- Tracking number (if shipped) -->
+            <div th:if="${order.trackingNumber != null}" class="mt-6 bg-blue-50 border border-blue-100 px-6 py-4">
+                <p class="text-[8px] text-blue-400 uppercase font-black tracking-widest mb-1">Tracking Number</p>
+                <p class="text-sm font-bold text-blue-700 font-mono" th:text="${order.trackingNumber}"></p>
+            </div>
+
+            <!-- Return reason (if return requested) -->
+            <div th:if="${order.status == 'RETURN_REQUESTED' or order.status == 'RETURNED'}"
+                 class="mt-6 bg-orange-50 border border-orange-200 px-6 py-4">
+                <p class="text-[8px] text-orange-400 uppercase font-black tracking-widest mb-1">Return Reason</p>
+                <p class="text-sm text-orange-700" th:text="${order.returnReason != null ? order.returnReason : '—'}"></p>
+                <p th:if="${order.status == 'RETURNED'}"
+                   class="text-[9px] text-green-600 font-bold uppercase tracking-wider mt-2">✓ Return resolved by admin</p>
+            </div>
+
+            <!-- Success flash -->
+            <div th:if="${param.containsKey('received')}" class="mt-6 border-l-4 border-green-500 bg-green-50 px-4 py-3">
+                <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Order marked as received. You can now leave a review!</p>
+            </div>
+            <div th:if="${param.containsKey('return_requested')}" class="mt-6 border-l-4 border-orange-400 bg-orange-50 px-4 py-3">
+                <p class="text-xs font-bold text-orange-700 uppercase tracking-widest">Return request submitted. Admin will contact you shortly.</p>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="mt-8 pt-6 border-t border-dashed border-gray-100 space-y-4">
+
+                <!-- Cancel (PENDING only) -->
+                <div th:if="${order.status == 'PENDING'}">
+                    <form th:action="@{/buyer/order/delete/{id}(id=${order.id})}" method="post"
+                          onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                        <button type="submit"
+                                class="text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition border-b border-red-300 pb-0.5">
+                            Cancel Order
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Mark as Received (SHIPPED only) -->
+                <div th:if="${order.status == 'SHIPPED'}">
+                    <form th:action="@{/buyer/order/{id}/received(id=${order.id})}" method="post"
+                          onsubmit="return confirm('Confirm that you have received this order?')">
+                        <button type="submit"
+                                class="bg-green-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-green-700 transition">
+                            ✓ Mark as Received
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Request Return (DELIVERED only) -->
+                <div th:if="${order.status == 'DELIVERED'}">
+                    <details class="group">
+                        <summary class="text-[9px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-700 cursor-pointer transition border-b border-orange-300 pb-0.5 w-fit">
+                            Request a Return ↓
+                        </summary>
+                        <form th:action="@{/buyer/order/{id}/return(id=${order.id})}" method="post"
+                              class="mt-4 space-y-3 max-w-md">
+                            <div>
+                                <label class="text-[8px] font-black uppercase tracking-widest text-gray-400 block mb-2">Reason for return</label>
+                                <textarea name="returnReason" rows="3" required
+                                          class="w-full border border-gray-200 p-3 text-sm focus:border-orange-400 outline-none resize-none placeholder-gray-300"
+                                          placeholder="Describe the issue with your order..."></textarea>
+                            </div>
+                            <button type="submit"
+                                    class="bg-orange-500 text-white px-6 py-2.5 text-[9px] font-black uppercase tracking-widest hover:bg-orange-600 transition">
+                                Submit Return Request →
+                            </button>
+                        </form>
+                    </details>
+                </div>
+
+            </div>
+
+            <!-- Review section (DELIVERED orders only, if not yet reviewed) -->
+            <div th:if="${order.status == 'DELIVERED'}"
+                 class="mt-10 pt-8 border-t-2 border-gray-100">
+                <h3 class="text-lg font-light tracking-tight mb-6">
+                    Leave a <span class="font-black italic text-blue-600">Review</span>
+                </h3>
+                <div class="space-y-4">
+                    <div th:each="item : ${order.items}" class="bg-gray-50 p-4 border border-gray-100">
+                        <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-3" th:text="${item.productName}"></p>
+                        <div th:if="${item.product != null}">
+                            <a th:href="@{/product/{id}(id=${item.product.id})}"
+                               class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
+                                Write a Review for this Product →
+                            </a>
+                        </div>
+                        <p th:if="${item.product == null}" class="text-[9px] text-gray-300 uppercase tracking-widest">Product no longer available</p>
+                    </div>
+                </div>
             </div>
 
         </div>

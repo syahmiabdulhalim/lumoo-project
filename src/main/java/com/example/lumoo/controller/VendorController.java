@@ -40,6 +40,7 @@ public class VendorController {
                 .mapToDouble(Order::getTotalAmount).sum();
 
         model.addAttribute("products", products);
+        model.addAttribute("vendorOrders", vendorOrders);
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("averageOrder", averageOrder);
         model.addAttribute("monthlySales", monthlySales);
@@ -98,6 +99,20 @@ public class VendorController {
         } catch (IOException e) {
             return "redirect:/vendor/edit-product/" + id + "?error=upload_failed";
         }
+    }
+
+    @PostMapping("/order/{id}/ship")
+    public String shipOrder(@PathVariable Long id,
+                            @RequestParam(required = false) String trackingNumber,
+                            @AuthenticationPrincipal UserDetails currentUser) {
+        User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
+        OrderService.ShipResult result = orderService.markShipped(id, vendor.getId(), trackingNumber);
+        return switch (result) {
+            case SHIPPED -> "redirect:/vendor/dashboard?shipped";
+            case NOT_FOUND -> "redirect:/vendor/dashboard?error=not_found";
+            case UNAUTHORIZED -> "redirect:/vendor/dashboard?error=unauthorized";
+            case INVALID_STATUS -> "redirect:/vendor/dashboard?error=invalid_status";
+        };
     }
 
     @GetMapping("/delete-product/{id}")

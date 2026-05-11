@@ -23,6 +23,10 @@ public class VendorApplication {
     private String status; // PENDING, APPROVED, REJECTED
 
     private LocalDateTime appliedAt;
+    private LocalDateTime reviewedAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String rejectionNote;
 
     @PrePersist
     protected void onCreate() {
@@ -47,4 +51,8 @@ public class VendorApplication {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getAppliedAt() { return appliedAt; }
     public void setAppliedAt(LocalDateTime appliedAt) { this.appliedAt = appliedAt; }
+    public LocalDateTime getReviewedAt() { return reviewedAt; }
+    public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }
+    public String getRejectionNote() { return rejectionNote; }
+    public void setRejectionNote(String rejectionNote) { this.rejectionNote = rejectionNote; }
 }

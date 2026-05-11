@@ -39,27 +39,68 @@ public class WebController {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
+    public String productDetail(@PathVariable Long id, Model model, Principal principal) {
         Product product = productService.findById(id).orElse(null);
         if (product == null) return "redirect:/?error=not_found";
         List<Review> reviews = reviewService.getByProduct(product);
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviews);
         model.addAttribute("avgRating", reviewService.getAverageRating(reviews));
+        if (principal != null) {
+            userService.findByEmail(principal.getName()).ifPresent(user -> {
+                model.addAttribute("canReview", reviewService.canReview(user, product));
+                model.addAttribute("alreadyReviewed", reviewService.hasAlreadyReviewed(user, product));
+            });
+        }
         return "product-detail";
     }
 
     @PostMapping("/product/{id}/review")
     public String addReview(@PathVariable Long id,
-                            @RequestParam String reviewerName,
                             @RequestParam int rating,
                             @RequestParam String comment,
                             Principal principal) {
         if (principal == null) return "redirect:/login";
         if (rating < 1 || rating > 5) return "redirect:/product/" + id + "?error=invalid_rating";
         if (comment == null || comment.trim().isEmpty()) return "redirect:/product/" + id + "?error=empty_comment";
-        productService.findById(id).ifPresent(p -> reviewService.addReview(p, reviewerName, rating, comment));
+        User currentUser = userService.findByEmail(principal.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        Product product = productService.findById(id).orElse(null);
+        if (product == null) return "redirect:/?error=not_found";
+        if (!reviewService.canReview(currentUser, product)) return "redirect:/product/" + id + "?error=not_purchased";
+        if (reviewService.hasAlreadyReviewed(currentUser, product)) return "redirect:/product/" + id + "?error=already_reviewed";
+        reviewService.addReview(product, currentUser, rating, comment);
         return "redirect:/product/" + id + "?review_success";
+    }
+
+    @PostMapping("/buyer/order/{id}/received")
+    public String markReceived(@PathVariable Long id, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User currentUser = userService.findByEmail(principal.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        OrderService.DeliverResult result = orderService.markDelivered(id, currentUser.getId());
+        return switch (result) {
+            case DELIVERED -> "redirect:/buyer/order/" + id + "?received";
+            case NOT_FOUND -> "redirect:/buyer/dashboard?error=not_found";
+            case UNAUTHORIZED -> "redirect:/buyer/dashboard?error=unauthorized";
+            case INVALID_STATUS -> "redirect:/buyer/order/" + id + "?error=invalid_status";
+        };
+    }
+
+    @PostMapping("/buyer/order/{id}/return")
+    public String requestReturn(@PathVariable Long id,
+                                @RequestParam(required = false) String returnReason,
+                                Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User currentUser = userService.findByEmail(principal.getName()).orElse(null);
+        if (currentUser == null) return "redirect:/login";
+        OrderService.ReturnResult result = orderService.requestReturn(id, currentUser.getId(), returnReason);
+        return switch (result) {
+            case REQUESTED -> "redirect:/buyer/order/" + id + "?return_requested";
+            case NOT_FOUND -> "redirect:/buyer/dashboard?error=not_found";
+            case UNAUTHORIZED -> "redirect:/buyer/dashboard?error=unauthorized";
+            case INVALID_STATUS -> "redirect:/buyer/order/" + id + "?error=invalid_status";
+        };
     }
 
     @GetMapping("/buyer/dashboard")
