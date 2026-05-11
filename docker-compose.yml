@@ -12,6 +12,9 @@ services:
       SPRING_DATASOURCE_USERNAME: lumoo_user
       SPRING_DATASOURCE_PASSWORD: lumoo_pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      UPLOAD_DIR: /app/uploads/products
+    volumes:
+      - lumoo_uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -39,3 +42,4 @@ services:
 
 volumes:
   lumoo_db_data:
+  lumoo_uploads:

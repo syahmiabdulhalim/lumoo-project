@@ -306,6 +306,65 @@
     </div>
 </section>
 
+            <!-- IMAGE REVIEW SECTION -->
+            <section id="images">
+                <div class="bg-white rounded-xl border border-orange-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-orange-100 flex items-center justify-between bg-orange-50">
+                        <div>
+                            <h2 class="text-sm font-semibold text-orange-800">📸 Image Review</h2>
+                            <p class="text-xs text-orange-500 mt-0.5">Product images awaiting approval — review before they go live</p>
+                        </div>
+                        <span class="bg-orange-100 text-orange-700 text-xs font-mono px-2 py-1 rounded-md"
+                              th:text="${(pendingImages != null ? #lists.size(pendingImages) : 0)} + ' pending'">0 pending</span>
+                    </div>
+
+                    <div th:if="${pendingImages != null and !#lists.isEmpty(pendingImages)}"
+                         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                        <div th:each="p : ${pendingImages}"
+                             class="border border-slate-100 rounded-lg overflow-hidden bg-slate-50">
+                            <div class="aspect-video bg-slate-100 overflow-hidden">
+                                <img th:if="${p.imageUrl != null}"
+                                     th:src="${p.imageUrl}"
+                                     class="w-full h-full object-cover"
+                                     th:alt="${p.name}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div th:if="${p.imageUrl == null}"
+                                     class="w-full h-full flex items-center justify-center text-slate-300">
+                                    <span class="text-3xl">🖼️</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <p class="text-sm font-bold text-slate-800 mb-1" th:text="${p.name}">Product</p>
+                                <p class="text-xs text-slate-400 mb-1" th:text="${p.category}">Category</p>
+                                <p class="text-xs text-slate-400 mb-3"
+                                   th:text="${'Vendor: ' + (p.vendor != null ? p.vendor.email : 'Unknown')}">Vendor</p>
+                                <div th:if="${p.imageUrl != null}" class="mb-3">
+                                    <p class="text-[9px] text-slate-400 uppercase tracking-wider mb-1">Image URL</p>
+                                    <a th:href="${p.imageUrl}" target="_blank"
+                                       class="text-[9px] text-blue-500 hover:underline break-all" th:text="${p.imageUrl}">url</a>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a th:href="@{/admin/approve-image/{id}(id=${p.id})}"
+                                       class="flex-1 text-center bg-green-600 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
+                                        ✓ Approve
+                                    </a>
+                                    <a th:href="@{/admin/reject-image/{id}(id=${p.id})}"
+                                       onclick="return confirm('Remove this image from the product?')"
+                                       class="flex-1 text-center bg-red-500 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-red-600 transition rounded">
+                                        ✗ Reject
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${pendingImages == null || #lists.isEmpty(pendingImages)}"
+                         class="text-center py-12">
+                        <p class="text-sm text-slate-400">No images pending review</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- PRODUCTS TABLE -->
             <section id="inventory">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">

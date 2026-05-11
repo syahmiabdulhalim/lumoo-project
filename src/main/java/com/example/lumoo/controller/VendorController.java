@@ -12,7 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
@@ -53,10 +55,19 @@ public class VendorController {
     }
 
     @PostMapping("/add-product")
-    public String saveProduct(@ModelAttribute Product product, Principal principal) {
+    public String saveProduct(@ModelAttribute Product product,
+                              @RequestParam(required = false) MultipartFile image,
+                              Principal principal) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);
         if (vendor == null) return "redirect:/login";
+        try {
+            if (image != null && !image.isEmpty()) {
+                product.setImageUrl(productService.saveImage(image));
+            }
+        } catch (IOException e) {
+            return "redirect:/vendor/add-product?error=upload_failed";
+        }
         productService.addProduct(product, vendor);
         return "redirect:/vendor/dashboard?success_add";
     }
@@ -74,12 +85,19 @@ public class VendorController {
     }
 
     @PostMapping("/edit-product/{id}")
-    public String updateProduct(@PathVariable Long id, @ModelAttribute Product product, Principal principal) {
+    public String updateProduct(@PathVariable Long id,
+                                @ModelAttribute Product product,
+                                @RequestParam(required = false) MultipartFile image,
+                                Principal principal) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);
         if (vendor == null) return "redirect:/login";
-        boolean updated = productService.updateProduct(id, product, vendor);
-        return updated ? "redirect:/vendor/dashboard?success_update" : "redirect:/vendor/dashboard?error=unauthorized";
+        try {
+            boolean updated = productService.updateProduct(id, product, vendor, image);
+            return updated ? "redirect:/vendor/dashboard?success_update" : "redirect:/vendor/dashboard?error=unauthorized";
+        } catch (IOException e) {
+            return "redirect:/vendor/edit-product/" + id + "?error=upload_failed";
+        }
     }
 
     @GetMapping("/delete-product/{id}")

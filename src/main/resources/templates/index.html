@@ -130,83 +130,99 @@
             </div>
         </section>
 
-        <!-- CATEGORY CARDS -->
+        <!-- CATEGORY CAROUSEL -->
         <section class="mb-20">
-            <h2 class="text-[10px] uppercase tracking-[0.5em] font-black text-gray-400 mb-10">Shop By Category</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex items-center justify-between mb-10">
+                <h2 class="text-[10px] uppercase tracking-[0.5em] font-black text-gray-400">Shop By Category</h2>
+                <div class="flex gap-3">
+                    <button id="cat-prev" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition text-gray-400 text-sm">‹</button>
+                    <button id="cat-next" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition text-gray-400 text-sm">›</button>
+                </div>
+            </div>
+            <div class="swiper category-swiper overflow-hidden">
+                <div class="swiper-wrapper">
 
-                <a href="/category/roofing" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏠 Roofing</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Decra, Corrugated & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/roofing" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏠 Roofing</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Decra, Corrugated & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/cement" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🧱 Cement</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Portland, Ready-mix & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/cement" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🧱 Cement</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Portland, Ready-mix & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/electrical" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">⚡ Electrical</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Wiring, Cables & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/building" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏗️ Building</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Bricks, Blocks & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/plumbing" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔧 Plumbing</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Pipes, Fittings & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/electrical" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">⚡ Electrical</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Wiring, Cables & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/building" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏗️ Building</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Bricks, Blocks & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/plumbing" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔧 Plumbing</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Pipes, Fittings & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/timber" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🪵 Timber</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Hardwood, Softwood & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/timber" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🪵 Timber</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Hardwood, Softwood & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/paint" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🎨 Paint</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Interior, Exterior & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/paint" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🎨 Paint</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Interior, Exterior & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
-                <a href="/category/hardware" class="group relative aspect-square overflow-hidden bg-gray-900">
-                    <img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80"
-                         class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 flex flex-col justify-end p-6">
-                        <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔩 Hardware</span>
-                        <span class="text-gray-300 text-[8px] mt-1">Tools, Bolts & more</span>
+                    <div class="swiper-slide">
+                        <a href="/category/hardware" class="group relative aspect-square overflow-hidden bg-gray-900 block">
+                            <img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
+                            <div class="absolute inset-0 flex flex-col justify-end p-6">
+                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔩 Hardware</span>
+                                <span class="text-gray-300 text-[8px] mt-1">Tools, Bolts & more</span>
+                            </div>
+                        </a>
                     </div>
-                </a>
 
+                </div>
             </div>
         </section>
 
@@ -224,13 +240,25 @@
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        new Swiper('.swiper', {
+        new Swiper('.swiper:not(.category-swiper)', {
             loop: true,
             autoplay: { delay: 5000, disableOnInteraction: false },
             pagination: { el: '.swiper-pagination', clickable: true },
             navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
             effect: 'fade',
             fadeEffect: { crossFade: true }
+        });
+
+        new Swiper('.category-swiper', {
+            loop: true,
+            autoplay: { delay: 3500, disableOnInteraction: false },
+            navigation: { nextEl: '#cat-next', prevEl: '#cat-prev' },
+            slidesPerView: 2,
+            spaceBetween: 16,
+            breakpoints: {
+                768:  { slidesPerView: 3, spaceBetween: 16 },
+                1024: { slidesPerView: 4, spaceBetween: 16 }
+            }
         });
     </script>
 

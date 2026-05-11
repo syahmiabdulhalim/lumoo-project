@@ -31,6 +31,7 @@ public class AdminController {
         model.addAttribute("inquiries", inquiryService.getAll());
         model.addAttribute("pendingProducts", productService.getPendingApproval());
         model.addAttribute("vendorApplications", vendorApplicationService.getPending());
+        model.addAttribute("pendingImages", productService.getPendingImageApproval());
         return "admin/dashboard";
     }
 
@@ -74,6 +75,18 @@ public class AdminController {
     public String deleteInquiry(@PathVariable Long id) {
         inquiryService.delete(id);
         return "redirect:/admin/dashboard?deleted_inquiry#inquiries";
+    }
+
+    @GetMapping("/approve-image/{id}")
+    public String approveImage(@PathVariable Long id) {
+        productService.approveImage(id);
+        return "redirect:/admin/dashboard?image_approved#images";
+    }
+
+    @GetMapping("/reject-image/{id}")
+    public String rejectImage(@PathVariable Long id) {
+        productService.rejectImage(id);
+        return "redirect:/admin/dashboard?image_rejected#images";
     }
 
     @GetMapping("/approve-vendor/{id}")

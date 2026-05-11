@@ -5,26 +5,27 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "products")
 public class Product {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String category;
     private Double price;
-    private Boolean approved;
-    @Column(name = "approved")
 
-public boolean isApproved() { return approved; }
-public void setApproved(boolean approved) { this.approved = approved; }
-    
+    @Column(name = "approved")
+    private boolean approved = false;
+
+    @Column(name = "image_approved")
+    private boolean imageApproved = false;
+
     @Column(name = "image_url")
     private String imageUrl;
 
-    // PEMBETULAN: Hubungkan produk dengan User (Vendor)
     @ManyToOne
-    @JoinColumn(name = "vendor_id") // Ini akan jadi 'foreign key' dalam table products
+    @JoinColumn(name = "vendor_id")
     private User vendor;
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -33,10 +34,12 @@ public void setApproved(boolean approved) { this.approved = approved; }
     public void setCategory(String category) { this.category = category; }
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
+    public boolean isApproved() { return approved; }
+    public void setApproved(boolean approved) { this.approved = approved; }
+    public boolean isImageApproved() { return imageApproved; }
+    public void setImageApproved(boolean imageApproved) { this.imageApproved = imageApproved; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    
-    // Tambah Getter & Setter untuk Vendor
     public User getVendor() { return vendor; }
     public void setVendor(User vendor) { this.vendor = vendor; }
 }
