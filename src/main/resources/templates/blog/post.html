@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Title -->
+    <title th:text="${post.effectiveMetaTitle + ' — LUMOO Blog'}">Post Title — LUMOO Blog</title>
+
+    <!-- Meta Description -->
+    <meta name="description" th:content="${post.effectiveMetaDescription}">
+    <meta name="author" th:content="${post.author}">
+    <meta name="robots" content="index, follow">
+
+    <!-- Tags as keywords -->
+    <meta th:if="${post.tags != null}" name="keywords" th:content="${post.tags}">
+
+    <!-- Canonical -->
+    <link rel="canonical" th:href="${'https://lumoo.gm/blog/' + post.slug}">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" th:content="${post.effectiveMetaTitle}">
+    <meta property="og:description" th:content="${post.effectiveMetaDescription}">
+    <meta property="og:url" th:content="${'https://lumoo.gm/blog/' + post.slug}">
+    <meta property="og:site_name" content="LUMOO Gambia">
+    <meta th:if="${post.featuredImageUrl != null}" property="og:image" th:content="${post.featuredImageUrl}">
+    <meta th:if="${post.publishedAt != null}" property="article:published_time"
+          th:content="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}">
+    <meta property="article:author" th:content="${post.author}">
+    <meta th:if="${post.category != null}" property="article:section" th:content="${post.category}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" th:content="${post.effectiveMetaTitle}">
+    <meta name="twitter:description" th:content="${post.effectiveMetaDescription}">
+    <meta th:if="${post.featuredImageUrl != null}" name="twitter:image" th:content="${post.featuredImageUrl}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <!-- JSON-LD: Article -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": /*[[${post.title}]]*/ "Title",
+      "description": /*[[${post.effectiveMetaDescription}]]*/ "",
+      "image": /*[[${post.featuredImageUrl != null ? post.featuredImageUrl : 'https://lumoo.gm/images/logo.jpg'}]]*/ "",
+      "author": {
+        "@type": "Person",
+        "name": /*[[${post.author}]]*/ "LUMOO Team"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "LUMOO Gambia",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://lumoo.gm/images/logo.jpg"
+        }
+      },
+      "datePublished": /*[[${post.publishedAt != null ? #temporals.format(post.publishedAt, 'yyyy-MM-dd') : ''}]]*/ "",
+      "url": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ "",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ ""
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json" th:inline="javascript">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type":"ListItem","position":1,"name":"Home","item":"https://lumoo.gm"},
+        {"@type":"ListItem","position":2,"name":"Blog","item":"https://lumoo.gm/blog"},
+        {"@type":"ListItem","position":3,"name": /*[[${post.title}]]*/ "Post","item": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ ""}
+      ]
+    }
+    </script>
+
+    <style>
+        .prose { font-family: 'Lora', Georgia, serif; color: #374151; line-height: 1.9; }
+        .prose h2 { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: #111827; margin: 2.5rem 0 1rem; }
+        .prose h3 { font-family: 'Inter', sans-serif; font-size: 1.125rem; font-weight: 700; color: #1f2937; margin: 2rem 0 0.75rem; }
+        .prose p { margin-bottom: 1.5rem; font-size: 1.0625rem; }
+        .prose ul, .prose ol { margin: 1.5rem 0; padding-left: 1.5rem; }
+        .prose li { margin-bottom: 0.5rem; }
+        .prose ul li { list-style: disc; }
+        .prose ol li { list-style: decimal; }
+        .prose strong { font-weight: 700; color: #111827; }
+        .prose a { color: #2563eb; text-decoration: underline; }
+        .prose blockquote { border-left: 4px solid #2563eb; padding-left: 1.5rem; margin: 2rem 0; color: #6b7280; font-style: italic; }
+        .prose img { width: 100%; border-radius: 0; margin: 2rem 0; }
+        .prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+        .prose th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 0.75rem 1rem; text-align: left; font-weight: 700; }
+        .prose td { border: 1px solid #e5e7eb; padding: 0.75rem 1rem; }
+    </style>
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <!-- TOPBAR -->
+    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
+    <!-- NAV -->
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+        <a href="/" class="transition hover:opacity-80">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+        </a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-blue-600 transition">Home</a>
+            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
+            <a href="/blog" class="text-blue-600 border-b-2 border-blue-600 pb-1">Blog</a>
+            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <form th:action="@{/logout}" method="post" class="inline">
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+                </form>
+            </div>
+            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+                <a href="/login" class="hover:text-blue-600 transition">Login</a>
+                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FEATURED IMAGE -->
+    <div th:if="${post.featuredImageUrl != null}"
+         class="w-full h-[480px] overflow-hidden bg-gray-100">
+        <img th:src="${post.featuredImageUrl}" th:alt="${post.title}"
+             class="w-full h-full object-cover">
+    </div>
+    <div th:if="${post.featuredImageUrl == null}"
+         class="w-full h-40 bg-gradient-to-r from-blue-600 to-blue-800"></div>
+
+    <main class="max-w-3xl mx-auto px-6 py-16">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-10 flex items-center gap-3 text-[9px] uppercase tracking-widest text-gray-400">
+            <a href="/" class="hover:text-black transition">Home</a>
+            <span>/</span>
+            <a href="/blog" class="hover:text-black transition">Blog</a>
+            <span>/</span>
+            <span class="text-black font-bold truncate max-w-xs" th:text="${post.title}">Post</span>
+        </nav>
+
+        <!-- Article Header -->
+        <header class="mb-12">
+            <span class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block"
+                  th:text="${post.category}">Category</span>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-tight mb-6"
+                th:text="${post.title}">Title</h1>
+            <p class="text-lg text-gray-500 leading-relaxed font-light mb-8"
+               th:text="${post.excerpt}">Excerpt</p>
+            <div class="flex items-center gap-6 text-[9px] text-gray-400 uppercase tracking-widest font-bold border-t border-b border-gray-100 py-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-[10px] font-black"
+                         th:text="${#strings.toUpperCase(#strings.substring(post.author, 0, 1))}">A</div>
+                    <span th:text="${post.author}">Author</span>
+                </div>
+                <span>·</span>
+                <span th:text="${#temporals.format(post.publishedAt, 'dd MMMM yyyy')}">Date</span>
+                <span>·</span>
+                <span th:text="${post.readingTimeMinutes + ' min read'}">5 min read</span>
+                <span th:if="${post.tags != null}" class="hidden md:block">·</span>
+                <div th:if="${post.tags != null}" class="hidden md:flex gap-2 flex-wrap">
+                    <span th:each="tag : ${#strings.arraySplit(post.tags, ',')}"
+                          class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider"
+                          th:text="${#strings.trim(tag)}"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Article Content -->
+        <div class="prose max-w-none" th:utext="${post.content}">
+            Content goes here.
+        </div>
+
+        <!-- Tags -->
+        <div th:if="${post.tags != null}" class="mt-12 pt-8 border-t border-gray-100">
+            <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Tags</p>
+            <div class="flex flex-wrap gap-2">
+                <span th:each="tag : ${#strings.arraySplit(post.tags, ',')}"
+                      class="bg-gray-100 hover:bg-blue-50 hover:text-blue-600 text-gray-600 px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider transition cursor-default"
+                      th:text="${#strings.trim(tag)}"></span>
+            </div>
+        </div>
+
+        <!-- Share -->
+        <div class="mt-10 pt-8 border-t border-gray-100">
+            <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Share this article</p>
+            <div class="flex gap-4">
+                <a th:href="${'https://www.facebook.com/sharer/sharer.php?u=https://lumoo.gm/blog/' + post.slug}"
+                   target="_blank" rel="noopener"
+                   class="text-[9px] font-black uppercase tracking-widest bg-blue-600 text-white px-5 py-2 hover:bg-blue-700 transition">
+                    Facebook
+                </a>
+                <a th:href="${'https://wa.me/?text=' + post.title + ' — https://lumoo.gm/blog/' + post.slug}"
+                   target="_blank" rel="noopener"
+                   class="text-[9px] font-black uppercase tracking-widest bg-green-500 text-white px-5 py-2 hover:bg-green-600 transition">
+                    WhatsApp
+                </a>
+                <a th:href="${'https://twitter.com/intent/tweet?text=' + post.title + '&url=https://lumoo.gm/blog/' + post.slug}"
+                   target="_blank" rel="noopener"
+                   class="text-[9px] font-black uppercase tracking-widest bg-gray-900 text-white px-5 py-2 hover:bg-black transition">
+                    X / Twitter
+                </a>
+            </div>
+        </div>
+
+        <!-- Author Box -->
+        <div class="mt-12 bg-white border border-gray-100 shadow-sm p-8 flex items-start gap-6">
+            <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black shrink-0"
+                 th:text="${#strings.toUpperCase(#strings.substring(post.author, 0, 1))}">A</div>
+            <div>
+                <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-1">Written by</p>
+                <p class="font-black text-sm tracking-tight" th:text="${post.author}">Author</p>
+                <p class="text-[10px] text-gray-400 mt-1">LUMOO Gambia — Building the Nation's construction knowledge base.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Related Posts -->
+    <div th:if="${related != null and !#lists.isEmpty(related)}"
+         class="bg-white border-t border-gray-100 py-20 mt-10">
+        <div class="max-w-7xl mx-auto px-12">
+            <p class="text-[8px] font-black uppercase tracking-[0.5em] text-gray-300 mb-8">Related Articles</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <article th:each="r : ${related}" class="group">
+                    <a th:href="@{/blog/{slug}(slug=${r.slug})}">
+                        <div class="aspect-video overflow-hidden bg-gray-100 mb-4">
+                            <img th:if="${r.featuredImageUrl != null}"
+                                 th:src="${r.featuredImageUrl}" th:alt="${r.title}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div th:if="${r.featuredImageUrl == null}"
+                                 class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                <span class="text-gray-300 text-3xl font-black italic">L</span>
+                            </div>
+                        </div>
+                        <span class="text-[8px] font-black uppercase tracking-[0.4em] text-blue-600 mb-2 block" th:text="${r.category}"></span>
+                        <h3 class="font-black tracking-tight text-sm leading-tight group-hover:text-blue-600 transition mb-2" th:text="${r.title}">Title</h3>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold" th:text="${#temporals.format(r.publishedAt, 'dd MMM yyyy')}">Date</p>
+                    </a>
+                </article>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="bg-blue-600 text-white px-12 py-16 text-center">
+        <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-200 mb-3">Ready to Build?</p>
+        <h2 class="text-3xl font-black tracking-tighter mb-6">Shop Quality Building Materials in Gambia</h2>
+        <a href="/" class="inline-block bg-white text-blue-600 px-10 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-50 transition">
+            Browse LUMOO →
+        </a>
+    </div>
+
+    <footer class="bg-white border-t border-gray-100 px-12 py-16 text-center">
+        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
+    </footer>
+
+    <div th:replace="~{fragments/loading :: loading}"></div>
+</body>
+</html>

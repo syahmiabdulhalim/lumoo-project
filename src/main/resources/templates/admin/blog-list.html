@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Blog Posts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Inter']">
+
+    <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+            <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+            <span class="text-slate-600">|</span>
+            <span class="text-sm font-bold">Blog Management</span>
+        </div>
+        <a href="/admin/blog/new"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
+            + New Post
+        </a>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-12">
+
+        <!-- Flash messages -->
+        <div th:if="${param.containsKey('created')}" class="mb-6 border-l-4 border-green-500 bg-green-50 px-5 py-3 rounded">
+            <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Post created successfully.</p>
+        </div>
+        <div th:if="${param.containsKey('updated')}" class="mb-6 border-l-4 border-blue-500 bg-blue-50 px-5 py-3 rounded">
+            <p class="text-xs font-bold text-blue-700 uppercase tracking-widest">Post updated successfully.</p>
+        </div>
+        <div th:if="${param.containsKey('deleted')}" class="mb-6 border-l-4 border-red-400 bg-red-50 px-5 py-3 rounded">
+            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Post deleted.</p>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">All Blog Posts</h1>
+                <span class="text-xs text-slate-400" th:text="${#lists.size(posts)} + ' total'">0 total</span>
+            </div>
+
+            <table class="w-full text-sm" th:if="${posts != null and !#lists.isEmpty(posts)}">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="text-left px-6 py-3">Title</th>
+                        <th class="text-left px-6 py-3">Category</th>
+                        <th class="text-left px-6 py-3">Author</th>
+                        <th class="text-left px-6 py-3">Status</th>
+                        <th class="text-left px-6 py-3">Published</th>
+                        <th class="text-left px-6 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="post : ${posts}" class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4">
+                            <p class="font-semibold text-slate-800 truncate max-w-xs" th:text="${post.title}">Title</p>
+                            <p class="text-xs text-slate-400 font-mono mt-0.5" th:text="${'/blog/' + post.slug}">slug</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded font-semibold" th:text="${post.category}">Category</span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500" th:text="${post.author}">Author</td>
+                        <td class="px-6 py-4">
+                            <span th:if="${post.published}"
+                                  class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded font-bold uppercase tracking-wider">Published</span>
+                            <span th:if="${!post.published}"
+                                  class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold uppercase tracking-wider">Draft</span>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400"
+                            th:text="${post.publishedAt != null ? #temporals.format(post.publishedAt, 'dd MMM yyyy') : '—'}">—</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2">
+                                <a th:if="${post.published}"
+                                   th:href="@{/blog/{slug}(slug=${post.slug})}" target="_blank"
+                                   class="text-xs text-slate-500 hover:text-blue-600 font-semibold transition">View</a>
+                                <a th:href="@{/admin/blog/edit/{id}(id=${post.id})}"
+                                   class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold transition">Edit</a>
+                                <form th:action="@{/admin/blog/delete/{id}(id=${post.id})}" method="post"
+                                      onsubmit="return confirm('Delete this post permanently?')">
+                                    <button type="submit"
+                                            class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${posts == null or #lists.isEmpty(posts)}" class="py-20 text-center">
+                <p class="text-sm text-slate-400 mb-4">No blog posts yet.</p>
+                <a href="/admin/blog/new" class="text-sm font-bold text-blue-600 hover:underline">Create your first post →</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

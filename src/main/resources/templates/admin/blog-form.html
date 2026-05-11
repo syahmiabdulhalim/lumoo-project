@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${editing ? 'Edit Post — LUMOO Admin' : 'New Post — LUMOO Admin'}">Blog Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- EasyMDE for Markdown editing -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <style>
+        .field-label { display:block; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:0.2em; color:#64748b; margin-bottom:0.5rem; }
+        .field-input { width:100%; border:1px solid #e2e8f0; border-radius:0.5rem; padding:0.625rem 0.875rem; font-size:0.875rem; outline:none; background:#fff; transition:border-color 0.2s; }
+        .field-input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+        .CodeMirror, .EasyMDEContainer .CodeMirror { border-radius:0.5rem; border:1px solid #e2e8f0; font-size:14px; }
+        .editor-toolbar { border-radius:0.5rem 0.5rem 0 0; border-color:#e2e8f0; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Inter']">
+
+    <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-6">
+            <a href="/admin/blog" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← All Posts</a>
+            <span class="text-slate-600">|</span>
+            <span class="text-sm font-bold" th:text="${editing ? 'Edit Post' : 'New Post'}">Post</span>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-12">
+        <form th:action="${editing ? '/admin/blog/edit/' + post.id : '/admin/blog/new'}"
+              th:object="${post}" method="post" class="space-y-6">
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Left: Main content -->
+                <div class="lg:col-span-2 space-y-6">
+
+                    <!-- Title -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <label class="field-label">Post Title <span class="text-red-400">*</span></label>
+                        <input type="text" th:field="*{title}" required
+                               class="field-input text-lg font-semibold"
+                               placeholder="e.g. How to Choose the Right Cement for Building in Gambia"
+                               oninput="autoSlug(this.value)">
+                    </div>
+
+                    <!-- Excerpt -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <label class="field-label">Excerpt / Summary <span class="text-red-400">*</span></label>
+                        <textarea th:field="*{excerpt}" rows="3" required
+                                  class="field-input resize-none"
+                                  placeholder="1–2 sentences summarising the article. Used as meta description (150–160 chars ideal)."></textarea>
+                        <p class="text-[9px] text-slate-400 mt-2">This appears in search results and on the blog listing page.</p>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <label class="field-label">Article Content <span class="text-red-400">*</span></label>
+                        <p class="text-[9px] text-slate-400 mb-3">Write in Markdown. Use ## for headings, **bold**, *italic*, - for bullet lists.</p>
+                        <textarea th:field="*{content}" id="contentEditor" rows="20"
+                                  class="field-input font-mono"
+                                  placeholder="Write your article here in Markdown or HTML..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Right: Metadata sidebar -->
+                <div class="space-y-6">
+
+                    <!-- Publish settings -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <p class="field-label mb-4">Publish Settings</p>
+                        <label class="flex items-center gap-3 cursor-pointer mb-4">
+                            <input type="checkbox" th:field="*{published}"
+                                   class="w-4 h-4 text-blue-600 border-slate-300 rounded cursor-pointer">
+                            <span class="text-sm font-semibold text-slate-700">Publish immediately</span>
+                        </label>
+                        <p class="text-[9px] text-slate-400">Unchecked = saved as draft</p>
+                        <div class="mt-4">
+                            <button type="submit"
+                                    class="w-full bg-slate-900 hover:bg-blue-600 text-white py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg"
+                                    th:text="${editing ? 'Update Post' : 'Save Post'}">Save</button>
+                        </div>
+                    </div>
+
+                    <!-- Slug -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <label class="field-label">URL Slug <span class="text-red-400">*</span></label>
+                        <input type="text" th:field="*{slug}" id="slugField" required
+                               class="field-input font-mono text-xs"
+                               placeholder="how-to-choose-cement-gambia">
+                        <p class="text-[9px] text-slate-400 mt-2">lumoo.gm/blog/<strong id="slugPreview" class="text-blue-600">your-slug</strong></p>
+                    </div>
+
+                    <!-- Category & Author -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
+                        <div>
+                            <label class="field-label">Category <span class="text-red-400">*</span></label>
+                            <select th:field="*{category}" required class="field-input">
+                                <option value="">Select category...</option>
+                                <option value="Construction Tips">Construction Tips</option>
+                                <option value="Building Guides">Building Guides</option>
+                                <option value="Material Reviews">Material Reviews</option>
+                                <option value="Gambia Market News">Gambia Market News</option>
+                                <option value="Vendor Spotlight">Vendor Spotlight</option>
+                                <option value="Project Showcases">Project Showcases</option>
+                                <option value="Company News">Company News</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="field-label">Author</label>
+                            <input type="text" th:field="*{author}"
+                                   class="field-input" placeholder="LUMOO Team">
+                        </div>
+                        <div>
+                            <label class="field-label">Tags <span class="text-slate-400">(comma-separated)</span></label>
+                            <input type="text" th:field="*{tags}"
+                                   class="field-input"
+                                   placeholder="cement, construction, gambia, roofing">
+                        </div>
+                    </div>
+
+                    <!-- Featured Image -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6">
+                        <label class="field-label">Featured Image URL</label>
+                        <input type="text" th:field="*{featuredImageUrl}"
+                               class="field-input" placeholder="https://example.com/image.jpg"
+                               id="imgUrlInput" oninput="previewImg(this.value)">
+                        <div id="imgPreview" class="mt-3 hidden">
+                            <img id="imgPreviewEl" src="" alt="Preview"
+                                 class="w-full aspect-video object-cover rounded-lg border border-slate-200">
+                        </div>
+                        <p class="text-[9px] text-slate-400 mt-2">Use an Unsplash URL or upload separately</p>
+                    </div>
+
+                    <!-- SEO overrides -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
+                        <p class="field-label">SEO Overrides <span class="text-slate-300">(optional)</span></p>
+                        <div>
+                            <label class="field-label">Meta Title</label>
+                            <input type="text" th:field="*{metaTitle}"
+                                   class="field-input"
+                                   placeholder="Leave blank to use post title">
+                            <p class="text-[9px] text-slate-400 mt-1">Ideal: 50–60 characters</p>
+                        </div>
+                        <div>
+                            <label class="field-label">Meta Description</label>
+                            <textarea th:field="*{metaDescription}" rows="3"
+                                      class="field-input resize-none"
+                                      placeholder="Leave blank to use excerpt"></textarea>
+                            <p class="text-[9px] text-slate-400 mt-1">Ideal: 150–160 characters</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Auto-generate slug from title
+        function slugify(str) {
+            return str.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-');
+        }
+        function autoSlug(title) {
+            const slugField = document.getElementById('slugField');
+            const preview   = document.getElementById('slugPreview');
+            const s = slugify(title);
+            slugField.value = s;
+            preview.textContent = s || 'your-slug';
+        }
+        document.getElementById('slugField').addEventListener('input', function() {
+            document.getElementById('slugPreview').textContent = this.value || 'your-slug';
+        });
+        // Set initial preview
+        const existing = document.getElementById('slugField').value;
+        if (existing) document.getElementById('slugPreview').textContent = existing;
+
+        // Image preview
+        function previewImg(url) {
+            const wrap = document.getElementById('imgPreview');
+            const img  = document.getElementById('imgPreviewEl');
+            if (url && url.startsWith('http')) {
+                img.src = url;
+                wrap.classList.remove('hidden');
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+        // Initial preview if editing
+        const existingImg = document.getElementById('imgUrlInput').value;
+        if (existingImg) previewImg(existingImg);
+
+        // EasyMDE Markdown editor
+        const easyMDE = new EasyMDE({
+            element: document.getElementById('contentEditor'),
+            spellChecker: false,
+            autosave: { enabled: true, uniqueId: 'lumoo-blog-editor', delay: 3000 },
+            toolbar: [
+                'bold','italic','heading','|',
+                'quote','unordered-list','ordered-list','|',
+                'link','image','table','|',
+                'preview','side-by-side','fullscreen','|',
+                'guide'
+            ],
+            placeholder: 'Write your article here in Markdown...\n\n## Section Heading\n\nYour paragraph text here...',
+            minHeight: '400px'
+        });
+    </script>
+</body>
+</html>

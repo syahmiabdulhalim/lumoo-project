@@ -30,6 +30,7 @@
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
             <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
+            <a href="/blog" class="hover:text-blue-600 transition">Blog</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
                 <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>

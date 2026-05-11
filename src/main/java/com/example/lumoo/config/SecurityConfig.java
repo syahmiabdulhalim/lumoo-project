@@ -23,7 +23,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
     .requestMatchers("/uploads/products/**", "/uploads/avatars/**").permitAll()
     .requestMatchers("/uploads/kyc/**").hasRole("ADMIN")
-    .requestMatchers("/stores", "/store/**", "/product/**", "/category/**").permitAll()
+    .requestMatchers("/stores", "/store/**", "/product/**", "/category/**", "/blog", "/blog/**", "/sitemap.xml").permitAll()
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
     .requestMatchers("/admin/**").hasRole("ADMIN")
