@@ -43,6 +43,7 @@ public class OrderService {
         order.setUser(user);
         order.setAddress(address.trim());
         order.setOrderDate(LocalDateTime.now());
+        order.setPaymentMethod(paymentMethod);
         order.setStatus(paymentMethod.equals("COD") ? "PENDING" : "PAID");
         order.setTotalAmount(total);
         order.setAdminCommission(commission);

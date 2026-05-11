@@ -27,26 +27,14 @@
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Join Gambia's premier construction marketplace</p>
         </header>
 
-        <!-- Already applied banner -->
-        <div th:if="${param.containsKey('already_applied')}"
-             class="mb-8 border-l-4 border-yellow-400 bg-yellow-50 px-6 py-4">
-            <p class="text-xs font-bold text-yellow-700 uppercase tracking-widest">
-                You already have a pending application. We'll notify you once reviewed.
-            </p>
-        </div>
-
-        <!-- Error banner -->
-        <div th:if="${param.containsKey('error')}"
-             class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
-            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">
-                Please fill in all required fields.
-            </p>
-        </div>
-
         <!-- Success state -->
         <div th:if="${param.containsKey('submitted')}">
             <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto">
-                <p class="text-5xl mb-6">✓</p>
+                <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
                 <h2 class="text-2xl font-black tracking-tighter mb-2">Application Received</h2>
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
                     Our team will review your application within 1–2 business days.
@@ -58,10 +46,14 @@
             </div>
         </div>
 
-        <!-- Already applied full state -->
+        <!-- Already applied state -->
         <div th:if="${param.containsKey('already_applied')}">
-            <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto mt-8">
-                <p class="text-5xl mb-6">⏳</p>
+            <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto">
+                <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
                 <h2 class="text-2xl font-black tracking-tighter mb-2">Application Under Review</h2>
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-8">
                     We're reviewing your application. You'll be notified once a decision is made.
@@ -73,8 +65,16 @@
             </div>
         </div>
 
-        <!-- Application form — only show if no params -->
+        <!-- Application form — only show if no state param -->
         <div th:if="${!param.containsKey('submitted') and !param.containsKey('already_applied')}">
+
+        <!-- Error banner — inside form section -->
+        <div th:if="${param.containsKey('error')}"
+             class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
+            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">
+                Please fill in all required fields.
+            </p>
+        </div>
 
             <!-- Benefits -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">

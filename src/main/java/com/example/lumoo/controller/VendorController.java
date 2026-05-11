@@ -36,7 +36,7 @@ public class VendorController {
         double totalRevenue = vendorOrders.stream().mapToDouble(Order::getTotalAmount).sum();
         double averageOrder = vendorOrders.isEmpty() ? 0.0 : totalRevenue / vendorOrders.size();
         double monthlySales = vendorOrders.stream()
-                .filter(o -> o.getCreatedAt().getMonth() == LocalDate.now().getMonth())
+                .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().getMonth() == LocalDate.now().getMonth())
                 .mapToDouble(Order::getTotalAmount).sum();
 
         model.addAttribute("products", products);

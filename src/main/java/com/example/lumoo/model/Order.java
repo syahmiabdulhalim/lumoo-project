@@ -10,7 +10,8 @@ public class Order {
     private Long id;
     
     private String customerName;
-    private String address; // TAMBAH INI supaya tally dengan Controller
+    private String address;
+    private String paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -37,6 +38,9 @@ private LocalDateTime createdAt;
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
     public User getUser() { return user; } // PULANGKAN 'User', BUKAN 'Object'
     public void setUser(User user) { this.user = user; }

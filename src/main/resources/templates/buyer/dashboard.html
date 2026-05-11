@@ -15,7 +15,9 @@
         <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
         <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/logout" class="text-gray-400 hover:text-black transition">Logout</a>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase transition">Logout</button>
+            </form>
         </div>
     </nav>
 

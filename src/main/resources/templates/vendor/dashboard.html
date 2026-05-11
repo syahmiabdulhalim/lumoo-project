@@ -31,6 +31,26 @@
             </div>
         </div>
 
+        <!-- Sales Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div class="bg-white border border-gray-100 shadow-sm p-6">
+                <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest mb-2">Total Revenue</p>
+                <p class="text-xl font-black text-blue-600" th:text="'GMD ' + ${#numbers.formatDecimal(totalRevenue, 1, 2)}">GMD 0.00</p>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-6">
+                <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest mb-2">This Month</p>
+                <p class="text-xl font-black text-green-600" th:text="'GMD ' + ${#numbers.formatDecimal(monthlySales, 1, 2)}">GMD 0.00</p>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-6">
+                <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest mb-2">Total Orders</p>
+                <p class="text-xl font-black" th:text="${totalSalesCount}">0</p>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-6">
+                <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest mb-2">Avg Order</p>
+                <p class="text-xl font-black" th:text="'GMD ' + ${#numbers.formatDecimal(averageOrder, 1, 2)}">GMD 0.00</p>
+            </div>
+        </div>
+
         <section class="bg-white shadow-2xl border-t-4 border-blue-600">
             <table class="w-full text-left">
                 <thead>
@@ -45,7 +65,10 @@
                     <tr th:each="p : ${products}" class="border-b last:border-0 hover:bg-gray-50 transition">
                         <td class="p-6">
                             <div class="flex items-center space-x-4">
-                                <img th:src="${p.imageUrl}" class="w-10 h-10 object-cover bg-gray-100">
+                                <div th:if="${p.imageUrl != null}" class="w-10 h-10 bg-gray-100 overflow-hidden">
+                                    <img th:src="${p.imageUrl}" class="w-10 h-10 object-cover">
+                                </div>
+                                <div th:if="${p.imageUrl == null}" class="w-10 h-10 bg-gray-100 flex items-center justify-center text-[7px] text-gray-300 font-bold uppercase">No Img</div>
                                 <span class="font-bold text-xs uppercase tracking-tight" th:text="${p.name}"></span>
                             </div>
                         </td>
