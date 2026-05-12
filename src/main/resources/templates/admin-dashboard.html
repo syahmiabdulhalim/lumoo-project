@@ -27,7 +27,7 @@
                     </td>
                     <td class="p-3">
                         <form th:if="${!user.verified}" th:action="@{/admin/verify/{id}(id=${user.id})}" method="post">
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700">Approve</button>
+                            <button type="submit" class="bg-[#4d78c0] text-white px-4 py-1 rounded hover:bg-[#3d68b0]">Approve</button>
                         </form>
                     </td>
                 </tr>

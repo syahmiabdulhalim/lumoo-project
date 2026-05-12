@@ -9,16 +9,16 @@
 
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b">
         <a href="/"><h1 class="text-xl font-black tracking-tighter">LUMOO</h1></a>
-        <a href="/buyer/dashboard" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition">← My Orders</a>
+        <a href="/buyer/dashboard" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#4d78c0] transition">← My Orders</a>
     </nav>
 
     <main class="max-w-3xl mx-auto py-16 px-6">
-        <div class="bg-white p-10 shadow-2xl border-t-4 border-blue-600">
+        <div class="bg-white p-10 shadow-2xl border-t-4 border-[#4d78c0]">
 
             <!-- Header -->
             <div class="flex justify-between items-start border-b pb-8 mb-8">
                 <div>
-                    <h2 class="text-2xl font-bold uppercase tracking-tighter">Order <span class="text-blue-600" th:text="'#' + ${order.id}"></span></h2>
+                    <h2 class="text-2xl font-bold uppercase tracking-tighter">Order <span class="text-[#4d78c0]" th:text="'#' + ${order.id}"></span></h2>
                     <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest"
                        th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy, HH:mm')}"></p>
                 </div>
@@ -30,20 +30,20 @@
                                        order.status == 'PAID'             ? 'bg-emerald-100 text-emerald-700' :
                                        order.status == 'RETURN_REQUESTED' ? 'bg-orange-100 text-orange-700' :
                                        order.status == 'RETURNED'         ? 'bg-gray-100 text-gray-600' :
-                                                                             'bg-blue-50 text-blue-600'}">
+                                                                             'bg-blue-50 text-[#4d78c0]'}">
                 </span>
             </div>
 
             <!-- Progress tracker -->
             <div class="mb-8" th:unless="${order.status == 'CANCELLED'}">
                 <div class="flex justify-between text-[7px] text-gray-300 uppercase font-black tracking-widest mb-2">
-                    <span class="text-blue-600">Ordered</span>
-                    <span th:classappend="${order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'DELIVERED' ? 'text-blue-600' : ''}">Confirmed</span>
-                    <span th:classappend="${order.status == 'SHIPPED' or order.status == 'DELIVERED' ? 'text-blue-600' : ''}">Shipped</span>
+                    <span class="text-[#4d78c0]">Ordered</span>
+                    <span th:classappend="${order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'DELIVERED' ? 'text-[#4d78c0]' : ''}">Confirmed</span>
+                    <span th:classappend="${order.status == 'SHIPPED' or order.status == 'DELIVERED' ? 'text-[#4d78c0]' : ''}">Shipped</span>
                     <span th:classappend="${order.status == 'DELIVERED' ? 'text-green-600' : ''}">Delivered</span>
                 </div>
                 <div class="w-full bg-gray-100 h-0.5">
-                    <div class="h-0.5 bg-blue-600"
+                    <div class="h-0.5 bg-[#4d78c0]"
                          th:style="${order.status == 'PENDING'   ? 'width:10%' :
                                     order.status == 'PAID'      ? 'width:33%' :
                                     order.status == 'SHIPPED'   ? 'width:66%' :
@@ -56,7 +56,7 @@
             <div class="space-y-6">
                 <div th:each="item : ${order.items}" class="flex justify-between items-center border-b border-gray-50 pb-4">
                     <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-gray-100 flex items-center justify-center text-blue-600 font-bold text-[10px]">LUMOO</div>
+                        <div class="w-12 h-12 bg-gray-100 flex items-center justify-center text-[#4d78c0] font-bold text-[10px]">LUMOO</div>
                         <div>
                             <p class="text-xs font-bold uppercase" th:text="${item.productName}">Product Name</p>
                             <p class="text-[10px] text-gray-400" th:text="'Quantity: ' + ${item.quantity}"></p>
@@ -83,7 +83,7 @@
                     </div>
                     <div class="text-right">
                         <p class="text-[10px] text-gray-400 uppercase font-bold">Total Amount</p>
-                        <p class="text-2xl font-black text-blue-600" th:text="'GMD ' + ${order.totalAmount}"></p>
+                        <p class="text-2xl font-black text-[#4d78c0]" th:text="'GMD ' + ${order.totalAmount}"></p>
                     </div>
                 </div>
             </div>
@@ -116,24 +116,26 @@
 
                 <!-- Cancel (PENDING only) -->
                 <div th:if="${order.status == 'PENDING'}">
-                    <form th:action="@{/buyer/order/delete/{id}(id=${order.id})}" method="post"
-                          onsubmit="return confirm('Are you sure you want to cancel this order?')">
-                        <button type="submit"
-                                class="text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition border-b border-red-300 pb-0.5">
-                            Cancel Order
-                        </button>
-                    </form>
+                    <form th:id="'cancel-order-form'" th:action="@{/buyer/order/delete/{id}(id=${order.id})}" method="post" class="hidden"></form>
+                    <button type="button" class="btn-lm-delete text-[9px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition border-b border-red-300 pb-0.5"
+                            data-title="Cancel Order"
+                            th:data-msg="|Cancel order #LMO-${order.id}? This cannot be reversed.|"
+                            data-btn="Cancel Order"
+                            data-form-id="cancel-order-form">
+                        Cancel Order
+                    </button>
                 </div>
 
                 <!-- Mark as Received (SHIPPED only) -->
                 <div th:if="${order.status == 'SHIPPED'}">
-                    <form th:action="@{/buyer/order/{id}/received(id=${order.id})}" method="post"
-                          onsubmit="return confirm('Confirm that you have received this order?')">
-                        <button type="submit"
-                                class="bg-green-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-green-700 transition">
-                            ✓ Mark as Received
-                        </button>
-                    </form>
+                    <form id="received-form" th:action="@{/buyer/order/{id}/received(id=${order.id})}" method="post" class="hidden"></form>
+                    <button type="button" class="btn-lm-delete bg-green-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-green-700 transition"
+                            data-title="Confirm Receipt"
+                            data-msg="Mark this order as received? This confirms delivery and closes the order."
+                            data-btn="Confirm Received"
+                            data-form-id="received-form">
+                        ✓ Mark as Received
+                    </button>
                 </div>
 
                 <!-- Request Return (DELIVERED only) -->
@@ -164,14 +166,14 @@
             <div th:if="${order.status == 'DELIVERED'}"
                  class="mt-10 pt-8 border-t-2 border-gray-100">
                 <h3 class="text-lg font-light tracking-tight mb-6">
-                    Leave a <span class="font-black italic text-blue-600">Review</span>
+                    Leave a <span class="font-black italic text-[#4d78c0]">Review</span>
                 </h3>
                 <div class="space-y-4">
                     <div th:each="item : ${order.items}" class="bg-gray-50 p-4 border border-gray-100">
                         <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-3" th:text="${item.productName}"></p>
                         <div th:if="${item.product != null}">
                             <a th:href="@{/product/{id}(id=${item.product.id})}"
-                               class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">
+                               class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">
                                 Write a Review for this Product →
                             </a>
                         </div>

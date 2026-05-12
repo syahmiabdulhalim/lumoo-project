@@ -76,7 +76,7 @@ public class VendorApplicationService {
             applicationRepository.save(app);
             String msg = "Your vendor application was not approved.";
             if (note != null && !note.isBlank()) msg += " Reason: " + note.trim();
-            msg += " You may re-apply after 12 hours. Contact info@lumoo.gm for help.";
+            msg += " You may re-apply after 12 hours. Contact info@lumoo.my for help.";
             notificationRepository.save(new Notification(msg, app.getUser()));
         });
     }

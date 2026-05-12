@@ -2,9 +2,100 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="loading">
+
+    <!-- ── GLOBAL CONFIRM MODAL ── -->
+    <div id="lm-confirm-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center">
+        <div class="absolute inset-0 bg-[#1a2336]/60 backdrop-blur-sm" onclick="lmCloseConfirm()"></div>
+        <div class="relative bg-white w-full max-w-md mx-4 shadow-2xl">
+            <div id="lm-confirm-header" class="bg-red-600 px-6 py-4 flex items-center gap-3">
+                <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span id="lm-confirm-title" class="text-white font-black uppercase tracking-widest text-xs">Confirm Action</span>
+            </div>
+            <div class="px-6 py-5">
+                <p id="lm-confirm-msg" class="text-sm text-gray-700 leading-relaxed"></p>
+                <p class="text-[9px] text-red-500 uppercase font-black tracking-widest mt-2">This action cannot be undone.</p>
+                <div id="lm-type-wrap" class="hidden mt-5 border-t border-dashed border-red-100 pt-4">
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-2">Type <span class="text-red-600 font-black">DELETE</span> to confirm:</p>
+                    <input id="lm-type-input" type="text" autocomplete="off" placeholder="DELETE"
+                           class="w-full border-b-2 border-gray-200 focus:border-red-500 outline-none text-sm font-mono py-1 tracking-widest"
+                           oninput="lmCheckType()">
+                </div>
+            </div>
+            <div class="px-6 pb-6 flex gap-3 justify-end border-t border-gray-100 pt-4">
+                <button onclick="lmCloseConfirm()"
+                        class="px-5 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 text-gray-500 hover:bg-gray-50 transition">
+                    Cancel
+                </button>
+                <button id="lm-confirm-btn"
+                        class="px-5 py-2 text-[10px] font-black uppercase tracking-widest bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                        onclick="lmDoConfirm()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var _lmUrl, _lmMethod, _lmForm, _lmRequireType;
+        function lmConfirm(opts) {
+            document.getElementById('lm-confirm-title').textContent = opts.title || 'Confirm';
+            document.getElementById('lm-confirm-msg').textContent = opts.msg || 'Are you sure you want to do this?';
+            var btn = document.getElementById('lm-confirm-btn');
+            btn.textContent = opts.btn || 'Delete';
+            _lmRequireType = !!opts.requireType;
+            _lmUrl    = opts.url || null;
+            _lmMethod = (opts.method || 'get').toUpperCase();
+            _lmForm   = opts.form || null;
+            var tw = document.getElementById('lm-type-wrap');
+            if (_lmRequireType) {
+                tw.classList.remove('hidden');
+                document.getElementById('lm-type-input').value = '';
+                btn.disabled = true;
+            } else {
+                tw.classList.add('hidden');
+                btn.disabled = false;
+            }
+            document.getElementById('lm-confirm-modal').classList.remove('hidden');
+        }
+        function lmCheckType() {
+            document.getElementById('lm-confirm-btn').disabled =
+                document.getElementById('lm-type-input').value.trim().toUpperCase() !== 'DELETE';
+        }
+        function lmCloseConfirm() {
+            document.getElementById('lm-confirm-modal').classList.add('hidden');
+        }
+        function lmDoConfirm() {
+            lmCloseConfirm();
+            if (_lmForm) { _lmForm.submit(); return; }
+            if (_lmMethod === 'POST') {
+                var f = document.createElement('form');
+                f.method = 'post'; f.action = _lmUrl;
+                document.body.appendChild(f); f.submit();
+            } else { window.location.href = _lmUrl; }
+        }
+        document.addEventListener('keydown', function(e){ if(e.key==='Escape') lmCloseConfirm(); });
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-lm-delete');
+            if (!btn) return;
+            e.preventDefault();
+            var formId = btn.dataset.formId;
+            var form = formId ? document.getElementById(formId) : null;
+            lmConfirm({
+                title: btn.dataset.title || 'Confirm',
+                msg:   btn.dataset.msg   || 'This action cannot be undone.',
+                btn:   btn.dataset.btn   || 'Delete',
+                url:   btn.dataset.url   || null,
+                method: btn.dataset.method || 'get',
+                requireType: btn.dataset.requireType === 'true',
+                form: form
+            });
+        });
+    </script>
+
     <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center" style="display:none !important">
         <div class="text-center">
-            <div class="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div class="w-8 h-8 border-2 border-[#1a2336] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p class="text-[9px] uppercase tracking-[0.3em] font-bold text-gray-400">Loading...</p>
         </div>
     </div>

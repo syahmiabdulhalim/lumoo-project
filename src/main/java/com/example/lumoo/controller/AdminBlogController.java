@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin/blog")
@@ -27,12 +28,14 @@ public class AdminBlogController {
     }
 
     @PostMapping("/new")
-    public String create(@ModelAttribute BlogPost post) {
+    public String create(@ModelAttribute BlogPost post, RedirectAttributes ra) {
         if (post.getSlug() == null || post.getSlug().isBlank()) {
             post.setSlug(blogService.slugify(post.getTitle()));
         }
         blogService.save(post);
-        return "redirect:/admin/blog?created";
+        ra.addFlashAttribute("flashMsg", "Post created successfully.");
+        ra.addFlashAttribute("flashType", "green");
+        return "redirect:/admin/blog";
     }
 
     @GetMapping("/edit/{id}")
@@ -45,7 +48,7 @@ public class AdminBlogController {
     }
 
     @PostMapping("/edit/{id}")
-    public String update(@PathVariable Long id, @ModelAttribute BlogPost updated) {
+    public String update(@PathVariable Long id, @ModelAttribute BlogPost updated, RedirectAttributes ra) {
         BlogPost existing = blogService.findById(id).orElse(null);
         if (existing == null) return "redirect:/admin/blog";
         existing.setTitle(updated.getTitle());
@@ -61,12 +64,16 @@ public class AdminBlogController {
         existing.setMetaTitle(updated.getMetaTitle());
         existing.setMetaDescription(updated.getMetaDescription());
         blogService.save(existing);
-        return "redirect:/admin/blog?updated";
+        ra.addFlashAttribute("flashMsg", "Post updated successfully.");
+        ra.addFlashAttribute("flashType", "blue");
+        return "redirect:/admin/blog";
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
+    public String delete(@PathVariable Long id, RedirectAttributes ra) {
         blogService.delete(id);
-        return "redirect:/admin/blog?deleted";
+        ra.addFlashAttribute("flashMsg", "Post deleted.");
+        ra.addFlashAttribute("flashType", "red");
+        return "redirect:/admin/blog";
     }
 }

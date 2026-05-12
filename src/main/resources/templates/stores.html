@@ -8,8 +8,8 @@
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
     <!-- TOPBAR -->
-    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.my</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -19,28 +19,28 @@
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/stores" class="text-blue-600 border-b-2 border-blue-600 pb-1">Stores</a>
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/stores" class="text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1">Stores</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
                 <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
                 </form>
             </div>
             <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-                <a href="/login" class="hover:text-blue-600 transition">Login</a>
-                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
+                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
             </div>
         </div>
     </nav>
 
     <!-- HERO BANNER -->
-    <div class="bg-black text-white px-12 py-24 relative overflow-hidden">
+    <div class="bg-[#1a2336] text-white px-12 py-24 relative overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
         <div class="relative max-w-7xl mx-auto">
             <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4">Browse by Store</p>
@@ -73,18 +73,18 @@
                 <!-- Avatar -->
                 <div class="mb-6">
                     <div th:if="${v.profilePicture != null}"
-                         class="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-600">
+                         class="w-16 h-16 rounded-full overflow-hidden border-2 border-[#4d78c0]">
                         <img th:src="${v.profilePicture}" class="w-full h-full object-cover" alt="Store">
                     </div>
                     <div th:if="${v.profilePicture == null}"
-                         class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-black"
+                         class="w-16 h-16 rounded-full bg-[#4d78c0] flex items-center justify-center text-white text-2xl font-black"
                          th:text="${#strings.toUpperCase(#strings.substring(v.email, 0, 1))}">V</div>
                 </div>
 
                 <!-- Info -->
                 <div class="flex-1">
-                    <p class="text-[8px] font-black uppercase tracking-[0.4em] text-blue-600 mb-1">Verified Vendor</p>
-                    <h2 class="text-lg font-black tracking-tight text-gray-900 group-hover:text-blue-600 transition"
+                    <p class="text-[8px] font-black uppercase tracking-[0.4em] text-[#4d78c0] mb-1">Verified Vendor</p>
+                    <h2 class="text-lg font-black tracking-tight text-gray-900 group-hover:text-[#4d78c0] transition"
                         th:text="${v.fullName != null and !v.fullName.isEmpty() ? v.fullName : v.email}">Store Name</h2>
                     <p class="text-[10px] text-gray-400 mt-1" th:text="${v.email}">email</p>
                     <p th:if="${v.phone != null}" class="text-[10px] text-gray-400" th:text="${v.phone}"></p>
@@ -93,7 +93,7 @@
                 <!-- CTA -->
                 <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
                     <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">View Store</span>
-                    <span class="text-blue-600 group-hover:translate-x-1 transition-transform duration-300 font-bold">→</span>
+                    <span class="text-[#4d78c0] group-hover:translate-x-1 transition-transform duration-300 font-bold">→</span>
                 </div>
             </a>
         </div>
@@ -104,13 +104,11 @@
             <p class="text-5xl mb-6">🏪</p>
             <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2">No stores yet.</p>
             <p class="text-[10px] text-gray-300 mb-8">Vendors are joining daily — check back soon.</p>
-            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">← Browse All Products</a>
+            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse All Products</a>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-gray-100 px-12 py-16 mt-10 text-center">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>

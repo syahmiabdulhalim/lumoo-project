@@ -12,9 +12,9 @@
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-12 w-auto object-contain">
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a th:if="${user.role.name() == 'ADMIN'}"  href="/admin/dashboard"  class="hover:text-blue-600 transition">← Admin Dashboard</a>
-            <a th:if="${user.role.name() == 'VENDOR'}" href="/vendor/dashboard" class="hover:text-blue-600 transition">← Vendor Hub</a>
-            <a th:if="${user.role.name() == 'USER'}"   href="/buyer/dashboard"  class="hover:text-blue-600 transition">← My Orders</a>
+            <a th:if="${user.role.name() == 'ADMIN'}"  href="/admin/dashboard"  class="hover:text-[#4d78c0] transition">← Admin Dashboard</a>
+            <a th:if="${user.role.name() == 'VENDOR'}" href="/vendor/dashboard" class="hover:text-[#4d78c0] transition">← Vendor Hub</a>
+            <a th:if="${user.role.name() == 'USER'}"   href="/buyer/dashboard"  class="hover:text-[#4d78c0] transition">← My Orders</a>
             <form th:action="@{/logout}" method="post" class="inline">
                 <button type="submit" class="text-red-500 hover:text-red-700 transition">Logout</button>
             </form>
@@ -28,9 +28,9 @@
             <div class="relative group">
                 <img th:if="${user.profilePicture != null}"
                      th:src="${user.profilePicture}"
-                     class="w-20 h-20 rounded-full object-cover border-2 border-blue-600" alt="Profile">
+                     class="w-20 h-20 rounded-full object-cover border-2 border-[#4d78c0]" alt="Profile">
                 <div th:if="${user.profilePicture == null}"
-                     class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-3xl font-bold"
+                     class="w-20 h-20 rounded-full bg-[#4d78c0] flex items-center justify-center text-white text-3xl font-bold"
                      th:text="${#strings.toUpperCase(#strings.substring(user.email, 0, 1))}">U</div>
             </div>
             <div>
@@ -79,7 +79,7 @@
                                  class="w-16 h-16 rounded-full object-cover border border-gray-200">
                             <div th:if="${user.profilePicture == null}"
                                  id="avatarPlaceholder"
-                                 class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold"
+                                 class="w-16 h-16 rounded-full bg-[#4d78c0] flex items-center justify-center text-white text-xl font-bold"
                                  th:text="${#strings.toUpperCase(#strings.substring(user.email, 0, 1))}">U</div>
                         </div>
                         <label class="cursor-pointer bg-gray-100 hover:bg-blue-50 border border-gray-200 hover:border-blue-400 px-4 py-2 text-[9px] font-black uppercase tracking-widest transition">
@@ -123,7 +123,7 @@
                 </div>
 
                 <button type="submit"
-                        class="bg-black text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-300">
+                        class="bg-[#1a2336] text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-300">
                     Save Changes →
                 </button>
             </form>
@@ -159,7 +159,7 @@
                 </div>
 
                 <button type="submit" id="pwBtn"
-                        class="bg-black text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition duration-300">
+                        class="bg-[#1a2336] text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-300">
                     Update Password →
                 </button>
             </form>
@@ -167,9 +167,7 @@
 
     </main>
 
-    <footer class="text-center py-10">
-        <p class="text-[9px] text-gray-300 uppercase tracking-widest">© 2026 LUMOO — Building the Nation</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script>
         function previewAvatar(event) {

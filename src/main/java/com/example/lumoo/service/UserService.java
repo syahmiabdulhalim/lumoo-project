@@ -113,4 +113,27 @@ public class UserService {
         }
         return notes;
     }
+
+    public boolean verifyUser(Long id) {
+        return userRepository.findById(id).map(user -> {
+            if (user.isVerified()) return false;
+            user.setVerified(true);
+            userRepository.save(user);
+            notificationRepository.save(new Notification(
+                "✅ Your account has been verified by LUMOO admin.", user));
+            return true;
+        }).orElse(false);
+    }
+
+    public boolean upgradeToVendor(Long id) {
+        return userRepository.findById(id).map(user -> {
+            if (user.getRole() == Role.VENDOR || user.getRole() == Role.ADMIN) return false;
+            user.setRole(Role.VENDOR);
+            user.setVerified(true);
+            userRepository.save(user);
+            notificationRepository.save(new Notification(
+                "🎉 Your account has been upgraded to Vendor by LUMOO admin. Please log out and log back in to access your Vendor Hub.", user));
+            return true;
+        }).orElse(false);
+    }
 }

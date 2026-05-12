@@ -7,18 +7,13 @@
     <meta name="description" content="Expert construction advice, building material guides, and market news from Gambia's leading building materials marketplace.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://lumoo.gm/blog">
-
-    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="LUMOO Blog — Construction &amp; Building Resources for Gambia">
     <meta property="og:description" content="Expert construction advice, building material guides, and market news from Gambia's leading building materials marketplace.">
     <meta property="og:url" content="https://lumoo.gm/blog">
     <meta property="og:site_name" content="LUMOO Gambia">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-
-    <!-- JSON-LD: Blog -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -26,18 +21,18 @@
       "name": "LUMOO Blog",
       "description": "Construction tips, building guides, and market news for Gambia",
       "url": "https://lumoo.gm/blog",
-      "publisher": {
-        "@type": "Organization",
-        "name": "LUMOO Gambia",
-        "url": "https://lumoo.gm"
-      }
+      "publisher": { "@type": "Organization", "name": "LUMOO Gambia", "url": "https://lumoo.gm" }
     }
     </script>
+    <style>
+        .card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease, opacity .4s ease; }
+        .card-wrap:hover .card-img { transform: scale(1.05); opacity: .65; }
+    </style>
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-white text-gray-900 font-['Inter']">
 
     <!-- TOPBAR -->
-    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
@@ -48,133 +43,139 @@
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
-            <a href="/blog" class="text-blue-600 border-b-2 border-blue-600 pb-1">Blog</a>
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/stores" class="hover:text-[#4d78c0] transition">Stores</a>
+            <a href="/blog" class="text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1">Blog</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
                 <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
                 </form>
             </div>
             <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-                <a href="/login" class="hover:text-blue-600 transition">Login</a>
-                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
+                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
             </div>
         </div>
     </nav>
 
-    <!-- HERO -->
-    <div class="bg-black text-white px-12 py-24 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
-        <div class="relative max-w-7xl mx-auto">
-            <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4">LUMOO Editorial</p>
-            <h1 class="text-6xl font-light tracking-tighter leading-none">
-                The <span class="font-black italic">Build</span> Blog.
-            </h1>
-            <p class="mt-6 text-sm text-gray-400 max-w-2xl leading-relaxed">
-                Construction guides, material comparisons, market news, and expert advice — built for builders, contractors, and homeowners across Gambia.
+    <!-- HERO – JD Sports editorial style -->
+    <div class="bg-[#1a2336] text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-[0.04]"
+             style="background-image: repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%);background-size:18px 18px;"></div>
+        <div class="relative max-w-7xl mx-auto px-12 py-16 md:py-24">
+            <span class="text-[9px] font-black uppercase tracking-[0.7em] text-blue-500 mb-4 block">LUMOO Editorial</span>
+            <h1 class="text-[clamp(3rem,10vw,7rem)] font-black tracking-tighter leading-none uppercase">The Build<br>Blog.</h1>
+            <p class="mt-6 text-sm text-gray-400 max-w-xl leading-relaxed">
+                Construction guides, material comparisons, market news, and expert advice — built for builders across Gambia.
             </p>
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-12 py-20">
-
-        <!-- Breadcrumb -->
-        <nav aria-label="breadcrumb" class="mb-10 flex items-center gap-3 text-[9px] uppercase tracking-widest text-gray-400">
-            <a href="/" class="hover:text-black transition">Home</a>
-            <span>/</span>
-            <span class="text-black font-bold">Blog</span>
-        </nav>
-
-        <!-- Category Filter -->
-        <div th:if="${categories != null and !#lists.isEmpty(categories)}"
-             class="mb-12 flex flex-wrap gap-4 border-b border-gray-100 pb-8">
-            <a href="/blog"
-               class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-               th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-               All Posts
-            </a>
-            <a th:each="cat : ${categories}"
-               th:href="@{/blog(category=${cat})}"
-               th:text="${cat}"
-               class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-               th:classappend="${cat == selectedCategory ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
-            </a>
+    <!-- CATEGORY FILTER – sticky tabs -->
+    <div th:if="${categories != null and !#lists.isEmpty(categories)}"
+         class="bg-white border-b border-gray-200 sticky top-[104px] z-40">
+        <div class="max-w-7xl mx-auto px-12 overflow-x-auto scrollbar-hide">
+            <div class="flex min-w-max">
+                <a href="/blog"
+                   class="px-8 py-5 text-[10px] uppercase font-black tracking-[0.3em] border-b-2 whitespace-nowrap transition"
+                   th:classappend="${selectedCategory == null} ? 'border-[#1a2336] text-black' : 'border-transparent text-gray-400 hover:text-black'">
+                   All
+                </a>
+                <a th:each="cat : ${categories}"
+                   th:href="@{/blog(category=${cat})}"
+                   th:text="${cat}"
+                   class="px-8 py-5 text-[10px] uppercase font-black tracking-[0.3em] border-b-2 whitespace-nowrap transition"
+                   th:classappend="${cat == selectedCategory} ? 'border-[#1a2336] text-black' : 'border-transparent text-gray-400 hover:text-black'">
+                </a>
+            </div>
         </div>
+    </div>
 
-        <!-- Featured Post -->
-        <div th:if="${featured != null and selectedCategory == null}" class="mb-20">
-            <p class="text-[8px] font-black uppercase tracking-[0.5em] text-gray-300 mb-6">Featured</p>
-            <a th:href="@{/blog/{slug}(slug=${featured.slug})}" class="group block">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 bg-white border border-gray-100 shadow-sm hover:shadow-2xl transition-shadow duration-500">
-                    <div class="aspect-video lg:aspect-auto overflow-hidden bg-gray-100">
-                        <img th:if="${featured.featuredImageUrl != null}"
-                             th:src="${featured.featuredImageUrl}" th:alt="${featured.title}"
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <div th:if="${featured.featuredImageUrl == null}"
-                             class="w-full h-full min-h-64 bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-                            <span class="text-white text-6xl font-black italic opacity-30">L</span>
-                        </div>
-                    </div>
-                    <div class="p-12 flex flex-col justify-center">
-                        <span class="text-[9px] font-black uppercase tracking-[0.4em] text-blue-600 mb-4"
+    <main class="max-w-7xl mx-auto px-12 py-12">
+
+        <!-- FEATURED POST – full-width image overlay (JD Sports hero card) -->
+        <div th:if="${featured != null and selectedCategory == null}" class="mb-12">
+            <a th:href="@{/blog/{slug}(slug=${featured.slug})}"
+               class="card-wrap group block relative overflow-hidden bg-gray-900"
+               style="aspect-ratio:21/8;min-height:340px;">
+
+                <img th:if="${featured.featuredImageUrl != null}"
+                     th:src="${featured.featuredImageUrl}" th:alt="${featured.title}"
+                     class="card-img opacity-75">
+                <div th:if="${featured.featuredImageUrl == null}"
+                     class="absolute inset-0 bg-gradient-to-br from-[#1a3060] to-black"></div>
+
+                <!-- dark gradient bottom overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none"></div>
+
+                <!-- text at bottom-left -->
+                <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+                    <div class="flex items-center gap-4 mb-3">
+                        <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-[0.4em] px-3 py-1.5"
                               th:text="${featured.category}">Category</span>
-                        <h2 class="text-3xl font-black tracking-tighter leading-tight mb-4 group-hover:text-blue-600 transition"
-                            th:text="${featured.title}">Title</h2>
-                        <p class="text-sm text-gray-500 leading-relaxed mb-8 line-clamp-3"
-                           th:text="${featured.excerpt}">Excerpt</p>
-                        <div class="flex items-center gap-4 text-[9px] text-gray-400 uppercase tracking-widest font-bold">
-                            <span th:text="${featured.author}">Author</span>
-                            <span>·</span>
-                            <span th:text="${#temporals.format(featured.publishedAt, 'dd MMM yyyy')}">Date</span>
-                            <span>·</span>
-                            <span th:text="${featured.readingTimeMinutes + ' min read'}">5 min read</span>
-                        </div>
-                        <div class="mt-8">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5 group-hover:border-blue-800 transition">
-                                Read Article →
-                            </span>
-                        </div>
+                        <span class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 border border-gray-600 px-3 py-1.5">Featured</span>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-4 max-w-3xl"
+                        th:text="${featured.title}">Title</h2>
+                    <div class="flex items-center gap-3 text-[9px] text-gray-400 uppercase tracking-widest font-bold">
+                        <span th:text="${featured.author}">Author</span>
+                        <span class="text-gray-600">·</span>
+                        <span th:text="${#temporals.format(featured.publishedAt, 'dd MMM yyyy')}">Date</span>
+                        <span class="text-gray-600">·</span>
+                        <span th:text="${featured.readingTimeMinutes + ' min read'}">5 min</span>
+                    </div>
+                    <div class="mt-6">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white border-b border-white pb-0.5 group-hover:text-blue-400 group-hover:border-blue-400 transition">
+                            Read Article →
+                        </span>
                     </div>
                 </div>
             </a>
         </div>
 
-        <!-- Posts Grid -->
+        <!-- ARTICLES GRID -->
         <div th:if="${posts != null and !#lists.isEmpty(posts)}">
-            <p class="text-[8px] font-black uppercase tracking-[0.5em] text-gray-300 mb-8"
-               th:text="${selectedCategory != null ? selectedCategory : 'All Articles'}">All Articles</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+                <p class="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400"
+                   th:text="${selectedCategory != null ? selectedCategory : 'Latest Articles'}">Latest</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
                 <article th:each="post, iter : ${posts}"
                          th:if="${selectedCategory != null or iter.index > 0}"
-                         class="group bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                    <a th:href="@{/blog/{slug}(slug=${post.slug})}">
-                        <div class="aspect-video overflow-hidden bg-gray-100">
+                         class="group">
+                    <a th:href="@{/blog/{slug}(slug=${post.slug})}" class="block">
+
+                        <!-- Image block – dominant, category badge top-left -->
+                        <div class="card-wrap relative overflow-hidden bg-gray-100" style="aspect-ratio:4/3;">
                             <img th:if="${post.featuredImageUrl != null}"
                                  th:src="${post.featuredImageUrl}" th:alt="${post.title}"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                 class="card-img opacity-100">
                             <div th:if="${post.featuredImageUrl == null}"
-                                 class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                                <span class="text-gray-300 text-4xl font-black italic">L</span>
+                                 class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                <span class="text-gray-400 text-5xl font-black italic">L</span>
+                            </div>
+                            <div class="absolute top-0 left-0 p-4">
+                                <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5"
+                                      th:text="${post.category}">Category</span>
                             </div>
                         </div>
-                        <div class="p-6">
-                            <span class="text-[8px] font-black uppercase tracking-[0.4em] text-blue-600 mb-3 block"
-                                  th:text="${post.category}">Category</span>
-                            <h2 class="text-base font-black tracking-tight leading-tight mb-3 group-hover:text-blue-600 transition line-clamp-2"
-                                th:text="${post.title}">Title</h2>
-                            <p class="text-xs text-gray-500 leading-relaxed mb-4 line-clamp-2"
-                               th:text="${post.excerpt}">Excerpt</p>
-                            <div class="flex items-center justify-between text-[8px] text-gray-400 uppercase tracking-widest font-bold border-t border-gray-50 pt-4">
+
+                        <!-- Minimal info below image -->
+                        <div class="pt-4">
+                            <h3 class="font-black text-gray-900 text-sm leading-snug tracking-tight mb-2 group-hover:text-[#4d78c0] transition line-clamp-2"
+                                th:text="${post.title}">Title</h3>
+                            <div class="flex items-center gap-2 text-[9px] text-gray-400 uppercase tracking-widest font-bold">
                                 <span th:text="${#temporals.format(post.publishedAt, 'dd MMM yyyy')}">Date</span>
-                                <span th:text="${post.readingTimeMinutes + ' min read'}">5 min</span>
+                                <span>·</span>
+                                <span th:text="${post.readingTimeMinutes + ' min'}">5 min</span>
                             </div>
                         </div>
                     </a>
@@ -183,27 +184,25 @@
         </div>
 
         <!-- Empty state -->
-        <div th:if="${posts == null or #lists.isEmpty(posts)}"
-             class="py-40 text-center border-y border-gray-100">
+        <div th:if="${posts == null or #lists.isEmpty(posts)}" class="py-40 text-center">
             <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-4">No articles published yet.</p>
-            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">← Browse Products</a>
+            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse Products</a>
         </div>
 
     </main>
 
-    <!-- CTA Banner -->
-    <div class="bg-blue-600 text-white px-12 py-16 text-center mt-20">
-        <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-200 mb-3">Ready to Build?</p>
-        <h2 class="text-3xl font-black tracking-tighter mb-6">Shop Quality Building Materials</h2>
-        <a href="/" class="inline-block bg-white text-blue-600 px-10 py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-50 transition">
+    <!-- CTA Banner – JD style dark -->
+    <div class="bg-[#1a2336] text-white px-12 py-20 text-center mt-8">
+        <p class="text-[9px] font-black uppercase tracking-[0.6em] text-blue-500 mb-4">Ready to Build?</p>
+        <h2 class="text-[clamp(2rem,6vw,4rem)] font-black tracking-tighter leading-none mb-8 uppercase">
+            Shop Quality<br>Building Materials.
+        </h2>
+        <a href="/" class="inline-block bg-[#4d78c0] text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-500 transition">
             Browse LUMOO →
         </a>
     </div>
 
-    <footer class="bg-white border-t border-gray-100 px-12 py-16 text-center">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
-    </footer>
-
+    <div th:replace="~{fragments/footer :: footer}"></div>
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

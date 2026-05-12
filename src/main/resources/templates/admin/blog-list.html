@@ -14,23 +14,23 @@
             <span class="text-sm font-bold">Blog Management</span>
         </div>
         <a href="/admin/blog/new"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
+           class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
             + New Post
         </a>
     </nav>
 
     <main class="max-w-6xl mx-auto px-6 py-12">
 
-        <!-- Flash messages -->
-        <div th:if="${param.containsKey('created')}" class="mb-6 border-l-4 border-green-500 bg-green-50 px-5 py-3 rounded">
-            <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Post created successfully.</p>
+        <!-- Flash toast -->
+        <div th:if="${flashMsg != null}" id="flash-toast"
+             class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest transition-all duration-500"
+             th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+            <span th:text="${flashMsg}"></span>
+            <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
         </div>
-        <div th:if="${param.containsKey('updated')}" class="mb-6 border-l-4 border-blue-500 bg-blue-50 px-5 py-3 rounded">
-            <p class="text-xs font-bold text-blue-700 uppercase tracking-widest">Post updated successfully.</p>
-        </div>
-        <div th:if="${param.containsKey('deleted')}" class="mb-6 border-l-4 border-red-400 bg-red-50 px-5 py-3 rounded">
-            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Post deleted.</p>
-        </div>
+        <script th:if="${flashMsg != null}">
+            setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity = '0'; setTimeout(() => t.remove(), 500); } }, 3000);
+        </script>
 
         <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -71,16 +71,17 @@
                             <div class="flex items-center gap-2">
                                 <a th:if="${post.published}"
                                    th:href="@{/blog/{slug}(slug=${post.slug})}" target="_blank"
-                                   class="text-xs text-slate-500 hover:text-blue-600 font-semibold transition">View</a>
+                                   class="text-xs text-slate-500 hover:text-[#4d78c0] font-semibold transition">View</a>
                                 <a th:href="@{/admin/blog/edit/{id}(id=${post.id})}"
                                    class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold transition">Edit</a>
-                                <form th:action="@{/admin/blog/delete/{id}(id=${post.id})}" method="post"
-                                      onsubmit="return confirm('Delete this post permanently?')">
-                                    <button type="submit"
-                                            class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition">
-                                        Delete
-                                    </button>
-                                </form>
+                                <form th:id="'del-blog-' + ${post.id}"
+                                      th:action="@{/admin/blog/delete/{id}(id=${post.id})}" method="post" class="hidden"></form>
+                                <button type="button" class="btn-lm-delete text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition"
+                                        data-title="Delete Blog Post"
+                                        th:data-msg="|'${post.title}' will be permanently deleted.|"
+                                        th:data-form-id="'del-blog-' + ${post.id}">
+                                    Delete
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -89,7 +90,7 @@
 
             <div th:if="${posts == null or #lists.isEmpty(posts)}" class="py-20 text-center">
                 <p class="text-sm text-slate-400 mb-4">No blog posts yet.</p>
-                <a href="/admin/blog/new" class="text-sm font-bold text-blue-600 hover:underline">Create your first post →</a>
+                <a href="/admin/blog/new" class="text-sm font-bold text-[#4d78c0] hover:underline">Create your first post →</a>
             </div>
         </div>
     </main>

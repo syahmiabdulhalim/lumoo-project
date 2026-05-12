@@ -8,8 +8,8 @@
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
     <!-- TOPBAR -->
-    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.my</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -19,22 +19,22 @@
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/stores" class="hover:text-[#4d78c0] transition">Stores</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
                 <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
                 </form>
             </div>
             <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-                <a href="/login" class="hover:text-blue-600 transition">Login</a>
-                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
+                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
             </div>
         </div>
     </nav>
@@ -45,16 +45,16 @@
             <!-- Avatar -->
             <div>
                 <div th:if="${vendor.profilePicture != null}"
-                     class="w-24 h-24 rounded-full overflow-hidden border-4 border-blue-600 shadow-lg">
+                     class="w-24 h-24 rounded-full overflow-hidden border-4 border-[#4d78c0] shadow-lg">
                     <img th:src="${vendor.profilePicture}" class="w-full h-full object-cover" alt="Store">
                 </div>
                 <div th:if="${vendor.profilePicture == null}"
-                     class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white text-4xl font-black shadow-lg"
+                     class="w-24 h-24 rounded-full bg-[#4d78c0] flex items-center justify-center text-white text-4xl font-black shadow-lg"
                      th:text="${#strings.toUpperCase(#strings.substring(vendor.email, 0, 1))}">V</div>
             </div>
             <!-- Info -->
             <div class="flex-1">
-                <p class="text-[8px] font-black uppercase tracking-[0.5em] text-blue-600 mb-2">Official Store</p>
+                <p class="text-[8px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-2">Official Store</p>
                 <h1 class="text-4xl font-black tracking-tighter"
                     th:text="${vendor.fullName != null and !vendor.fullName.isEmpty() ? vendor.fullName : vendor.email}">Store Name</h1>
                 <p class="text-[10px] text-gray-400 mt-2" th:text="${vendor.email}">email</p>
@@ -63,7 +63,7 @@
             <!-- Stats -->
             <div class="text-right shrink-0">
                 <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Products</p>
-                <p class="text-4xl font-black text-blue-600" th:text="${#lists.size(products)}">0</p>
+                <p class="text-4xl font-black text-[#4d78c0]" th:text="${#lists.size(products)}">0</p>
             </div>
         </div>
     </div>
@@ -85,14 +85,14 @@
              class="mb-10 flex flex-wrap gap-4 border-b border-gray-100 pb-8">
             <a th:href="@{/store/{id}(id=${vendor.id})}"
                class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-               th:classappend="${selectedCategory == null ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+               th:classappend="${selectedCategory == null ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'text-gray-400 hover:text-black'}">
                 All
             </a>
             <a th:each="cat : ${categories}"
                th:href="@{/store/{id}(id=${vendor.id}, category=${cat})}"
                th:text="${cat}"
                class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all capitalize"
-               th:classappend="${cat == selectedCategory ? 'text-blue-600 border-b-2 border-blue-600 pb-1' : 'text-gray-400 hover:text-black'}">
+               th:classappend="${cat == selectedCategory ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'text-gray-400 hover:text-black'}">
             </a>
         </div>
 
@@ -122,7 +122,7 @@
                     <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit"
-                                class="w-full border border-gray-200 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-black hover:text-white hover:border-black transition duration-300">
+                                class="w-full border border-gray-200 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-[#1a2336] hover:text-white hover:border-[#1a2336] transition duration-300">
                             Add to Cart +
                         </button>
                     </form>
@@ -135,14 +135,12 @@
              class="py-32 text-center border-y border-gray-100">
             <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2">No products in this category yet.</p>
             <a th:href="@{/store/{id}(id=${vendor.id})}"
-               class="text-[9px] font-black uppercase tracking-widest text-blue-600 border-b border-blue-600 pb-0.5">View All Products</a>
+               class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">View All Products</a>
         </div>
 
     </main>
 
-    <footer class="bg-white border-t border-gray-100 px-12 py-16 mt-10 text-center">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia — Building the Nation</p>
-    </footer>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>

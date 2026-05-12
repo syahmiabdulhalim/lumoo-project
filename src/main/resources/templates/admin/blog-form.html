@@ -70,13 +70,13 @@
                         <p class="field-label mb-4">Publish Settings</p>
                         <label class="flex items-center gap-3 cursor-pointer mb-4">
                             <input type="checkbox" th:field="*{published}"
-                                   class="w-4 h-4 text-blue-600 border-slate-300 rounded cursor-pointer">
+                                   class="w-4 h-4 text-[#4d78c0] border-slate-300 rounded cursor-pointer">
                             <span class="text-sm font-semibold text-slate-700">Publish immediately</span>
                         </label>
                         <p class="text-[9px] text-slate-400">Unchecked = saved as draft</p>
                         <div class="mt-4">
                             <button type="submit"
-                                    class="w-full bg-slate-900 hover:bg-blue-600 text-white py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg"
+                                    class="w-full bg-slate-900 hover:bg-[#4d78c0] text-white py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg"
                                     th:text="${editing ? 'Update Post' : 'Save Post'}">Save</button>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
                         <input type="text" th:field="*{slug}" id="slugField" required
                                class="field-input font-mono text-xs"
                                placeholder="how-to-choose-cement-gambia">
-                        <p class="text-[9px] text-slate-400 mt-2">lumoo.gm/blog/<strong id="slugPreview" class="text-blue-600">your-slug</strong></p>
+                        <p class="text-[9px] text-slate-400 mt-2">lumoo.gm/blog/<strong id="slugPreview" class="text-[#4d78c0]">your-slug</strong></p>
                     </div>
 
                     <!-- Category & Author -->

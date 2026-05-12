@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk -F: '{print $1}')",
+      "Bash(python3)",
+      "Bash(xargs ls)"
+    ]
+  }
+}

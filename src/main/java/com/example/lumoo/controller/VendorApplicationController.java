@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -27,6 +28,11 @@ public class VendorApplicationController {
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
         if (user.getRole() != Role.USER) return "redirect:/?error=not_eligible";
+
+        // If flash attribute "submitted" was set by POST, show confirmation and stop
+        if (Boolean.TRUE.equals(model.getAttribute("submitted"))) {
+            return "vendor-apply";
+        }
 
         List<VendorApplication> applications = vendorApplicationService.getByUser(user);
         VendorApplication latest = applications.isEmpty() ? null : applications.get(0);
@@ -82,7 +88,8 @@ public class VendorApplicationController {
             // Section 6: Documents
             @RequestParam(required = false) MultipartFile nationalIdDoc,
             @RequestParam(required = false) MultipartFile businessRegDoc,
-            Principal principal) {
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
 
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
@@ -93,7 +100,8 @@ public class VendorApplicationController {
         if (isBlank(businessName) || isBlank(businessType) || isBlank(phone)
                 || isBlank(ownerFullName) || isBlank(ownerIdNumber)
                 || isBlank(bankAccountNumber) || isBlank(productsToSell) || isBlank(reason)) {
-            return "redirect:/buyer/vendorapply?error";
+            redirectAttributes.addFlashAttribute("errorMsg", "Please fill in all required fields.");
+            return "redirect:/buyer/vendorapply";
         }
 
         VendorApplication app = new VendorApplication();
@@ -119,15 +127,22 @@ public class VendorApplicationController {
 
         if (nationalIdDoc != null && !nationalIdDoc.isEmpty()) {
             try { app.setNationalIdDocUrl(userService.saveKycDoc(nationalIdDoc)); }
-            catch (Exception e) { return "redirect:/buyer/vendorapply?error=doc_upload"; }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Document upload failed. Check file size (max 5MB).");
+                return "redirect:/buyer/vendorapply";
+            }
         }
         if (businessRegDoc != null && !businessRegDoc.isEmpty()) {
             try { app.setBusinessRegDocUrl(userService.saveKycDoc(businessRegDoc)); }
-            catch (Exception e) { return "redirect:/buyer/vendorapply?error=doc_upload"; }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMsg", "Document upload failed. Check file size (max 5MB).");
+                return "redirect:/buyer/vendorapply";
+            }
         }
 
         vendorApplicationService.apply(user, app);
-        return "redirect:/buyer/vendorapply?submitted";
+        redirectAttributes.addFlashAttribute("submitted", true);
+        return "redirect:/buyer/vendorapply";
     }
 
     private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }

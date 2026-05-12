@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.gm</span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+        <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain"></a>
+        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase transition">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="max-w-2xl mx-auto px-6 md:px-12 py-16">
+
+        <header class="mb-12">
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-2 block">Account</span>
+            <h1 class="text-4xl font-light tracking-tighter">Settings<span class="font-black italic text-[#4d78c0]">.</span></h1>
+        </header>
+
+        <!-- Account Info -->
+        <section class="bg-white border border-gray-100 shadow-sm mb-4">
+            <div class="px-8 py-4 border-b border-gray-100 flex items-center gap-3">
+                <span class="text-[9px] font-black bg-[#4d78c0] text-white w-5 h-5 flex items-center justify-center rounded-full shrink-0">1</span>
+                <h2 class="text-[10px] font-black uppercase tracking-widest">Account Information</h2>
+            </div>
+            <div class="px-8 py-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-1">Full Name</p>
+                        <p class="font-semibold" th:text="${user.fullName ?: user.username}">—</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-1">Email</p>
+                        <p class="font-semibold" th:text="${user.email}">—</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-1">Role</p>
+                        <p class="font-semibold" th:text="${user.role}">—</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-gray-400 uppercase font-black tracking-widest mb-1">Username</p>
+                        <p class="font-semibold" th:text="${user.username}">—</p>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <a href="/profile" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5 hover:text-blue-800 transition">
+                        Edit Profile →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security -->
+        <section class="bg-white border border-gray-100 shadow-sm mb-4">
+            <div class="px-8 py-4 border-b border-gray-100 flex items-center gap-3">
+                <span class="text-[9px] font-black bg-[#4d78c0] text-white w-5 h-5 flex items-center justify-center rounded-full shrink-0">2</span>
+                <h2 class="text-[10px] font-black uppercase tracking-widest">Security</h2>
+            </div>
+            <div class="px-8 py-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-800">Password</p>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">Change your account password</p>
+                </div>
+                <a href="/forgot-password" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5 hover:text-blue-800 transition shrink-0">
+                    Reset Password →
+                </a>
+            </div>
+        </section>
+
+        <!-- Notification Preferences (display only) -->
+        <section class="bg-white border border-gray-100 shadow-sm mb-12">
+            <div class="px-8 py-4 border-b border-gray-100 flex items-center gap-3">
+                <span class="text-[9px] font-black bg-[#4d78c0] text-white w-5 h-5 flex items-center justify-center rounded-full shrink-0">3</span>
+                <h2 class="text-[10px] font-black uppercase tracking-widest">Notifications</h2>
+            </div>
+            <div class="px-8 py-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Order Updates</p>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">Status changes for your orders</p>
+                    </div>
+                    <span class="text-[9px] font-black text-green-600 uppercase tracking-widest">Active</span>
+                </div>
+                <div class="flex items-center justify-between border-t border-dashed border-gray-100 pt-4">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">Account Alerts</p>
+                        <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-0.5">Login, approvals, and security notices</p>
+                    </div>
+                    <span class="text-[9px] font-black text-green-600 uppercase tracking-widest">Active</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- DANGER ZONE -->
+        <section class="border-2 border-red-200 bg-red-50">
+            <div class="px-8 py-4 border-b border-red-200 flex items-center gap-3">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <h2 class="text-[10px] font-black uppercase tracking-widest text-red-700">Danger Zone</h2>
+            </div>
+            <div class="px-8 py-6 flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-900">Delete Account</p>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Permanently delete your account and all associated data.</p>
+                </div>
+                <form id="delete-account-form" th:action="@{/settings/delete-account}" method="post" class="hidden"></form>
+                <button type="button" class="btn-lm-delete ml-6 shrink-0 px-5 py-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-700 transition"
+                        data-title="Delete Account"
+                        th:data-msg="|You are about to permanently delete the account for ${user.email}. All orders, data, and settings will be gone forever.|"
+                        data-require-type="true"
+                        data-btn="Delete My Account"
+                        data-form-id="delete-account-form">
+                    Delete Account
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <div th:replace="~{fragments/loading :: loading}"></div>
+</body>
+</html>

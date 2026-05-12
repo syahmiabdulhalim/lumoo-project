@@ -17,8 +17,8 @@
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
     <!-- CONTACT TOPBAR -->
-    <div class="bg-black text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.gm</span>
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -28,23 +28,24 @@
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
         </a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-blue-600 transition">Home</a>
-            <a href="/stores" class="hover:text-blue-600 transition">Stores</a>
-            <a href="/blog" class="hover:text-blue-600 transition">Blog</a>
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/stores" class="hover:text-[#4d78c0] transition">Stores</a>
+            <a href="/blog" class="hover:text-[#4d78c0] transition">Blog</a>
             <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-                <a href="/cart" class="hover:text-blue-600 transition">Cart</a>
+                <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
                 <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-                <a href="/profile" class="hover:text-blue-600 transition">Profile</a>
+                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
+                <a href="/settings" class="hover:text-[#4d78c0] transition">Settings</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
                 </form>
             </div>
             <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-                <a href="/login" class="hover:text-blue-600 transition">Login</a>
-                <a href="/register" class="bg-black text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
+                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
             </div>
         </div>
     </nav>
@@ -56,13 +57,13 @@
             <!-- Slide 1 -->
             <div class="swiper-slide relative">
                 <img th:src="@{/images/bg1.jpg}" alt="Gambia Construction">
-                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
                         <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Gambia's Premier Supply</span>
                         <h1 class="text-6xl font-light tracking-tighter leading-none">
                             Build your <br><span class="font-black italic">Future.</span>
                         </h1>
-                        <a href="/category/building" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                        <a href="/category/building" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
                             Shop Building →
                         </a>
                     </div>
@@ -72,13 +73,13 @@
             <!-- Slide 2 -->
             <div class="swiper-slide relative">
                 <img th:src="@{/images/bg2.jpg}" alt="Gambia Roofing">
-                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
                         <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Built for Gambia, Built to Last</span>
                         <h1 class="text-6xl font-light tracking-tighter leading-none">
                             Protect what <br><span class="font-black italic">Matters.</span>
                         </h1>
-                        <a href="/category/roofing" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                        <a href="/category/roofing" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
                             Shop Roofing →
                         </a>
                     </div>
@@ -88,13 +89,13 @@
             <!-- Slide 3 -->
             <div class="swiper-slide relative">
                 <img th:src="@{/images/bg-3.jpg}" alt="Gambia Materials">
-                <div class="absolute inset-0 bg-black/50 flex items-center px-16">
+                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
                     <div class="text-white max-w-xl">
                         <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Quality Materials Across Gambia</span>
                         <h1 class="text-6xl font-light tracking-tighter leading-none">
                             Strong <br><span class="font-black italic">Foundations.</span>
                         </h1>
-                        <a href="/category/cement" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition">
+                        <a href="/category/cement" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
                             Shop Cement →
                         </a>
                     </div>
@@ -113,13 +114,13 @@
         <section class="mb-20">
             <div class="flex flex-col md:flex-row items-end justify-between gap-8">
                 <div class="max-w-3xl text-left">
-                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 block">Everything You Need To Build</span>
+                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-4 block">Everything You Need To Build</span>
                     <h2 class="text-5xl font-light tracking-tighter leading-none text-gray-900">
                         Browse our <span class="font-black italic">Collection.</span>
                     </h2>
                 </div>
                 <div class="w-full md:w-96">
-                    <form th:action="@{/}" method="get" class="relative border-b-2 border-black py-2">
+                    <form th:action="@{/}" method="get" class="relative border-b-2 border-[#1a2336] py-2">
                         <input type="text" name="keyword" th:value="${keyword}"
                                placeholder="Search collection..."
                                class="w-full bg-transparent outline-none text-sm uppercase tracking-widest font-bold placeholder-gray-300">
@@ -138,8 +139,8 @@
             <div class="flex items-center justify-between mb-10">
                 <h2 class="text-[10px] uppercase tracking-[0.5em] font-black text-gray-400">Shop By Category</h2>
                 <div class="flex gap-3">
-                    <button id="cat-prev" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition text-gray-400 text-sm">‹</button>
-                    <button id="cat-next" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition text-gray-400 text-sm">›</button>
+                    <button id="cat-prev" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-[#1a2336] hover:text-white hover:border-[#1a2336] transition text-gray-400 text-sm">‹</button>
+                    <button id="cat-next" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-[#1a2336] hover:text-white hover:border-[#1a2336] transition text-gray-400 text-sm">›</button>
                 </div>
             </div>
             <div class="swiper category-swiper overflow-hidden">
@@ -233,12 +234,96 @@
 
         
 
+        <!-- BLOG SECTION – JD Sports editorial style -->
+        <section class="mb-20">
+            <div class="flex items-end justify-between mb-10">
+                <div>
+                    <span class="text-[9px] font-black uppercase tracking-[0.6em] text-[#4d78c0] mb-3 block">LUMOO Editorial</span>
+                    <h2 class="text-[clamp(2.5rem,6vw,4.5rem)] font-black tracking-tighter leading-none uppercase">The Build<br>Blog.</h2>
+                </div>
+                <a href="/blog" class="text-[10px] font-black uppercase tracking-widest border-b-2 border-[#1a2336] hover:text-[#4d78c0] hover:border-[#4d78c0] transition pb-0.5 shrink-0 ml-8">
+                    View All →
+                </a>
+            </div>
+
+            <!-- 1 large (left 2/3) + 2 stacked small (right 1/3) -->
+            <div th:if="${recentPosts != null and !recentPosts.isEmpty()}" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+
+                <!-- Large card -->
+                <article th:if="${recentPosts.size() > 0}" class="lg:col-span-2 group">
+                    <a th:href="@{/blog/{slug}(slug=${recentPosts[0].slug})}"
+                       class="block relative overflow-hidden bg-gray-900" style="aspect-ratio:16/10;min-height:300px;">
+                        <img th:if="${recentPosts[0].featuredImageUrl != null and !recentPosts[0].featuredImageUrl.isEmpty()}"
+                             th:src="${recentPosts[0].featuredImageUrl}" alt=""
+                             class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 group-hover:scale-105 transition duration-700">
+                        <div th:if="${recentPosts[0].featuredImageUrl == null or recentPosts[0].featuredImageUrl.isEmpty()}"
+                             class="absolute inset-0 bg-gradient-to-br from-[#1a3060] to-gray-900"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 p-8">
+                            <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-[0.4em] px-3 py-1.5 mb-4 inline-block"
+                                  th:text="${recentPosts[0].category}">Category</span>
+                            <h3 class="text-xl md:text-2xl font-black text-white tracking-tight leading-tight mb-2 max-w-lg"
+                                th:text="${recentPosts[0].title}">Title</h3>
+                            <span class="text-[9px] text-gray-400 uppercase tracking-widest font-bold"
+                                  th:text="${recentPosts[0].publishedAt != null ? #temporals.format(recentPosts[0].publishedAt, 'dd MMM yyyy') : ''}">Date</span>
+                            <div class="mt-5">
+                                <span class="text-[9px] font-black uppercase tracking-widest text-white border-b border-white pb-0.5 group-hover:text-blue-400 group-hover:border-blue-400 transition">Read →</span>
+                            </div>
+                        </div>
+                    </a>
+                </article>
+
+                <!-- 2 small cards stacked -->
+                <div class="flex flex-col gap-3">
+                    <article th:if="${recentPosts.size() > 1}" class="group flex-1">
+                        <a th:href="@{/blog/{slug}(slug=${recentPosts[1].slug})}"
+                           class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
+                            <img th:if="${recentPosts[1].featuredImageUrl != null and !recentPosts[1].featuredImageUrl.isEmpty()}"
+                                 th:src="${recentPosts[1].featuredImageUrl}" alt=""
+                                 class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
+                            <div th:if="${recentPosts[1].featuredImageUrl == null or recentPosts[1].featuredImageUrl.isEmpty()}"
+                                 class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-0 left-0 p-5">
+                                <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
+                                      th:text="${recentPosts[1].category}">Category</span>
+                                <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
+                                    th:text="${recentPosts[1].title}">Title</h3>
+                            </div>
+                        </a>
+                    </article>
+                    <article th:if="${recentPosts.size() > 2}" class="group flex-1">
+                        <a th:href="@{/blog/{slug}(slug=${recentPosts[2].slug})}"
+                           class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
+                            <img th:if="${recentPosts[2].featuredImageUrl != null and !recentPosts[2].featuredImageUrl.isEmpty()}"
+                                 th:src="${recentPosts[2].featuredImageUrl}" alt=""
+                                 class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
+                            <div th:if="${recentPosts[2].featuredImageUrl == null or recentPosts[2].featuredImageUrl.isEmpty()}"
+                                 class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-0 left-0 p-5">
+                                <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
+                                      th:text="${recentPosts[2].category}">Category</span>
+                                <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
+                                    th:text="${recentPosts[2].title}">Title</h3>
+                            </div>
+                        </a>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${recentPosts == null or recentPosts.isEmpty()}" class="py-16 text-center border border-dashed border-gray-200">
+                <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-bold mb-4">No articles published yet.</p>
+                <a href="/blog" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Visit Blog →</a>
+            </div>
+        </section>
+
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t border-gray-100 px-12 py-20 mt-20 text-center">
-        <p class="text-[10px] uppercase tracking-[0.5em] text-gray-400">© 2026 LUMOO Gambia - Building the Nation</p>
-    </footer>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>

@@ -39,7 +39,7 @@ public String processForgot(@RequestParam String email, Model model) {
         if (sent) {
             model.addAttribute("message", "A reset link has been sent to your email. Please check your inbox (and spam folder).");
         } else {
-            model.addAttribute("error", "We could not send the email right now. Please try again later or contact support at info@lumoo.gm.");
+            model.addAttribute("error", "We could not send the email right now. Please try again later or contact support at info@lumoo.my.");
         }
     } else {
         model.addAttribute("error", "No account found with that email address.");

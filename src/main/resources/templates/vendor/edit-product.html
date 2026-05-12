@@ -8,20 +8,26 @@
 <body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
 
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b border-gray-100">
-        <h1 class="text-2xl font-black tracking-tighter text-blue-600">LUMOO <span class="text-xs font-normal text-gray-400 ml-2">VENDOR</span></h1>
+        <h1 class="text-2xl font-black tracking-tighter text-[#4d78c0]">LUMOO <span class="text-xs font-normal text-gray-400 ml-2">VENDOR</span></h1>
         <a href="/vendor/dashboard" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition">← Back to Dashboard</a>
     </nav>
 
     <div class="max-w-2xl mx-auto mt-16 mb-20 p-12 bg-white border border-gray-100 shadow-2xl">
         <div class="mb-10">
-            <h2 class="text-3xl font-light tracking-tight italic">Update <span class="font-bold text-blue-600">Material</span></h2>
+            <h2 class="text-3xl font-light tracking-tight italic">Update <span class="font-bold text-[#4d78c0]">Material</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-2">Changes to the image will require admin re-approval</p>
         </div>
 
-        <!-- Error banner -->
-        <div th:if="${param.containsKey('error')}" class="mb-6 bg-red-50 border-l-4 border-red-400 px-4 py-3">
-            <p class="text-xs text-red-600 font-bold uppercase tracking-wider">Image upload failed. Please try again.</p>
+        <!-- Flash toast -->
+        <div th:if="${flashMsg != null}" id="edit-flash-toast"
+             class="mb-6 flex items-center gap-3 px-4 py-3 text-white text-xs font-bold uppercase tracking-widest"
+             th:classappend="${flashType == 'green'} ? 'bg-green-600' : 'bg-red-500'">
+            <span th:text="${flashMsg}"></span>
+            <button onclick="document.getElementById('edit-flash-toast').remove()" class="ml-auto opacity-70 hover:opacity-100">✕</button>
         </div>
+        <script th:if="${flashMsg != null}">
+            setTimeout(() => { const t = document.getElementById('edit-flash-toast'); if(t){t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500);} }, 3000);
+        </script>
 
         <form th:action="@{/vendor/edit-product/{id}(id=${product.id})}" th:object="${product}"
               method="post" enctype="multipart/form-data" class="space-y-8">
@@ -29,14 +35,14 @@
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Material Name *</label>
                 <input type="text" th:field="*{name}" required
-                       class="w-full border-b border-gray-200 py-3 text-sm focus:border-blue-600 outline-none transition bg-transparent">
+                       class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none transition bg-transparent">
             </div>
 
             <div class="grid grid-cols-2 gap-8">
                 <div>
                     <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Category *</label>
                     <select th:field="*{category}" required
-                            class="w-full border-b border-gray-200 py-3 text-sm focus:border-blue-600 outline-none bg-transparent cursor-pointer">
+                            class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent cursor-pointer">
                         <option value="roofing">🏠 Roofing</option>
                         <option value="cement">🧱 Cement</option>
                         <option value="electrical">⚡ Electrical</option>
@@ -50,14 +56,14 @@
                 <div>
                     <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Price (GMD) *</label>
                     <input type="number" step="0.01" th:field="*{price}" required
-                           class="w-full border-b border-gray-200 py-3 text-sm focus:border-blue-600 outline-none transition bg-transparent">
+                           class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none transition bg-transparent">
                 </div>
             </div>
 
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Description</label>
                 <textarea th:field="*{description}" rows="3"
-                          class="w-full border-b border-gray-200 py-3 text-sm focus:border-blue-600 outline-none transition bg-transparent resize-none"
+                          class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none transition bg-transparent resize-none"
                           placeholder="Describe your product — specifications, uses, packaging, etc."></textarea>
             </div>
 
@@ -80,21 +86,21 @@
                     <div>
                         <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-2">Upload a new photo</p>
                         <input type="file" name="image" accept="image/*"
-                               class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-black file:text-white hover:file:bg-blue-600 file:cursor-pointer file:transition">
+                               class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-[#1a2336] file:text-white hover:file:bg-[#4d78c0] file:cursor-pointer file:transition">
                         <p class="text-[8px] text-gray-300 mt-2">Max 5MB. JPG, PNG or WEBP.</p>
                     </div>
                     <div class="border-t border-gray-200 pt-4">
                         <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-2">Or update image URL</p>
                         <input type="text" th:field="*{imageUrl}"
-                               class="w-full border-b border-gray-200 py-2 text-xs focus:border-blue-600 outline-none transition bg-transparent">
+                               class="w-full border-b border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none transition bg-transparent">
                     </div>
-                    <p class="text-[8px] text-blue-600">⚠ Changing the image will reset it for admin re-approval.</p>
+                    <p class="text-[8px] text-[#4d78c0]">⚠ Changing the image will reset it for admin re-approval.</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit"
-                        class="flex-1 bg-blue-600 text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-blue-700 transition duration-500">
+                        class="flex-1 bg-[#4d78c0] text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#3d68b0] transition duration-500">
                     Save Changes →
                 </button>
                 <a href="/vendor/dashboard"

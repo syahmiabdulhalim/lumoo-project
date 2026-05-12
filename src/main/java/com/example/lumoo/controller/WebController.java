@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +21,7 @@ public class WebController {
     @Autowired private OrderService orderService;
     @Autowired private ReviewService reviewService;
     @Autowired private VendorApplicationService vendorApplicationService;
+    @Autowired private BlogService blogService;
 
     @GetMapping("/stores")
     public String stores(Model model) {
@@ -64,6 +67,7 @@ public class WebController {
         model.addAttribute("products", products);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
+        model.addAttribute("recentPosts", blogService.getPublished().stream().limit(3).toList());
         return "index";
     }
 
@@ -159,6 +163,26 @@ public class WebController {
         }
         model.addAttribute("order", order);
         return "buyer/order-details";
+    }
+
+    @GetMapping("/settings")
+    public String settings(Model model, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        model.addAttribute("user", user);
+        return "settings";
+    }
+
+    @PostMapping("/settings/delete-account")
+    public String deleteAccount(Principal principal, HttpServletRequest request) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        HttpSession session = request.getSession(false);
+        if (session != null) session.invalidate();
+        userService.delete(user.getId());
+        return "redirect:/?account_deleted";
     }
 
     @PostMapping("/buyer/order/delete/{id}")

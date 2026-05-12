@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -58,7 +59,7 @@ public class VendorController {
     @PostMapping("/add-product")
     public String saveProduct(@ModelAttribute Product product,
                               @RequestParam(required = false) MultipartFile image,
-                              Principal principal) {
+                              Principal principal, RedirectAttributes ra) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);
         if (vendor == null) return "redirect:/login";
@@ -67,10 +68,14 @@ public class VendorController {
                 product.setImageUrl(productService.saveImage(image));
             }
         } catch (IOException e) {
-            return "redirect:/vendor/add-product?error=upload_failed";
+            ra.addFlashAttribute("flashMsg", "Image upload failed. Please try again.");
+            ra.addFlashAttribute("flashType", "red");
+            return "redirect:/vendor/add-product";
         }
         productService.addProduct(product, vendor);
-        return "redirect:/vendor/dashboard?success_add";
+        ra.addFlashAttribute("flashMsg", "Product listed. Pending admin approval.");
+        ra.addFlashAttribute("flashType", "green");
+        return "redirect:/vendor/dashboard";
     }
 
     @GetMapping("/edit-product/{id}")
@@ -89,38 +94,52 @@ public class VendorController {
     public String updateProduct(@PathVariable Long id,
                                 @ModelAttribute Product product,
                                 @RequestParam(required = false) MultipartFile image,
-                                Principal principal) {
+                                Principal principal, RedirectAttributes ra) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);
         if (vendor == null) return "redirect:/login";
         try {
             boolean updated = productService.updateProduct(id, product, vendor, image);
-            return updated ? "redirect:/vendor/dashboard?success_update" : "redirect:/vendor/dashboard?error=unauthorized";
+            if (updated) {
+                ra.addFlashAttribute("flashMsg", "Product updated successfully.");
+                ra.addFlashAttribute("flashType", "green");
+                return "redirect:/vendor/dashboard";
+            } else {
+                ra.addFlashAttribute("flashMsg", "Unauthorized to edit this product.");
+                ra.addFlashAttribute("flashType", "red");
+                return "redirect:/vendor/dashboard";
+            }
         } catch (IOException e) {
-            return "redirect:/vendor/edit-product/" + id + "?error=upload_failed";
+            ra.addFlashAttribute("flashMsg", "Image upload failed.");
+            ra.addFlashAttribute("flashType", "red");
+            return "redirect:/vendor/edit-product/" + id;
         }
     }
 
     @PostMapping("/order/{id}/ship")
     public String shipOrder(@PathVariable Long id,
                             @RequestParam(required = false) String trackingNumber,
-                            @AuthenticationPrincipal UserDetails currentUser) {
+                            @AuthenticationPrincipal UserDetails currentUser,
+                            RedirectAttributes ra) {
         User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
         OrderService.ShipResult result = orderService.markShipped(id, vendor.getId(), trackingNumber);
-        return switch (result) {
-            case SHIPPED -> "redirect:/vendor/dashboard?shipped";
-            case NOT_FOUND -> "redirect:/vendor/dashboard?error=not_found";
-            case UNAUTHORIZED -> "redirect:/vendor/dashboard?error=unauthorized";
-            case INVALID_STATUS -> "redirect:/vendor/dashboard?error=invalid_status";
-        };
+        switch (result) {
+            case SHIPPED -> { ra.addFlashAttribute("flashMsg", "Order marked as shipped."); ra.addFlashAttribute("flashType", "green"); }
+            case NOT_FOUND -> { ra.addFlashAttribute("flashMsg", "Order not found."); ra.addFlashAttribute("flashType", "red"); }
+            case UNAUTHORIZED -> { ra.addFlashAttribute("flashMsg", "Unauthorized action."); ra.addFlashAttribute("flashType", "red"); }
+            case INVALID_STATUS -> { ra.addFlashAttribute("flashMsg", "Order cannot be shipped at its current status."); ra.addFlashAttribute("flashType", "red"); }
+        }
+        return "redirect:/vendor/dashboard";
     }
 
     @GetMapping("/delete-product/{id}")
-    public String deleteProduct(@PathVariable Long id, Principal principal) {
+    public String deleteProduct(@PathVariable Long id, Principal principal, RedirectAttributes ra) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);
         if (vendor == null) return "redirect:/login";
         productService.deleteByVendor(id, vendor);
-        return "redirect:/vendor/dashboard?success_delete";
+        ra.addFlashAttribute("flashMsg", "Product deleted.");
+        ra.addFlashAttribute("flashType", "red");
+        return "redirect:/vendor/dashboard";
     }
 }
