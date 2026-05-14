@@ -31,7 +31,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             ))
         )
         .authorizeHttpRequests(auth -> auth
-    .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+    .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error").permitAll()
     .requestMatchers("/uploads/products/**", "/uploads/avatars/**").permitAll()
     .requestMatchers("/uploads/proofs/**").hasRole("ADMIN")
     .requestMatchers("/uploads/kyc/**").hasRole("ADMIN")
