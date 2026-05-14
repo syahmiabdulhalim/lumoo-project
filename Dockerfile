@@ -22,10 +22,16 @@ WORKDIR /app
  
 # Salin JAR dari stage build
 COPY --from=builder /app/target/*.jar app.jar
- 
+
+# Non-root user for security
+RUN addgroup -S lumoo && adduser -S -G lumoo lumoo \
+    && mkdir -p /app/uploads/products /app/uploads/avatars /app/uploads/kyc \
+    && chown -R lumoo:lumoo /app
+USER lumoo
+
 # Port Spring Boot
 EXPOSE 8080
- 
+
 # Jalankan app
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 

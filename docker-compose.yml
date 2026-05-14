@@ -13,6 +13,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: lumoo_pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       UPLOAD_DIR: /app/uploads/products
+      RESEND_API_KEY: ${RESEND_API_KEY}
     volumes:
       - lumoo_uploads:/app/uploads
     depends_on:

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
+<style>
+    html { font-size: 17px; }
+</style>
 <div th:fragment="loading">
 
     <!-- ── GLOBAL CONFIRM MODAL ── -->
@@ -100,23 +103,40 @@
         </div>
     </div>
     <script>
-        const loading = document.getElementById('loading');
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', () => {
+        (function () {
+            const loading = document.getElementById('loading');
+            let hideTimer;
+
+            function showLoading() {
+                clearTimeout(hideTimer);
                 loading.style.cssText = 'display:flex !important';
+                // safety fallback — hide after 8s so it never gets stuck
+                hideTimer = setTimeout(hideLoading, 8000);
+            }
+            function hideLoading() {
+                clearTimeout(hideTimer);
+                loading.style.cssText = 'display:none !important';
+            }
+
+            // link clicks — use delegation so Swiper clones are covered
+            document.addEventListener('click', function (e) {
+                const link = e.target.closest('a[href]');
+                if (!link) return;
+                const href = link.getAttribute('href');
+                if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+                if (link.target === '_blank') return;
+                showLoading();
             });
-        });
-        document.querySelectorAll('a[href]').forEach(link => {
-            link.addEventListener('click', function() {
-                const href = this.getAttribute('href');
-                if (href && !href.startsWith('#') && !href.startsWith('mailto')) {
-                    loading.style.cssText = 'display:flex !important';
-                }
+
+            // form submits — delegation
+            document.addEventListener('submit', function () {
+                showLoading();
             });
-        });
-        window.addEventListener('pageshow', () => {
-            loading.style.cssText = 'display:none !important';
-        });
+
+            // hide when page becomes visible (normal load, back/forward)
+            window.addEventListener('pageshow', hideLoading);
+            window.addEventListener('popstate', hideLoading);
+        })();
     </script>
 </div>
 

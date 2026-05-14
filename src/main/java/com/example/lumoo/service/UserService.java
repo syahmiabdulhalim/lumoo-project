@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -68,11 +69,31 @@ public class UserService {
         userRepository.save(user);
     }
 
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp");
+    private static final Set<String> ALLOWED_IMAGE_TYPES    = Set.of("image/jpeg", "image/png", "image/webp");
+    private static final Set<String> ALLOWED_KYC_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".pdf");
+    private static final Set<String> ALLOWED_KYC_TYPES      = Set.of("image/jpeg", "image/png", "application/pdf");
+
+    private void validateFile(MultipartFile file, Set<String> allowedTypes, Set<String> allowedExtensions) throws IOException {
+        String ct = file.getContentType();
+        if (ct == null || !allowedTypes.contains(ct.toLowerCase())) {
+            throw new IOException("Invalid file type.");
+        }
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            String ext = original.substring(original.lastIndexOf(".")).toLowerCase();
+            if (!allowedExtensions.contains(ext)) {
+                throw new IOException("Invalid file extension.");
+            }
+        }
+    }
+
     public String saveKycDoc(MultipartFile file) throws IOException {
+        validateFile(file, ALLOWED_KYC_TYPES, ALLOWED_KYC_EXTENSIONS);
         String extension = "";
         String original = file.getOriginalFilename();
         if (original != null && original.contains(".")) {
-            extension = original.substring(original.lastIndexOf("."));
+            extension = original.substring(original.lastIndexOf(".")).toLowerCase();
         }
         String filename = UUID.randomUUID() + extension;
         Path dir = Paths.get(uploadDir).getParent().resolve("kyc");
@@ -82,10 +103,11 @@ public class UserService {
     }
 
     public String saveAvatar(MultipartFile file) throws IOException {
+        validateFile(file, ALLOWED_IMAGE_TYPES, ALLOWED_IMAGE_EXTENSIONS);
         String extension = "";
         String original = file.getOriginalFilename();
         if (original != null && original.contains(".")) {
-            extension = original.substring(original.lastIndexOf("."));
+            extension = original.substring(original.lastIndexOf(".")).toLowerCase();
         }
         String filename = UUID.randomUUID() + extension;
         Path dir = Paths.get(uploadDir).getParent().resolve("avatars");
@@ -99,7 +121,7 @@ public class UserService {
     public PasswordChangeResult changePassword(User user, String current, String newPwd, String confirm) {
         if (!passwordEncoder.matches(current, user.getPassword())) return PasswordChangeResult.WRONG_CURRENT;
         if (!newPwd.equals(confirm)) return PasswordChangeResult.MISMATCH;
-        if (newPwd.length() < 6) return PasswordChangeResult.TOO_SHORT;
+        if (newPwd.length() < 8) return PasswordChangeResult.TOO_SHORT;
         user.setPassword(passwordEncoder.encode(newPwd));
         userRepository.save(user);
         return PasswordChangeResult.SUCCESS;

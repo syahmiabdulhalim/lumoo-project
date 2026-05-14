@@ -14,6 +14,17 @@ public class AdminBlogController {
 
     @Autowired private BlogService blogService;
 
+    private String sanitizeImageUrl(String url) {
+        if (url == null || url.isBlank()) return null;
+        String trimmed = url.trim();
+        if (trimmed.startsWith("/uploads/") ||
+            trimmed.startsWith("http://") ||
+            trimmed.startsWith("https://")) {
+            return trimmed;
+        }
+        return null;
+    }
+
     @GetMapping({"", "/"})
     public String list(Model model) {
         model.addAttribute("posts", blogService.getAll());
@@ -32,6 +43,7 @@ public class AdminBlogController {
         if (post.getSlug() == null || post.getSlug().isBlank()) {
             post.setSlug(blogService.slugify(post.getTitle()));
         }
+        post.setFeaturedImageUrl(sanitizeImageUrl(post.getFeaturedImageUrl()));
         blogService.save(post);
         ra.addFlashAttribute("flashMsg", "Post created successfully.");
         ra.addFlashAttribute("flashType", "green");
@@ -58,7 +70,7 @@ public class AdminBlogController {
         existing.setContent(updated.getContent());
         existing.setCategory(updated.getCategory());
         existing.setTags(updated.getTags());
-        existing.setFeaturedImageUrl(updated.getFeaturedImageUrl());
+        existing.setFeaturedImageUrl(sanitizeImageUrl(updated.getFeaturedImageUrl()));
         existing.setAuthor(updated.getAuthor());
         existing.setPublished(updated.isPublished());
         existing.setMetaTitle(updated.getMetaTitle());

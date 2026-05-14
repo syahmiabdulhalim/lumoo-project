@@ -3,208 +3,246 @@
 <head>
     <title th:text="'LUMOO | ' + ${categoryName}">LUMOO | Category</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        .showcase-swiper { width: 100%; height: 320px; }
-        .showcase-swiper .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        body { font-family: 'Inter', sans-serif; }
+        .filter-section { border-bottom: 1px solid #e5e7eb; }
+        details summary { list-style: none; }
+        details summary::-webkit-details-marker { display: none; }
+        details[open] .chevron { transform: rotate(180deg); }
+        .chevron { transition: transform 0.2s; display: inline-block; }
     </style>
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-white text-black font-['Inter']">
 
-    <!-- CONTACT TOPBAR -->
-    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+    <!-- TOP INFO BAR -->
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
         <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
     <!-- NAV -->
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+    <nav class="flex justify-between items-center px-6 md:px-12 py-5 bg-white border-b border-gray-100 sticky top-0 z-50">
         <a href="/" class="transition hover:opacity-80">
-            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain">
         </a>
-        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <div class="flex items-center gap-8 text-[10px] uppercase tracking-[0.2em] font-black">
             <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
-            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+            <a href="/stores" class="hover:text-[#4d78c0] transition">Stores</a>
+            <a href="/blog" class="hover:text-[#4d78c0] transition">Blog</a>
+            <div sec:authorize="isAuthenticated()" class="flex items-center gap-8">
                 <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
-                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
-                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
-                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-500">Admin</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard" class="hover:text-[#4d78c0] transition">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard" class="hover:text-[#4d78c0] transition">My Orders</a>
+                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+                    <button type="submit" class="text-gray-400 hover:text-red-500 transition">Logout</button>
                 </form>
             </div>
-            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+            <div sec:authorize="isAnonymous()" class="flex items-center gap-6">
                 <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
-                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/register" class="bg-black text-white px-5 py-2.5 text-[9px] hover:bg-[#1a2336] transition">Join</a>
             </div>
         </div>
     </nav>
 
-    <!-- CATEGORY HERO SLIDESHOW -->
-    <div class="showcase-swiper swiper">
-        <div class="swiper-wrapper">
-
-            <!-- ROOFING slides -->
-            <th:block th:if="${categoryName == 'roofing'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80" alt="Roofing"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Corrugated Iron Sheets</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1604399852419-eff633ae3b24?w=1400&q=80" alt="Metal Roof"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Metal Roofing Systems</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1400&q=80" alt="Tile Roof"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Decra &amp; Tile Roofing</p></div></div>
-            </th:block>
-
-            <!-- CEMENT slides -->
-            <th:block th:if="${categoryName == 'cement'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1400&q=80" alt="Cement"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Portland Cement</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1400&q=80" alt="Concrete"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Ready-Mix Concrete</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80" alt="Construction"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Cement Blocks &amp; Mortar</p></div></div>
-            </th:block>
-
-            <!-- BUILDING slides -->
-            <th:block th:if="${categoryName == 'building'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1400&q=80" alt="Building"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Bricks &amp; Blocks</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80" alt="Construction"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Sand &amp; Gravel</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=1400&q=80" alt="Materials"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Structural Materials</p></div></div>
-            </th:block>
-
-            <!-- ELECTRICAL slides -->
-            <th:block th:if="${categoryName == 'electrical'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1400&q=80" alt="Electrical"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Wiring &amp; Cables</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1400&q=80" alt="Panel"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Distribution Panels</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=1400&q=80" alt="Switches"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Switches &amp; Sockets</p></div></div>
-            </th:block>
-
-            <!-- PLUMBING slides -->
-            <th:block th:if="${categoryName == 'plumbing'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1400&q=80" alt="Plumbing"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">PVC Pipes &amp; Fittings</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1584622781564-1d987f7333c1?w=1400&q=80" alt="Water Tank"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Water Tanks &amp; Valves</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80" alt="Sanitary"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Sanitary Ware</p></div></div>
-            </th:block>
-
-            <!-- TIMBER slides -->
-            <th:block th:if="${categoryName == 'timber'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1400&q=80" alt="Timber"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Hardwood Lumber</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1400&q=80" alt="Softwood"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Softwood &amp; Framing</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1400&q=80" alt="Wood"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Finishing &amp; Flooring</p></div></div>
-            </th:block>
-
-            <!-- PAINT slides -->
-            <th:block th:if="${categoryName == 'paint'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=1400&q=80" alt="Paint"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Interior Paints</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=1400&q=80" alt="Exterior"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Exterior &amp; Weatherproof</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80" alt="Primer"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Primers &amp; Undercoats</p></div></div>
-            </th:block>
-
-            <!-- HARDWARE slides -->
-            <th:block th:if="${categoryName == 'hardware'}">
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=1400&q=80" alt="Hardware"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Tools &amp; Equipment</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1400&q=80" alt="Bolts"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">Bolts, Screws &amp; Fixings</p></div></div>
-                <div class="swiper-slide relative"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1400&q=80" alt="General"><div class="absolute inset-0 bg-[#1a2336]/40 flex items-end px-16 pb-10"><p class="text-white text-[9px] uppercase tracking-widest font-bold">General Hardware</p></div></div>
-            </th:block>
-
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-    </div>
-
-    <main class="max-w-7xl mx-auto px-12 py-16">
-
-        <!-- BREADCRUMB -->
-        <div class="mb-10 flex items-center gap-3 text-[10px] uppercase tracking-widest text-gray-400">
-            <a href="/" class="hover:text-black transition">Home</a>
-            <span>/</span>
-            <span class="text-black font-bold" th:text="${categoryName}">Category</span>
-        </div>
-
-        <!-- CATEGORY HEADER -->
-        <section class="mb-12 pb-12 border-b border-gray-100">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                <div>
-                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-4 block"
-                          th:text="${icon + ' ' + categoryName}">Category</span>
-                    <h1 class="text-6xl font-light tracking-tighter leading-none text-gray-900">
-                        <span th:text="${categoryName}" class="font-black italic">Category</span><br>
-                        <span class="font-light">Collection.</span>
-                    </h1>
-                    <p class="mt-6 text-sm text-gray-500 max-w-2xl leading-relaxed" th:text="${description}">
-                        Category description here.
-                    </p>
-                </div>
-                <div class="text-right shrink-0">
-                    <p class="text-[10px] uppercase tracking-widest text-gray-400">Available Products</p>
-                    <p class="text-5xl font-black" th:text="${productCount}">0</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- CATEGORY NAV -->
-        <section class="mb-12 border-b border-gray-100 pb-8">
-            <div class="flex flex-wrap gap-6 items-center">
-                <a href="/" class="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400 hover:text-black transition">All</a>
+    <!-- CATEGORY HEADER BANNER -->
+    <div class="bg-[#0d0d0d] text-white">
+        <!-- Category tab bar -->
+        <div class="border-b border-white/10 px-6 md:px-12 overflow-x-auto">
+            <div class="flex gap-0 min-w-max">
+                <a href="/"
+                   class="text-[9px] uppercase tracking-widest font-black px-4 py-4 border-b-2 transition whitespace-nowrap border-transparent text-gray-400 hover:text-white hover:border-white">
+                    All
+                </a>
                 <a th:each="cat : ${ {'Roofing', 'Cement', 'Building', 'Electrical', 'Plumbing', 'Timber', 'Paint', 'Hardware'} }"
-                   th:href="@{/category/{name}(name=${cat.toLowerCase()})}"
+                   th:href="@{/category/{n}(n=${cat.toLowerCase()})}"
                    th:text="${cat}"
-                   class="text-[10px] uppercase tracking-[0.3em] font-bold transition-all"
-                   th:classappend="${cat.equalsIgnoreCase(categoryName) ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'text-gray-400 hover:text-black'}">
+                   class="text-[9px] uppercase tracking-widest font-black px-4 py-4 border-b-2 transition whitespace-nowrap"
+                   th:classappend="${cat.equalsIgnoreCase(categoryName) ? 'border-white text-white' : 'border-transparent text-gray-400 hover:text-white hover:border-white/40'}">
                 </a>
             </div>
-        </section>
+        </div>
 
-        <!-- PRODUCTS GRID -->
-        <div th:if="${products != null && !products.empty}"
-             class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16">
-
-            <div th:each="p : ${products}" class="group relative">
-                <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-                    <img th:src="${(p.imageUrl != null and p.imageApproved) ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/999?text=Image+Pending'}"
-                         class="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 group-hover:scale-105 transition duration-700"
-                         th:alt="${p.name}">
-                    <div class="absolute inset-0 bg-[#1a2336]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                        <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
-                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                            <button type="submit" class="bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition-colors">
-                                Quick Add +
-                            </button>
-                        </form>
-                    </div>
+        <!-- Category title area -->
+        <div class="px-6 md:px-12 py-10">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <p class="text-[9px] uppercase tracking-[0.4em] text-[#4d78c0] font-black mb-3"
+                       th:text="${icon + ' ' + categoryName}">Category</p>
+                    <h1 class="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-none"
+                        th:text="${categoryName}">Category</h1>
+                    <p class="text-gray-400 text-xs mt-3 max-w-xl leading-relaxed" th:text="${description}">Description</p>
                 </div>
-                <div class="space-y-1">
-                    <div class="flex justify-between items-baseline">
-                        <h3 th:text="${p.name}" class="text-xs font-bold uppercase tracking-wider text-gray-900 truncate pr-4">Name</h3>
-                        <span class="text-[9px] text-gray-400 font-medium" th:text="${p.category}">Category</span>
-                    </div>
-                    <p class="text-sm font-light text-gray-500 italic">
-                        GMD <span th:text="${p.price}" class="font-bold text-gray-900 not-italic">0.00</span>
-                    </p>
+                <div class="text-right">
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500 mb-1">Products</p>
+                    <p class="text-4xl font-black" th:text="${productCount}">0</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- EMPTY STATE -->
-        <div th:if="${products == null || products.empty}" class="py-32 text-center border-y border-gray-100">
-            <p class="text-5xl mb-6" th:text="${icon}">📦</p>
-            <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2"
-               th:text="'No ' + ${categoryName} + ' products listed yet.'"></p>
-            <p class="text-[10px] text-gray-300 mb-8">Vendors are adding products daily — check back soon.</p>
-            <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse All Categories</a>
+    <!-- BREADCRUMB -->
+    <div class="bg-gray-50 border-b border-gray-100 px-6 md:px-12 py-3">
+        <div class="max-w-7xl mx-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-400">
+            <a href="/" class="hover:text-black transition">Home</a>
+            <span>›</span>
+            <span class="text-black font-bold" th:text="${categoryName}">Category</span>
         </div>
+    </div>
 
-    </main>
+    <!-- MAIN: Filters Sidebar + Products -->
+    <div class="max-w-7xl mx-auto px-6 md:px-12 py-8 flex gap-10 items-start">
+
+        <!-- LEFT FILTERS SIDEBAR -->
+        <aside class="w-56 shrink-0 sticky top-24">
+            <p class="text-[11px] uppercase tracking-widest font-black mb-6 pb-3 border-b border-gray-200">Filters</p>
+
+            <!-- Category filter -->
+            <details class="filter-section" open>
+                <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
+                    <span class="text-[10px] uppercase tracking-widest font-black">Category</span>
+                    <span class="chevron text-gray-400 text-xs">▼</span>
+                </summary>
+                <div class="pb-4 space-y-1">
+                    <a href="/"
+                       class="block text-[11px] py-1 text-gray-500 hover:text-black transition">All Categories</a>
+                    <a th:each="cat : ${ {'Roofing', 'Cement', 'Building', 'Electrical', 'Plumbing', 'Timber', 'Paint', 'Hardware'} }"
+                       th:href="@{/category/{n}(n=${cat.toLowerCase()})}"
+                       th:text="${cat}"
+                       class="block text-[11px] py-1 transition"
+                       th:classappend="${cat.equalsIgnoreCase(categoryName) ? 'font-black text-black' : 'text-gray-500 hover:text-black'}">
+                    </a>
+                </div>
+            </details>
+
+            <!-- Price range -->
+            <details class="filter-section" open>
+                <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
+                    <span class="text-[10px] uppercase tracking-widest font-black">Price</span>
+                    <span class="chevron text-gray-400 text-xs">▼</span>
+                </summary>
+                <div class="pb-4 space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 border-gray-300 accent-black">
+                        <span class="text-[11px] text-gray-600">Under GMD 500</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 border-gray-300 accent-black">
+                        <span class="text-[11px] text-gray-600">GMD 500 – 1,000</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 border-gray-300 accent-black">
+                        <span class="text-[11px] text-gray-600">GMD 1,000 – 5,000</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 border-gray-300 accent-black">
+                        <span class="text-[11px] text-gray-600">Over GMD 5,000</span>
+                    </label>
+                </div>
+            </details>
+
+            <!-- Availability -->
+            <details class="filter-section">
+                <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
+                    <span class="text-[10px] uppercase tracking-widest font-black">Availability</span>
+                    <span class="chevron text-gray-400 text-xs">▼</span>
+                </summary>
+                <div class="pb-4 space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 border-gray-300 accent-black" checked>
+                        <span class="text-[11px] text-gray-600">In Stock</span>
+                    </label>
+                </div>
+            </details>
+        </aside>
+
+        <!-- RIGHT: Sort + Products Grid -->
+        <div class="flex-1 min-w-0">
+
+            <!-- Sort bar -->
+            <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+                <span class="text-[10px] text-gray-500 uppercase tracking-widest">
+                    <span class="font-black text-black" th:text="${productCount}">0</span> Products
+                </span>
+                <div class="flex items-center gap-3">
+                    <span class="text-[9px] uppercase tracking-widest text-gray-400">Sort By</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest border border-gray-200 px-3 py-1.5 cursor-pointer hover:border-black transition">
+                        Recommended ▼
+                    </span>
+                </div>
+            </div>
+
+            <!-- Products grid (3 cols like JD Sports) -->
+            <div th:if="${products != null && !products.empty}"
+                 class="grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-10">
+
+                <div th:each="p : ${products}" class="group relative cursor-pointer">
+                    <a th:href="@{/product/{id}(id=${p.id})}">
+                        <!-- Image wrapper -->
+                        <div class="aspect-[3/4] overflow-hidden bg-gray-100 mb-4 relative">
+                            <img th:src="${(p.imageUrl != null and p.imageApproved) ? p.imageUrl : 'https://placehold.co/600x800/f0f0f0/999?text=No+Image'}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                 th:alt="${p.name}">
+                            <!-- Quick add overlay -->
+                            <div class="absolute bottom-0 left-0 right-0 bg-black text-white text-center py-3 text-[9px] font-black uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post" onclick="event.stopPropagation()">
+                                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="w-full">Quick Add +</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Product info -->
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest text-gray-400 mb-1"
+                               th:text="${p.vendor != null ? p.vendor.username : 'LUMOO'}">Vendor</p>
+                            <h3 class="text-[11px] font-bold uppercase tracking-wide text-black leading-snug mb-2 line-clamp-2"
+                                th:text="${p.name}">Product Name</h3>
+                            <p class="text-[12px] font-black">
+                                GMD <span th:text="${#numbers.formatDecimal(p.price, 1, 2)}">0.00</span>
+                            </p>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- PAGINATION -->
+            <div th:if="${totalPages > 1}" class="mt-16 flex items-center justify-center gap-1">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/category/{n}(n=${categoryName}, page=${currentPage - 1})}"
+                   class="px-4 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 hover:border-black transition">
+                    ← Prev
+                </a>
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/category/{n}(n=${categoryName}, page=${i})}"
+                       th:text="${i + 1}"
+                       class="w-9 h-9 flex items-center justify-center text-[10px] font-black border transition"
+                       th:classappend="${i == currentPage ? 'bg-black text-white border-black' : 'border-gray-200 hover:border-black text-gray-600'}">
+                    </a>
+                </th:block>
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/category/{n}(n=${categoryName}, page=${currentPage + 1})}"
+                   class="px-4 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 hover:border-black transition">
+                    Next →
+                </a>
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div th:if="${products == null || products.empty}" class="py-32 text-center border-y border-gray-100">
+                <p class="text-5xl mb-6" th:text="${icon}">📦</p>
+                <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2"
+                   th:text="'No ' + ${categoryName} + ' products listed yet.'"></p>
+                <p class="text-xs text-gray-300 mb-8">Vendors are adding products daily — check back soon.</p>
+                <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse All Categories</a>
+            </div>
+
+        </div>
+    </div>
 
     <div th:replace="~{fragments/footer :: footer}"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        new Swiper('.showcase-swiper', {
-            loop: true,
-            autoplay: { delay: 4000, disableOnInteraction: false },
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            effect: 'fade',
-            fadeEffect: { crossFade: true }
-        });
-    </script>
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

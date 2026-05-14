@@ -3,11 +3,12 @@ package com.example.lumoo.controller;
 import com.example.lumoo.model.Product;
 import com.example.lumoo.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -33,15 +34,19 @@ public class CategoryController {
     );
 
     @GetMapping("/{name}")
-    public String categoryPage(@PathVariable String name, Model model) {
+    public String categoryPage(@PathVariable String name,
+                               @RequestParam(defaultValue = "0") int page,
+                               Model model) {
         String categoryName = name.toLowerCase();
-        List<Product> products = productService.getApprovedByCategory(categoryName);
-        model.addAttribute("products", products);
+        Page<Product> productPage = productService.getApprovedByCategoryPaged(categoryName, PageRequest.of(page, 8));
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("categoryName", name);
         model.addAttribute("description", CATEGORY_DESCRIPTIONS.getOrDefault(categoryName,
                 "Browse our selection of " + name + " products from verified vendors."));
         model.addAttribute("icon", CATEGORY_ICONS.getOrDefault(categoryName, "📦"));
-        model.addAttribute("productCount", products.size());
+        model.addAttribute("productCount", productPage.getTotalElements());
         return "category";
     }
 

@@ -42,15 +42,15 @@ public String processForgot(@RequestParam String email, Model model) {
             model.addAttribute("error", "We could not send the email right now. Please try again later or contact support at info@lumoo.my.");
         }
     } else {
-        model.addAttribute("error", "No account found with that email address.");
+        model.addAttribute("message", "If an account exists for that email, a reset link has been sent.");
     }
     return "forgot-password";
 }
 
     @GetMapping("/reset-password")
     public String showResetPage(@RequestParam String token, Model model) {
-        var userOpt = userRepository.findByResetToken(token); // Tambah findByResetToken di Repository
-        if (userOpt.isEmpty() || userOpt.get().getTokenExpiry().isBefore(LocalDateTime.now())) {
+        var userOpt = userRepository.findByResetToken(token);
+        if (userOpt.isEmpty() || isTokenExpired(userOpt.get())) {
             return "redirect:/login?error=invalid_token";
         }
         model.addAttribute("token", token);
@@ -59,7 +59,11 @@ public String processForgot(@RequestParam String email, Model model) {
 
     @PostMapping("/reset-password")
     public String handleReset(@RequestParam String token, @RequestParam String password) {
-        User user = userRepository.findByResetToken(token).orElseThrow();
+        var userOpt = userRepository.findByResetToken(token);
+        if (userOpt.isEmpty() || isTokenExpired(userOpt.get())) {
+            return "redirect:/login?error=invalid_token";
+        }
+        User user = userOpt.get();
         user.setPassword(passwordEncoder.encode(password));
         user.setResetToken(null); // Clear token lepas guna
         user.setTokenExpiry(null);
@@ -67,5 +71,7 @@ public String processForgot(@RequestParam String email, Model model) {
         return "redirect:/login?reset_success";
     }
 
-
+    private boolean isTokenExpired(User user) {
+        return user.getTokenExpiry() == null || user.getTokenExpiry().isBefore(LocalDateTime.now());
+    }
 }

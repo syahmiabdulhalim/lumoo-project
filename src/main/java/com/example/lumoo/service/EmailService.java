@@ -13,14 +13,22 @@ public class EmailService {
     private String apiKey;
 
     @Value("${app.base-url:http://localhost:8080}")
-private String baseUrl;
+    private String baseUrl;
+
+    @Value("${app.email.from:onboarding@resend.dev}")
+    private String fromAddress;
 
     public boolean sendResetEmail(String toEmail, String token) {
-        Resend resend = new Resend(apiKey);
+        if (apiKey.startsWith("dummy") || apiKey.isBlank()) {
+            System.err.println("[EmailService] RESEND_API_KEY not configured — skipping email send to " + toEmail);
+            return false;
+        }
 
+        Resend resend = new Resend(apiKey);
         String resetLink = baseUrl + "/reset-password?token=" + token;
+
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("LUMOO <onboarding@resend.dev>")
+                .from("LUMOO <" + fromAddress + ">")
                 .to(toEmail)
                 .subject("Reset Your LUMOO Password")
                 .html("<strong>Build your Future.</strong><br><br>" +
@@ -31,9 +39,10 @@ private String baseUrl;
 
         try {
             resend.emails().send(params);
+            System.out.println("[EmailService] Reset email sent to " + toEmail);
             return true;
         } catch (ResendException e) {
-            System.err.println("Resend error for " + toEmail + ": " + e.getMessage());
+            System.err.println("[EmailService] Resend error sending to " + toEmail + ": " + e.getMessage());
             return false;
         }
     }

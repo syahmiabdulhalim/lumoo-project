@@ -13,8 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -41,6 +44,10 @@ public class ProductService {
         return productRepository.findByCategoryIgnoreCaseAndApproved(category);
     }
 
+    public Page<Product> getApprovedByCategoryPaged(String category, Pageable pageable) {
+        return productRepository.findByCategoryIgnoreCaseAndApprovedPaged(category, pageable);
+    }
+
     public List<Product> getByVendor(User vendor) {
         return productRepository.findByVendor(vendor);
     }
@@ -65,11 +72,29 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp");
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
+
+    private void validateImage(MultipartFile file) throws IOException {
+        String ct = file.getContentType();
+        if (ct == null || !ALLOWED_IMAGE_TYPES.contains(ct.toLowerCase())) {
+            throw new IOException("Invalid file type. Only JPG, PNG and WEBP images are allowed.");
+        }
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            String ext = original.substring(original.lastIndexOf(".")).toLowerCase();
+            if (!ALLOWED_IMAGE_EXTENSIONS.contains(ext)) {
+                throw new IOException("Invalid file extension.");
+            }
+        }
+    }
+
     public String saveImage(MultipartFile file) throws IOException {
+        validateImage(file);
         String extension = "";
         String original = file.getOriginalFilename();
         if (original != null && original.contains(".")) {
-            extension = original.substring(original.lastIndexOf("."));
+            extension = original.substring(original.lastIndexOf(".")).toLowerCase();
         }
         String filename = UUID.randomUUID() + extension;
         Path dir = Paths.get(uploadDir);

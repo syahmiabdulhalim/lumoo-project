@@ -3,104 +3,75 @@
 <head>
     <title>LUMOO | Construction Materials</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Swiper CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
-        .swiper { width: 100%; height: 520px; }
-        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        body { font-family: 'Inter', sans-serif; }
+        .hero-swiper { width: 100%; height: 600px; }
+        .hero-swiper .swiper-slide { height: 600px; background-size: cover; background-position: center; }
         .swiper-pagination-bullet { background: white; opacity: 0.6; }
         .swiper-pagination-bullet-active { background: white; opacity: 1; }
         .swiper-button-next, .swiper-button-prev { color: white; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-track { overflow: hidden; }
+        .marquee-inner { display: flex; width: max-content; animation: marquee 25s linear infinite; }
+        .marquee-inner:hover { animation-play-state: paused; }
     </style>
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-white text-black font-['Inter']">
 
-    <!-- CONTACT TOPBAR -->
-    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+    <!-- TOP INFO BAR -->
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
         <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
     <!-- NAV -->
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
+    <nav class="flex justify-between items-center px-6 md:px-12 py-5 bg-white border-b border-gray-100 sticky top-0 z-50">
         <a href="/" class="transition hover:opacity-80">
-            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+            <img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain">
         </a>
-        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <div class="flex items-center gap-8 text-[10px] uppercase tracking-[0.2em] font-black">
             <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
             <a href="/stores" class="hover:text-[#4d78c0] transition">Stores</a>
             <a href="/blog" class="hover:text-[#4d78c0] transition">Blog</a>
-            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+            <div sec:authorize="isAuthenticated()" class="flex items-center gap-8">
                 <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
-                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
-                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
-                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-500">Admin</a>
+                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard" class="hover:text-[#4d78c0] transition">Vendor Hub</a>
+                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard" class="hover:text-[#4d78c0] transition">My Orders</a>
                 <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
-                <a href="/settings" class="hover:text-[#4d78c0] transition">Settings</a>
                 <form th:action="@{/logout}" method="post" class="inline">
-                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="text-gray-400 hover:text-red-500 transition">Logout</button>
                 </form>
             </div>
-            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+            <div sec:authorize="isAnonymous()" class="flex items-center gap-6">
                 <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
-                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+                <a href="/register" class="bg-black text-white px-5 py-2.5 text-[9px] hover:bg-[#1a2336] transition">Join</a>
             </div>
         </div>
     </nav>
 
     <!-- HERO SLIDESHOW -->
-    <div class="swiper relative">
+    <div class="swiper hero-swiper relative overflow-hidden">
         <div class="swiper-wrapper">
 
-            <!-- Slide 1 -->
-            <div class="swiper-slide relative">
-                <img th:src="@{/images/bg1.jpg}" alt="Gambia Construction">
-                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
-                    <div class="text-white max-w-xl">
-                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Gambia's Premier Supply</span>
-                        <h1 class="text-6xl font-light tracking-tighter leading-none">
-                            Build your <br><span class="font-black italic">Future.</span>
-                        </h1>
-                        <a href="/category/building" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
-                            Shop Building →
+            <div class="swiper-slide relative" style="background-image:url('https://images.unsplash.com/photo-1751502776559-2ee0612ec54a?q=80&w=1333&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')">
+                <div class="absolute inset-0 bg-black/45 flex items-end pb-16 md:pb-24 px-8 md:px-20">
+                    <div class="text-white">
+                        <span class="text-[9px] font-black uppercase tracking-[0.6em] text-blue-400 mb-4 block">Gambia's Premier Supply</span>
+                        <h1 class="text-5xl md:text-7xl font-black tracking-tighter leading-none uppercase mb-8">Build your<br>Future.</h1>
+                        <a href="/category/building" class="inline-block bg-white text-black px-8 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
+                            Shop Building
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Slide 2 -->
-            <div class="swiper-slide relative">
-                <img th:src="@{/images/bg2.jpg}" alt="Gambia Roofing">
-                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
-                    <div class="text-white max-w-xl">
-                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Built for Gambia, Built to Last</span>
-                        <h1 class="text-6xl font-light tracking-tighter leading-none">
-                            Protect what <br><span class="font-black italic">Matters.</span>
-                        </h1>
-                        <a href="/category/roofing" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
-                            Shop Roofing →
-                        </a>
-                    </div>
-                </div>
-            </div>
+           
 
-            <!-- Slide 3 -->
-            <div class="swiper-slide relative">
-                <img th:src="@{/images/bg-3.jpg}" alt="Gambia Materials">
-                <div class="absolute inset-0 bg-[#1a2336]/50 flex items-center px-16">
-                    <div class="text-white max-w-xl">
-                        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-blue-400 mb-4 block">Quality Materials Across Gambia</span>
-                        <h1 class="text-6xl font-light tracking-tighter leading-none">
-                            Strong <br><span class="font-black italic">Foundations.</span>
-                        </h1>
-                        <a href="/category/cement" class="mt-8 inline-block bg-white text-black px-8 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
-                            Shop Cement →
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
         </div>
         <div class="swiper-pagination"></div>
@@ -108,245 +79,286 @@
         <div class="swiper-button-prev"></div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-12 py-20">
+    <!-- MARQUEE TICKER -->
+    <div class="bg-black text-white py-3 marquee-track">
+        <div class="marquee-inner text-[8px] font-black uppercase tracking-widest">
+            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over RM500</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">Quality Assured Construction Materials</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">Shop From Top Vendors Across Gambia</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">New Stock Arriving Weekly</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over RM500</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">Quality Assured Construction Materials</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">Shop From Top Vendors Across Gambia</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+            <span class="px-8 whitespace-nowrap">New Stock Arriving Weekly</span>
+            <span class="px-3 text-[#4d78c0]">★</span>
+        </div>
+    </div>
 
-        <!-- HERO TEXT + SEARCH -->
-        <section class="mb-20">
-            <div class="flex flex-col md:flex-row items-end justify-between gap-8">
-                <div class="max-w-3xl text-left">
-                    <span class="text-[10px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-4 block">Everything You Need To Build</span>
-                    <h2 class="text-5xl font-light tracking-tighter leading-none text-gray-900">
-                        Browse our <span class="font-black italic">Collection.</span>
-                    </h2>
+    <!-- SHOP BY CATEGORY -->
+    <section class="py-10 px-6 md:px-12">
+        <h2 class="text-[9px] uppercase tracking-[0.5em] font-black text-gray-400 mb-6">Shop By Category</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-0.5">
+
+            <a href="/category/roofing" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1673645652590-9d21295bf4ac?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
                 </div>
-                <div class="w-full md:w-96">
-                    <form th:action="@{/}" method="get" class="relative border-b-2 border-[#1a2336] py-2">
-                        <input type="text" name="keyword" th:value="${keyword}"
-                               placeholder="Search collection..."
-                               class="w-full bg-transparent outline-none text-sm uppercase tracking-widest font-bold placeholder-gray-300">
-                        <button type="submit">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute right-0 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </button>
-                    </form>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Roofing</p>
                 </div>
+            </a>
+
+            <a href="/category/cement" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1588415796310-b9a124beabb0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Cement</p>
+                </div>
+            </a>
+
+            <a href="/category/building" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1508450859948-4e04fabaa4ea?q=80&w=779&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Building</p>
+                </div>
+            </a>
+
+            <a href="/category/electrical" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1625276254563-f0fbbf66a5e7?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Electrical</p>
+                </div>
+            </a>
+
+            <a href="/category/plumbing" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Plumbing</p>
+                </div>
+            </a>
+
+            <a href="/category/timber" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1571035089306-e40c9289fe78?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Timber</p>
+                </div>
+            </a>
+
+            <a href="/category/paint" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1525909002-1b05e0c869d8?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Paint</p>
+                </div>
+            </a>
+
+            <a href="/category/hardware" class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img src="https://images.unsplash.com/photo-1687373969540-20481dec19b5?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition duration-300"></div>
+                </div>
+                <div class="py-3 px-1 bg-white border-t-2 border-black">
+                    <p class="text-[8px] font-black uppercase tracking-widest">Hardware</p>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- BROWSE + SEARCH HEADER -->
+    <section class="py-10 px-6 md:px-12 border-t border-gray-100">
+        <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+            <div>
+                <span class="text-[9px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-3 block">Everything You Need To Build</span>
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter leading-none uppercase">Browse our<br>Collection.</h2>
             </div>
-        </section>
-
-        <!-- CATEGORY CAROUSEL -->
-        <section class="mb-20">
-            <div class="flex items-center justify-between mb-10">
-                <h2 class="text-[10px] uppercase tracking-[0.5em] font-black text-gray-400">Shop By Category</h2>
-                <div class="flex gap-3">
-                    <button id="cat-prev" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-[#1a2336] hover:text-white hover:border-[#1a2336] transition text-gray-400 text-sm">‹</button>
-                    <button id="cat-next" class="w-8 h-8 border border-gray-300 flex items-center justify-center hover:bg-[#1a2336] hover:text-white hover:border-[#1a2336] transition text-gray-400 text-sm">›</button>
-                </div>
+            <div class="w-full md:w-80">
+                <form th:action="@{/}" method="get" class="relative border-b-2 border-black py-3">
+                    <input type="text" name="keyword" th:value="${keyword}"
+                           placeholder="Search collection..."
+                           class="w-full bg-transparent outline-none text-sm uppercase tracking-widest font-bold placeholder-gray-300">
+                    <button type="submit" class="absolute right-0 top-1/2 -translate-y-1/2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                </form>
             </div>
-            <div class="swiper category-swiper overflow-hidden">
-                <div class="swiper-wrapper">
+        </div>
+    </section>
 
-                    <div class="swiper-slide">
-                        <a href="/category/roofing" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏠 Roofing</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Decra, Corrugated & more</span>
-                            </div>
-                        </a>
+    <!-- PRODUCT GRID -->
+    <section class="pb-16 px-6 md:px-12">
+        <div th:if="${products != null and !products.isEmpty()}"
+             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-0.5">
+            <a th:each="product : ${products}" th:href="@{/product/{id}(id=${product.id})}"
+               class="group block">
+                <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
+                    <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                         th:src="${product.imageUrl}" alt=""
+                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}"
+                         class="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span class="text-gray-400 text-5xl">🏗️</span>
                     </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/cement" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🧱 Cement</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Portland, Ready-mix & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/building" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🏗️ Building</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Bricks, Blocks & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/electrical" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">⚡ Electrical</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Wiring, Cables & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/plumbing" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔧 Plumbing</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Pipes, Fittings & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/timber" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🪵 Timber</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Hardwood, Softwood & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/paint" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🎨 Paint</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Interior, Exterior & more</span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="swiper-slide">
-                        <a href="/category/hardware" class="group relative aspect-square overflow-hidden bg-gray-900 block">
-                            <img src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=600&q=80" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition duration-500">
-                            <div class="absolute inset-0 flex flex-col justify-end p-6">
-                                <span class="text-white text-[9px] uppercase tracking-widest font-bold">🔩 Hardware</span>
-                                <span class="text-gray-300 text-[8px] mt-1">Tools, Bolts & more</span>
-                            </div>
-                        </a>
-                    </div>
-
                 </div>
+                <div class="py-4 px-1 bg-white border-t border-gray-100 group-hover:border-black transition">
+                    <p class="text-[7px] font-black uppercase tracking-widest text-gray-400 mb-1" th:text="${product.category}">Category</p>
+                    <p class="text-xs font-bold tracking-tight leading-snug line-clamp-2 mb-2" th:text="${product.name}">Name</p>
+                    <p class="text-sm font-black" th:text="${'RM ' + product.price}">RM 0.00</p>
+                </div>
+            </a>
+        </div>
+        <div th:if="${products == null or products.isEmpty()}"
+             class="text-center py-20 border border-dashed border-gray-200">
+            <p class="text-[10px] uppercase tracking-widest text-gray-300 font-black mb-4">No products listed yet.</p>
+            <a href="/stores" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0]">Browse Stores →</a>
+        </div>
+    </section>
+
+    <!-- PROMO BANNER — Our Vendors -->
+    <section class="relative overflow-hidden" style="min-height:380px;">
+        <div class="absolute inset-0 bg-[#1a2336]"></div>
+        <div class="absolute inset-0 opacity-10"
+             style="background-image:url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=50'); background-size:cover; background-position:center;"></div>
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10 px-8 md:px-20 py-20">
+            <div class="text-white">
+                <span class="text-[9px] font-black uppercase tracking-[0.6em] text-blue-400 mb-4 block">Discover Gambia's Best</span>
+                <h2 class="text-4xl md:text-6xl font-black tracking-tighter leading-none uppercase mb-5">Our<br>Vendors.</h2>
+                <p class="text-gray-400 text-sm max-w-sm leading-relaxed">Browse trusted construction material suppliers. Quality products, verified vendors, competitive prices.</p>
             </div>
-        </section>
+            <a href="/stores" class="shrink-0 bg-white text-black px-10 py-5 text-[10px] font-black uppercase tracking-widest hover:bg-[#4d78c0] hover:text-white transition">
+                Browse Stores →
+            </a>
+        </div>
+    </section>
 
-      
+    <!-- BLOG EDITORIAL -->
+    <section class="py-16 px-6 md:px-12">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <span class="text-[9px] font-black uppercase tracking-[0.6em] text-[#4d78c0] mb-3 block">LUMOO Editorial</span>
+                <h2 class="text-[clamp(2.5rem,6vw,4.5rem)] font-black tracking-tighter leading-none uppercase">The Build<br>Blog.</h2>
+            </div>
+            <a href="/blog" class="text-[10px] font-black uppercase tracking-widest border-b-2 border-black hover:text-[#4d78c0] hover:border-[#4d78c0] transition pb-0.5 shrink-0 ml-8">
+                View All →
+            </a>
+        </div>
 
-        
+        <div th:if="${recentPosts != null and !recentPosts.isEmpty()}" class="grid grid-cols-1 lg:grid-cols-3 gap-0.5">
 
-        <!-- BLOG SECTION – JD Sports editorial style -->
-        <section class="mb-20">
-            <div class="flex items-end justify-between mb-10">
-                <div>
-                    <span class="text-[9px] font-black uppercase tracking-[0.6em] text-[#4d78c0] mb-3 block">LUMOO Editorial</span>
-                    <h2 class="text-[clamp(2.5rem,6vw,4.5rem)] font-black tracking-tighter leading-none uppercase">The Build<br>Blog.</h2>
-                </div>
-                <a href="/blog" class="text-[10px] font-black uppercase tracking-widest border-b-2 border-[#1a2336] hover:text-[#4d78c0] hover:border-[#4d78c0] transition pb-0.5 shrink-0 ml-8">
-                    View All →
+            <article th:if="${recentPosts.size() > 0}" class="lg:col-span-2 group">
+                <a th:href="@{/blog/{slug}(slug=${recentPosts[0].slug})}"
+                   class="block relative overflow-hidden bg-gray-900" style="aspect-ratio:16/10; min-height:280px;">
+                    <img th:if="${recentPosts[0].featuredImageUrl != null and !recentPosts[0].featuredImageUrl.isEmpty()}"
+                         th:src="${recentPosts[0].featuredImageUrl}" alt=""
+                         class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 group-hover:scale-105 transition duration-700">
+                    <div th:if="${recentPosts[0].featuredImageUrl == null or recentPosts[0].featuredImageUrl.isEmpty()}"
+                         class="absolute inset-0 bg-gradient-to-br from-[#1a3060] to-gray-900"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 p-8">
+                        <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 mb-4 inline-block"
+                              th:text="${recentPosts[0].category}">Category</span>
+                        <h3 class="text-xl md:text-2xl font-black text-white tracking-tight leading-tight mb-3 max-w-lg"
+                            th:text="${recentPosts[0].title}">Title</h3>
+                        <span class="text-[9px] text-gray-400 uppercase tracking-widest font-bold"
+                              th:text="${recentPosts[0].publishedAt != null ? #temporals.format(recentPosts[0].publishedAt, 'dd MMM yyyy') : ''}"></span>
+                        <div class="mt-4">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-white border-b border-white pb-0.5 group-hover:text-blue-400 group-hover:border-blue-400 transition">Read →</span>
+                        </div>
+                    </div>
                 </a>
-            </div>
+            </article>
 
-            <!-- 1 large (left 2/3) + 2 stacked small (right 1/3) -->
-            <div th:if="${recentPosts != null and !recentPosts.isEmpty()}" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-
-                <!-- Large card -->
-                <article th:if="${recentPosts.size() > 0}" class="lg:col-span-2 group">
-                    <a th:href="@{/blog/{slug}(slug=${recentPosts[0].slug})}"
-                       class="block relative overflow-hidden bg-gray-900" style="aspect-ratio:16/10;min-height:300px;">
-                        <img th:if="${recentPosts[0].featuredImageUrl != null and !recentPosts[0].featuredImageUrl.isEmpty()}"
-                             th:src="${recentPosts[0].featuredImageUrl}" alt=""
-                             class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 group-hover:scale-105 transition duration-700">
-                        <div th:if="${recentPosts[0].featuredImageUrl == null or recentPosts[0].featuredImageUrl.isEmpty()}"
-                             class="absolute inset-0 bg-gradient-to-br from-[#1a3060] to-gray-900"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none"></div>
-                        <div class="absolute bottom-0 left-0 p-8">
-                            <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-[0.4em] px-3 py-1.5 mb-4 inline-block"
-                                  th:text="${recentPosts[0].category}">Category</span>
-                            <h3 class="text-xl md:text-2xl font-black text-white tracking-tight leading-tight mb-2 max-w-lg"
-                                th:text="${recentPosts[0].title}">Title</h3>
-                            <span class="text-[9px] text-gray-400 uppercase tracking-widest font-bold"
-                                  th:text="${recentPosts[0].publishedAt != null ? #temporals.format(recentPosts[0].publishedAt, 'dd MMM yyyy') : ''}">Date</span>
-                            <div class="mt-5">
-                                <span class="text-[9px] font-black uppercase tracking-widest text-white border-b border-white pb-0.5 group-hover:text-blue-400 group-hover:border-blue-400 transition">Read →</span>
-                            </div>
+            <div class="flex flex-col gap-0.5">
+                <article th:if="${recentPosts.size() > 1}" class="group flex-1">
+                    <a th:href="@{/blog/{slug}(slug=${recentPosts[1].slug})}"
+                       class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
+                        <img th:if="${recentPosts[1].featuredImageUrl != null and !recentPosts[1].featuredImageUrl.isEmpty()}"
+                             th:src="${recentPosts[1].featuredImageUrl}" alt=""
+                             class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
+                        <div th:if="${recentPosts[1].featuredImageUrl == null or recentPosts[1].featuredImageUrl.isEmpty()}"
+                             class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 p-5">
+                            <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
+                                  th:text="${recentPosts[1].category}">Category</span>
+                            <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
+                                th:text="${recentPosts[1].title}">Title</h3>
                         </div>
                     </a>
                 </article>
-
-                <!-- 2 small cards stacked -->
-                <div class="flex flex-col gap-3">
-                    <article th:if="${recentPosts.size() > 1}" class="group flex-1">
-                        <a th:href="@{/blog/{slug}(slug=${recentPosts[1].slug})}"
-                           class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
-                            <img th:if="${recentPosts[1].featuredImageUrl != null and !recentPosts[1].featuredImageUrl.isEmpty()}"
-                                 th:src="${recentPosts[1].featuredImageUrl}" alt=""
-                                 class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
-                            <div th:if="${recentPosts[1].featuredImageUrl == null or recentPosts[1].featuredImageUrl.isEmpty()}"
-                                 class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
-                            <div class="absolute bottom-0 left-0 p-5">
-                                <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
-                                      th:text="${recentPosts[1].category}">Category</span>
-                                <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
-                                    th:text="${recentPosts[1].title}">Title</h3>
-                            </div>
-                        </a>
-                    </article>
-                    <article th:if="${recentPosts.size() > 2}" class="group flex-1">
-                        <a th:href="@{/blog/{slug}(slug=${recentPosts[2].slug})}"
-                           class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
-                            <img th:if="${recentPosts[2].featuredImageUrl != null and !recentPosts[2].featuredImageUrl.isEmpty()}"
-                                 th:src="${recentPosts[2].featuredImageUrl}" alt=""
-                                 class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
-                            <div th:if="${recentPosts[2].featuredImageUrl == null or recentPosts[2].featuredImageUrl.isEmpty()}"
-                                 class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
-                            <div class="absolute bottom-0 left-0 p-5">
-                                <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
-                                      th:text="${recentPosts[2].category}">Category</span>
-                                <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
-                                    th:text="${recentPosts[2].title}">Title</h3>
-                            </div>
-                        </a>
-                    </article>
-                </div>
+                <article th:if="${recentPosts.size() > 2}" class="group flex-1">
+                    <a th:href="@{/blog/{slug}(slug=${recentPosts[2].slug})}"
+                       class="block relative overflow-hidden bg-gray-800 h-full" style="min-height:155px;">
+                        <img th:if="${recentPosts[2].featuredImageUrl != null and !recentPosts[2].featuredImageUrl.isEmpty()}"
+                             th:src="${recentPosts[2].featuredImageUrl}" alt=""
+                             class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-55 group-hover:scale-105 transition duration-700">
+                        <div th:if="${recentPosts[2].featuredImageUrl == null or recentPosts[2].featuredImageUrl.isEmpty()}"
+                             class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 p-5">
+                            <span class="bg-[#4d78c0] text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 mb-2 inline-block"
+                                  th:text="${recentPosts[2].category}">Category</span>
+                            <h3 class="text-sm font-black text-white tracking-tight leading-snug line-clamp-2"
+                                th:text="${recentPosts[2].title}">Title</h3>
+                        </div>
+                    </a>
+                </article>
             </div>
+        </div>
 
-            <!-- Empty state -->
-            <div th:if="${recentPosts == null or recentPosts.isEmpty()}" class="py-16 text-center border border-dashed border-gray-200">
-                <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-bold mb-4">No articles published yet.</p>
-                <a href="/blog" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Visit Blog →</a>
-            </div>
-        </section>
-
-    </main>
+        <div th:if="${recentPosts == null or recentPosts.isEmpty()}"
+             class="py-16 text-center border border-dashed border-gray-200">
+            <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-black mb-4">No articles published yet.</p>
+            <a href="/blog" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Visit Blog →</a>
+        </div>
+    </section>
 
     <!-- FOOTER -->
-
     <div th:replace="~{fragments/footer :: footer}"></div>
 
-    <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        new Swiper('.swiper:not(.category-swiper)', {
-            loop: true,
-            autoplay: { delay: 5000, disableOnInteraction: false },
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            effect: 'fade',
-            fadeEffect: { crossFade: true }
-        });
-
-        new Swiper('.category-swiper', {
-            loop: true,
-            autoplay: { delay: 3500, disableOnInteraction: false },
-            navigation: { nextEl: '#cat-next', prevEl: '#cat-prev' },
-            slidesPerView: 2,
-            spaceBetween: 16,
-            breakpoints: {
-                768:  { slidesPerView: 3, spaceBetween: 16 },
-                1024: { slidesPerView: 4, spaceBetween: 16 }
-            }
+        document.addEventListener('DOMContentLoaded', function () {
+            new Swiper('.hero-swiper', {
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+            });
         });
     </script>
 

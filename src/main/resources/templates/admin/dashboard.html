@@ -435,6 +435,54 @@
                 </div>
             </section>
 
+            <!-- PENDING PRODUCT APPROVAL -->
+            <section id="moderation">
+                <div class="bg-white rounded-xl border border-blue-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-blue-100 flex items-center justify-between bg-blue-50">
+                        <div>
+                            <h2 class="text-sm font-semibold text-blue-800">🛒 Product Approval</h2>
+                            <p class="text-xs text-blue-500 mt-0.5">New products submitted by vendors awaiting approval</p>
+                        </div>
+                        <span class="bg-blue-100 text-blue-700 text-xs font-mono px-2 py-1 rounded-md"
+                              th:text="${(pendingProducts != null ? #lists.size(pendingProducts) : 0)} + ' pending'">0 pending</span>
+                    </div>
+
+                    <div th:if="${pendingProducts != null and !#lists.isEmpty(pendingProducts)}"
+                         class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
+                                    <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                <tr th:each="p : ${pendingProducts}" class="hover:bg-slate-50 transition-colors">
+                                    <td class="px-6 py-4 font-medium text-slate-800" th:text="${p.name}">Name</td>
+                                    <td class="px-6 py-4 text-slate-500" th:text="${p.category}">Category</td>
+                                    <td class="px-6 py-4 text-slate-700 font-mono" th:text="'GMD ' + ${p.price}">Price</td>
+                                    <td class="px-6 py-4 text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '-'}">Vendor</td>
+                                    <td class="px-6 py-4">
+                                        <a th:href="@{/admin/approve-product/{id}(id=${p.id})}"
+                                           class="inline-block bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
+                                            ✓ Approve
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div th:if="${pendingProducts == null || #lists.isEmpty(pendingProducts)}"
+                         class="text-center py-10">
+                        <p class="text-sm text-slate-400">No products pending approval</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- PRODUCTS TABLE -->
             <section id="inventory">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">

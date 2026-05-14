@@ -3,7 +3,11 @@ package com.example.lumoo.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+    @Index(name = "idx_product_approved", columnList = "approved"),
+    @Index(name = "idx_product_vendor", columnList = "vendor_id"),
+    @Index(name = "idx_product_category_approved", columnList = "category,approved")
+})
 public class Product {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
