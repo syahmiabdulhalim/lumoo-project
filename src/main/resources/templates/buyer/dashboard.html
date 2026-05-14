@@ -28,15 +28,6 @@
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Track your deliveries</p>
         </header>
 
-        <!-- Success message -->
-        <div th:if="${param.success}" class="mb-8 border-l-4 border-green-500 bg-green-50 px-6 py-4">
-            <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Order placed successfully! We'll keep you updated.</p>
-        </div>
-
-        <!-- Cancelled message -->
-        <div th:if="${param.order_cancelled}" class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
-            <p class="text-xs font-bold text-red-600 uppercase tracking-widest">Order has been cancelled.</p>
-        </div>
 
         <!-- Notifications -->
         <div th:if="${notifications != null and !#lists.isEmpty(notifications)}" class="mb-10 bg-blue-50 border-l-4 border-[#4d78c0] px-6 py-4">
@@ -78,18 +69,37 @@
                         <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest" th:text="${'#LMO-' + o.id}"></p>
                         <h3 class="text-xs font-bold uppercase mt-1" th:text="${#temporals.format(o.orderDate, 'dd MMM yyyy')}"></h3>
                     </div>
-                    <span th:text="${o.status}"
+                    <span th:text="${o.status == 'AWAITING_PROOF'  ? 'Awaiting Proof' :
+                                   o.status == 'PROOF_UPLOADED' ? 'Proof Submitted' :
+                                   o.status == 'RETURN_REQUESTED' ? 'Return Req.' : o.status}"
                           class="px-3 py-1 text-[7px] font-black uppercase tracking-tighter rounded-full"
-                          th:classappend="${o.status == 'DELIVERED' ? 'bg-green-100 text-green-700' :
-                                           o.status == 'SHIPPED'   ? 'bg-purple-100 text-purple-700' :
-                                           o.status == 'CANCELLED' ? 'bg-red-100 text-red-600' :
-                                           o.status == 'PAID'      ? 'bg-emerald-100 text-emerald-700' :
-                                                                      'bg-blue-100 text-blue-700'}">
+                          th:classappend="${o.status == 'DELIVERED'        ? 'bg-green-100 text-green-700' :
+                                           o.status == 'SHIPPED'           ? 'bg-purple-100 text-purple-700' :
+                                           o.status == 'CANCELLED'         ? 'bg-red-100 text-red-600' :
+                                           o.status == 'PAID'              ? 'bg-emerald-100 text-emerald-700' :
+                                           o.status == 'PROOF_UPLOADED'    ? 'bg-yellow-100 text-yellow-700' :
+                                           o.status == 'AWAITING_PROOF'    ? 'bg-orange-100 text-orange-700' :
+                                           o.status == 'RETURN_REQUESTED'  ? 'bg-orange-100 text-orange-600' :
+                                                                              'bg-blue-100 text-blue-700'}">
                     </span>
                 </div>
 
+                <!-- Upload proof nudge -->
+                <div th:if="${o.status == 'AWAITING_PROOF'}"
+                     class="mb-4 bg-orange-50 border border-orange-200 px-4 py-3 flex items-center justify-between">
+                    <p class="text-[8px] font-black uppercase tracking-widest text-orange-700">Upload payment screenshot to confirm order</p>
+                    <a th:href="@{/checkout/success/{id}(id=${o.id})}"
+                       class="text-[8px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5 shrink-0 ml-4">Upload →</a>
+                </div>
+
+                <!-- Proof submitted notice -->
+                <div th:if="${o.status == 'PROOF_UPLOADED'}"
+                     class="mb-4 bg-yellow-50 border border-yellow-200 px-4 py-3">
+                    <p class="text-[8px] font-black uppercase tracking-widest text-yellow-700">Proof submitted — waiting for admin verification</p>
+                </div>
+
                 <!-- Progress bar -->
-                <div class="mb-5" th:unless="${o.status == 'CANCELLED'}">
+                <div class="mb-5" th:unless="${o.status == 'CANCELLED' or o.status == 'AWAITING_PROOF' or o.status == 'PROOF_UPLOADED'}">
                     <div class="flex justify-between text-[7px] text-gray-300 uppercase font-black tracking-widest mb-1">
                         <span class="text-[#4d78c0]">Ordered</span>
                         <span th:classappend="${o.status == 'PAID' or o.status == 'SHIPPED' or o.status == 'DELIVERED' ? 'text-[#4d78c0]' : ''}">Confirmed</span>
@@ -126,6 +136,15 @@
 
     </main>
 
+    <script>
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            var flash = null;
+            if (p.has('success'))             flash = { msg: 'Order placed successfully!',       type: 'green' };
+            else if (p.has('order_cancelled')) flash = { msg: 'Order has been cancelled.',        type: 'red'   };
+            if (flash) window._lmFlash = flash;
+        })();
+    </script>
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

@@ -1,7 +1,9 @@
 package com.example.lumoo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -10,6 +12,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
+
+    @Autowired
+    private SiteSettingsInterceptor siteSettingsInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(siteSettingsInterceptor);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

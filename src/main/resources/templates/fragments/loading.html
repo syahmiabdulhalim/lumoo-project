@@ -96,6 +96,95 @@
         });
     </script>
 
+    <!-- ── COOKIE CONSENT ── -->
+    <div th:if="${siteSettings != null and siteSettings.cookieConsentEnabled}"
+         id="lm-cookie-banner"
+         class="fixed bottom-0 left-0 right-0 z-[500] bg-[#1a2336] text-white px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xl"
+         style="display:none !important">
+        <div class="flex-1 min-w-0">
+            <p class="text-[9px] font-black uppercase tracking-widest mb-1">We Use Cookies</p>
+            <p class="text-[9px] text-gray-300 leading-relaxed">
+                LUMOO uses essential cookies for site functionality. In compliance with the
+                <strong class="text-white">Gambia Personal Data Protection Act 2022</strong>,
+                we ask for your consent before using non-essential cookies.
+                <a href="/privacy-policy" class="text-[#4d78c0] underline ml-1">Privacy Policy</a>
+            </p>
+        </div>
+        <div class="flex gap-3 shrink-0">
+            <button onclick="lmRejectCookies()"
+                    class="px-4 py-2 text-[8px] font-black uppercase tracking-widest border border-white/30 text-gray-300 hover:border-white hover:text-white transition">
+                Essential Only
+            </button>
+            <button onclick="lmAcceptCookies()"
+                    class="px-5 py-2 text-[8px] font-black uppercase tracking-widest bg-[#4d78c0] text-white hover:bg-[#3a5fa0] transition">
+                Accept All
+            </button>
+        </div>
+    </div>
+    <script th:if="${siteSettings != null and siteSettings.cookieConsentEnabled}">
+        (function() {
+            var consent = document.cookie.split(';').some(c => c.trim().startsWith('lm_cookie_consent='));
+            if (!consent) {
+                var el = document.getElementById('lm-cookie-banner');
+                if (el) el.style.cssText = '';
+            }
+        })();
+        function lmAcceptCookies() {
+            document.cookie = 'lm_cookie_consent=all; max-age=' + (365*24*60*60) + '; path=/; SameSite=Lax';
+            document.getElementById('lm-cookie-banner').style.cssText = 'display:none !important';
+        }
+        function lmRejectCookies() {
+            document.cookie = 'lm_cookie_consent=essential; max-age=' + (365*24*60*60) + '; path=/; SameSite=Lax';
+            document.getElementById('lm-cookie-banner').style.cssText = 'display:none !important';
+        }
+    </script>
+
+    <!-- ── TOAST ── -->
+    <div id="lm-toast"
+         class="fixed bottom-6 right-6 z-[400] flex items-start gap-3 max-w-sm shadow-2xl border-l-4 px-5 py-4 pointer-events-auto"
+         style="display:none; transform:translateX(120%); transition:transform .35s cubic-bezier(.4,0,.2,1);">
+        <div id="lm-toast-icon" class="mt-0.5 shrink-0 w-4 h-4"></div>
+        <div class="flex-1 min-w-0">
+            <p id="lm-toast-msg" class="text-[10px] font-black uppercase tracking-widest leading-snug"></p>
+        </div>
+        <button onclick="lmHideToast()" class="text-gray-300 hover:text-gray-500 transition text-lg leading-none ml-1 shrink-0">×</button>
+    </div>
+    <script>
+        var _lmToastTimer;
+        function lmToast(msg, type) {
+            var el  = document.getElementById('lm-toast');
+            var ico = document.getElementById('lm-toast-icon');
+            var txt = document.getElementById('lm-toast-msg');
+            var schemes = {
+                green:  { border:'border-green-500',  bg:'bg-green-50',  text:'text-green-700',
+                          svg:'<svg fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' },
+                red:    { border:'border-red-500',    bg:'bg-white',     text:'text-red-600',
+                          svg:'<svg fill="none" stroke="#dc2626" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' },
+                blue:   { border:'border-[#4d78c0]', bg:'bg-blue-50',   text:'text-[#4d78c0]',
+                          svg:'<svg fill="none" stroke="#4d78c0" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
+                orange: { border:'border-orange-400', bg:'bg-orange-50', text:'text-orange-700',
+                          svg:'<svg fill="none" stroke="#f97316" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>' },
+            };
+            var s = schemes[type] || schemes.blue;
+            el.className = 'fixed bottom-6 right-6 z-[400] flex items-start gap-3 max-w-sm shadow-2xl border-l-4 px-5 py-4 pointer-events-auto ' + s.border + ' ' + s.bg;
+            txt.className = 'text-[10px] font-black uppercase tracking-widest leading-snug ' + s.text;
+            txt.textContent = msg;
+            ico.innerHTML = s.svg;
+            el.style.display = 'flex';
+            requestAnimationFrame(function() { el.style.transform = 'translateX(0)'; });
+            clearTimeout(_lmToastTimer);
+            _lmToastTimer = setTimeout(lmHideToast, 5000);
+        }
+        function lmHideToast() {
+            clearTimeout(_lmToastTimer);
+            var el = document.getElementById('lm-toast');
+            el.style.transform = 'translateX(120%)';
+            setTimeout(function() { el.style.display = 'none'; }, 350);
+        }
+        // pick up flash set by the page before this script ran
+        if (window._lmFlash) lmToast(window._lmFlash.msg, window._lmFlash.type);
+    </script>
+
     <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center" style="display:none !important">
         <div class="text-center">
             <div class="w-8 h-8 border-2 border-[#1a2336] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>

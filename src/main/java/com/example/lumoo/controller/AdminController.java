@@ -1,6 +1,7 @@
 package com.example.lumoo.controller;
 
 import com.example.lumoo.model.Order;
+import com.example.lumoo.model.SiteSettings;
 import com.example.lumoo.model.VendorApplication;
 import com.example.lumoo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ public class AdminController {
     @Autowired private UserService userService;
     @Autowired private InquiryService inquiryService;
     @Autowired private VendorApplicationService vendorApplicationService;
+    @Autowired private SiteSettingsService siteSettingsService;
+    @Autowired private SubscriberService subscriberService;
 
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
@@ -34,6 +37,8 @@ public class AdminController {
         model.addAttribute("pendingProducts", productService.getPendingApproval());
         model.addAttribute("vendorApplications", vendorApplicationService.getPending());
         model.addAttribute("pendingImages", productService.getPendingImageApproval());
+        model.addAttribute("proofOrders", orders.stream()
+                .filter(o -> "PROOF_UPLOADED".equals(o.getStatus())).toList());
         return "admin/dashboard";
     }
 
@@ -101,6 +106,12 @@ public class AdminController {
         return "redirect:/admin/dashboard?return_resolved#orders";
     }
 
+    @PostMapping("/order/{id}/verify-payment")
+    public String verifyPayment(@PathVariable Long id) {
+        orderService.verifyPayment(id);
+        return "redirect:/admin/dashboard?payment_verified#proof-review";
+    }
+
     @GetMapping("/approve-image/{id}")
     public String approveImage(@PathVariable Long id) {
         productService.approveImage(id);
@@ -132,5 +143,26 @@ public class AdminController {
                                @RequestParam(required = false) String note) {
         vendorApplicationService.reject(id, note);
         return "redirect:/admin/dashboard?vendor_rejected";
+    }
+
+    @GetMapping("/settings")
+    public String settings(Model model) {
+        model.addAttribute("settings", siteSettingsService.get());
+        model.addAttribute("subscribers", subscriberService.getAll());
+        return "admin/settings";
+    }
+
+    @PostMapping("/subscriber/{id}/delete")
+    public String deleteSubscriber(@PathVariable Long id) {
+        subscriberService.delete(id);
+        return "redirect:/admin/settings?tab=subscribers";
+    }
+
+    @PostMapping("/settings")
+    public String saveSettings(@ModelAttribute SiteSettings settings, RedirectAttributes ra) {
+        siteSettingsService.save(settings);
+        ra.addFlashAttribute("flashMsg", "Settings saved successfully.");
+        ra.addFlashAttribute("flashType", "green");
+        return "redirect:/admin/settings";
     }
 }

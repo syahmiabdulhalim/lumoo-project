@@ -51,16 +51,6 @@
             </div>
         </div>
 
-        <!-- Flash toast -->
-        <div th:if="${flashMsg != null}" id="vendor-flash-toast"
-             class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 shadow-lg text-white text-xs font-bold uppercase tracking-widest"
-             th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
-            <span th:text="${flashMsg}"></span>
-            <button onclick="document.getElementById('vendor-flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
-        </div>
-        <script th:if="${flashMsg != null}">
-            setTimeout(() => { const t = document.getElementById('vendor-flash-toast'); if(t){t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500);} }, 3000);
-        </script>
 
         <!-- Orders Section -->
         <section class="mb-12">
@@ -100,8 +90,8 @@
                             <td class="px-6 py-4 text-[10px] text-gray-400 font-mono"
                                 th:text="${o.trackingNumber != null ? o.trackingNumber : '—'}"></td>
                             <td class="px-6 py-4">
-                                <!-- Ship button for PENDING or PAID orders -->
-                                <form th:if="${o.status == 'PENDING' or o.status == 'PAID'}"
+                                <!-- Ship button: only for PAID orders -->
+                                <form th:if="${o.status == 'PAID'}"
                                       th:action="@{/vendor/order/{id}/ship(id=${o.id})}" method="post"
                                       class="flex items-center gap-2">
                                     <input type="text" name="trackingNumber"
@@ -109,10 +99,10 @@
                                            placeholder="Tracking no.">
                                     <button type="submit"
                                             class="bg-[#4d78c0] text-white px-3 py-1.5 text-[8px] font-black uppercase tracking-widest hover:bg-[#3d68b0] transition">
-                                        Ship
+                                        Mark Shipped
                                     </button>
                                 </form>
-                                <span th:if="${o.status != 'PENDING' and o.status != 'PAID'}"
+                                <span th:if="${o.status != 'PAID'}"
                                       class="text-[9px] text-gray-300 uppercase tracking-widest">—</span>
                             </td>
                         </tr>
@@ -170,6 +160,16 @@
         <p class="text-[9px] text-gray-300 uppercase tracking-widest">© 2026 LUMOO Vendor Portal</p>
     </footer>
 
+    <script th:if="${flashMsg != null}" th:inline="javascript">
+        window._lmFlash = { msg: /*[[${flashMsg}]]*/ '', type: /*[[${flashType ?: 'blue'}]]*/ 'blue' };
+    </script>
+    <script>
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            if (p.has('shipped'))  window._lmFlash = { msg: 'Order marked as shipped!', type: 'green' };
+            if (p.has('error'))    window._lmFlash = { msg: 'Could not mark as shipped. Order must be PAID first.', type: 'red' };
+        })();
+    </script>
 <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 

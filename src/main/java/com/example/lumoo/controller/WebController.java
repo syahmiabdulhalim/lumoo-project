@@ -3,6 +3,7 @@ package com.example.lumoo.controller;
 import com.example.lumoo.model.*;
 import com.example.lumoo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Controller
@@ -22,6 +24,7 @@ public class WebController {
     @Autowired private ReviewService reviewService;
     @Autowired private VendorApplicationService vendorApplicationService;
     @Autowired private BlogService blogService;
+    @Autowired private SubscriberService subscriberService;
 
     @GetMapping("/stores")
     public String stores(Model model) {
@@ -197,5 +200,26 @@ public class WebController {
             case UNAUTHORIZED -> "redirect:/buyer/dashboard?error=unauthorized";
             case CANNOT_CANCEL -> "redirect:/buyer/dashboard?error=cannot_cancel";
         };
+    }
+
+    @PostMapping("/subscribe")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> subscribe(@RequestParam String email) {
+        SubscriberService.Result result = subscriberService.subscribe(email);
+        return switch (result) {
+            case SUBSCRIBED -> ResponseEntity.ok(Map.of("status", "ok", "msg", "Subscribed! Thank you."));
+            case ALREADY_SUBSCRIBED -> ResponseEntity.ok(Map.of("status", "exists", "msg", "You're already subscribed."));
+            case INVALID -> ResponseEntity.badRequest().body(Map.of("status", "error", "msg", "Invalid email address."));
+        };
+    }
+
+    @GetMapping("/privacy-policy")
+    public String privacyPolicy() {
+        return "privacy-policy";
+    }
+
+    @GetMapping("/terms")
+    public String terms() {
+        return "terms";
     }
 }

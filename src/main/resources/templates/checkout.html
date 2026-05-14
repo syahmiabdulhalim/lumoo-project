@@ -100,44 +100,48 @@
                         <div id="bankDetails" class="hidden bg-blue-50 border border-blue-200 p-6 mb-8">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-blue-700 mb-4">Bank Transfer Details</p>
                             <div class="space-y-2 text-xs">
-                                <div class="flex justify-between">
+                                <div class="flex justify-between" th:if="${siteSettings != null and siteSettings.bankName != null}">
                                     <span class="text-gray-500 uppercase text-[9px] tracking-wider">Bank</span>
-                                    <span class="font-bold">Trust Bank Gambia</span>
+                                    <span class="font-bold" th:text="${siteSettings.bankName}">Trust Bank Gambia</span>
+                                </div>
+                                <div class="flex justify-between" th:if="${siteSettings != null and siteSettings.bankBranch != null}">
+                                    <span class="text-gray-500 uppercase text-[9px] tracking-wider">Branch</span>
+                                    <span class="font-bold" th:text="${siteSettings.bankBranch}"></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-500 uppercase text-[9px] tracking-wider">Account Name</span>
-                                    <span class="font-bold">LUMOO GAMBIA LTD</span>
+                                    <span class="font-bold" th:text="${siteSettings != null and siteSettings.bankAccountName != null ? siteSettings.bankAccountName : 'LUMOO GAMBIA LTD'}">LUMOO GAMBIA LTD</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-500 uppercase text-[9px] tracking-wider">Account Number</span>
-                                    <span class="font-bold tracking-widest">XXXX XXXX XXXX</span>
+                                    <span class="font-bold tracking-widest" th:text="${siteSettings != null and siteSettings.bankAccountNumber != null ? siteSettings.bankAccountNumber : 'Contact us for details'}"></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-500 uppercase text-[9px] tracking-wider">Reference</span>
                                     <span class="font-bold">Your order number</span>
                                 </div>
                             </div>
-                            <p class="text-[8px] text-[#4d78c0] mt-4">After transferring, email your proof of payment to <strong>payments@lumoo.gm</strong></p>
+                            <p class="text-[8px] text-[#4d78c0] mt-4">Upload your payment screenshot after placing the order.</p>
                         </div>
 
                         <!-- Mobile Money Details (shown when Afrimoney/QMoney selected) -->
                         <div id="mobileDetails" class="hidden bg-green-50 border border-green-200 p-6 mb-8">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-green-700 mb-4">Mobile Money Details</p>
                             <div class="space-y-2 text-xs">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500 uppercase text-[9px] tracking-wider">Afrimoney Number</span>
-                                    <span class="font-bold tracking-widest">+220 XXX XXXX</span>
+                                <div class="flex justify-between" th:if="${siteSettings != null and siteSettings.afrimoneyNumber != null}">
+                                    <span class="text-gray-500 uppercase text-[9px] tracking-wider">Afrimoney</span>
+                                    <span class="font-bold" th:text="${siteSettings.afrimoneyNumber}">+220 XXX XXXX</span>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500 uppercase text-[9px] tracking-wider">QMoney Number</span>
-                                    <span class="font-bold tracking-widest">+220 XXX XXXX</span>
+                                <div class="flex justify-between" th:if="${siteSettings != null and siteSettings.qmoneyNumber != null}">
+                                    <span class="text-gray-500 uppercase text-[9px] tracking-wider">QMoney</span>
+                                    <span class="font-bold" th:text="${siteSettings.qmoneyNumber}">+220 XXX XXXX</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-500 uppercase text-[9px] tracking-wider">Name</span>
-                                    <span class="font-bold">LUMOO GAMBIA</span>
+                                    <span class="font-bold" th:text="${siteSettings != null and siteSettings.afrimoneyName != null ? siteSettings.afrimoneyName : 'LUMOO GAMBIA'}">LUMOO GAMBIA</span>
                                 </div>
                             </div>
-                            <p class="text-[8px] text-green-700 mt-4">After sending, share your transaction ID to <strong>info@lumoo.my</strong> or WhatsApp us.</p>
+                            <p class="text-[8px] text-green-700 mt-4">Upload your payment screenshot after placing the order.</p>
                         </div>
 
                         <button type="submit"

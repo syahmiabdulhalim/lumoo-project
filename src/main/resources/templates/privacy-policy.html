@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Privacy Policy | LUMOO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+
+<nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b">
+    <a href="/"><h1 class="text-xl font-black tracking-tighter">LUMOO</h1></a>
+    <a href="/" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#4d78c0] transition">← Back to Store</a>
+</nav>
+
+<main class="max-w-3xl mx-auto py-16 px-6">
+
+    <header class="mb-12 border-b border-gray-100 pb-8">
+        <p class="text-[8px] text-gray-400 uppercase tracking-[0.4em] font-black mb-3">Legal</p>
+        <h1 class="text-4xl font-light tracking-tight">Privacy <span class="font-black italic text-[#4d78c0]">Policy</span></h1>
+        <p class="text-[9px] text-gray-400 mt-3 uppercase tracking-widest">In compliance with the Personal Data Protection Act 2022, The Gambia</p>
+    </header>
+
+    <!-- Custom text from admin settings -->
+    <div th:if="${siteSettings != null and siteSettings.privacyPolicyText != null and !#strings.isEmpty(siteSettings.privacyPolicyText)}"
+         class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4"
+         th:utext="${siteSettings.privacyPolicyText}">
+    </div>
+
+    <!-- Default template shown when no custom text is set -->
+    <div th:if="${siteSettings == null or siteSettings.privacyPolicyText == null or #strings.isEmpty(siteSettings.privacyPolicyText)}"
+         class="space-y-8 text-sm text-gray-700 leading-relaxed">
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">1. Data Controller</h2>
+            <p th:if="${siteSettings != null and siteSettings.dataControllerName != null}"
+               th:text="${siteSettings.dataControllerName + ' is the data controller responsible for your personal data.'}"></p>
+            <p th:if="${siteSettings == null or siteSettings.dataControllerName == null}">
+                LUMOO Gambia Ltd is the data controller responsible for your personal data collected through this website.
+            </p>
+            <p class="mt-2" th:if="${siteSettings != null and siteSettings.dataControllerEmail != null}">
+                Contact our Data Protection Officer: <a th:href="'mailto:' + ${siteSettings.dataControllerEmail}"
+                   th:text="${siteSettings.dataControllerEmail}" class="text-[#4d78c0] underline"></a>
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">2. What Data We Collect</h2>
+            <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li>Name and email address (registration)</li>
+                <li>Delivery address (orders)</li>
+                <li>Order history and transaction records</li>
+                <li>Payment proof images (uploaded by you)</li>
+                <li>Product reviews and ratings</li>
+                <li>Technical data: IP address, browser type, cookies</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">3. How We Use Your Data</h2>
+            <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li>Process and fulfil your orders</li>
+                <li>Verify payments and prevent fraud</li>
+                <li>Send order status updates and notifications</li>
+                <li>Improve our platform and services</li>
+                <li>Comply with legal obligations under Gambian law</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">4. Legal Basis (PDPA 2022)</h2>
+            <p class="text-gray-600">Under the Personal Data Protection Act 2022 of The Gambia, we process your data based on:</p>
+            <ul class="list-disc list-inside space-y-1 text-gray-600 mt-2">
+                <li><strong>Contract performance</strong> — processing necessary to fulfil your orders</li>
+                <li><strong>Consent</strong> — for cookies and marketing (you may withdraw at any time)</li>
+                <li><strong>Legitimate interest</strong> — fraud prevention and platform security</li>
+                <li><strong>Legal obligation</strong> — compliance with Gambian laws and regulations</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">5. Your Rights</h2>
+            <p class="text-gray-600 mb-2">Under the Gambia PDPA 2022, you have the right to:</p>
+            <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li><strong>Access</strong> — request a copy of your personal data</li>
+                <li><strong>Rectification</strong> — correct inaccurate data</li>
+                <li><strong>Erasure</strong> — request deletion of your data ("right to be forgotten")</li>
+                <li><strong>Portability</strong> — receive your data in a structured format</li>
+                <li><strong>Restriction</strong> — limit how we process your data</li>
+                <li><strong>Objection</strong> — object to data processing for direct marketing</li>
+                <li><strong>Withdraw consent</strong> — at any time, without affecting past processing</li>
+            </ul>
+            <p class="text-gray-500 text-xs mt-3">
+                To exercise any of these rights, contact us at
+                <span th:if="${siteSettings != null and siteSettings.dataControllerEmail != null}">
+                    <a th:href="'mailto:' + ${siteSettings.dataControllerEmail}"
+                       th:text="${siteSettings.dataControllerEmail}" class="text-[#4d78c0] underline"></a>.
+                </span>
+                <span th:if="${siteSettings == null or siteSettings.dataControllerEmail == null}">privacy@lumoo.my.</span>
+                We will respond within 30 days.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">6. Data Retention</h2>
+            <p th:if="${siteSettings != null and siteSettings.dataRetentionDays > 0}"
+               th:text="'We retain personal data for up to ' + ${siteSettings.dataRetentionDays} + ' days, after which it is securely deleted or anonymised.'">
+            </p>
+            <p th:if="${siteSettings == null or siteSettings.dataRetentionDays == 0}">
+                We retain personal data for as long as necessary to fulfil the purposes outlined in this policy, and as required by Gambian law.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">7. Cookies</h2>
+            <p class="text-gray-600">We use essential cookies for site functionality and session management. With your consent, we may use analytics cookies to improve our service. You can manage cookie preferences at any time via the consent banner.</p>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">8. Data Security</h2>
+            <p class="text-gray-600">We implement appropriate technical and organisational measures to protect your data, including encrypted storage of payment proof images, hashed passwords, and HTTPS-only communication. In the event of a data breach, we will notify the Personal Data Protection Agency and affected users within 72 hours as required by the PDPA 2022.</p>
+        </section>
+
+        <section>
+            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">9. Complaints</h2>
+            <p class="text-gray-600">If you believe your data rights have been violated, you have the right to lodge a complaint with the <strong>Personal Data Protection Agency of The Gambia</strong> (PDPA). We encourage you to contact us first so we can resolve your concern directly.</p>
+        </section>
+
+        <section class="border-t border-gray-100 pt-6">
+            <p class="text-[8px] text-gray-400 uppercase tracking-widest">Last updated: 2026 · LUMOO Gambia
+                <span th:if="${siteSettings != null and siteSettings.pdpaRegistrationNumber != null}">
+                    · PDPA Reg. <span th:text="${siteSettings.pdpaRegistrationNumber}"></span>
+                </span>
+            </p>
+        </section>
+
+    </div>
+</main>
+
+<footer class="border-t border-gray-100 py-8 text-center">
+    <div class="flex justify-center gap-6 text-[9px] text-gray-400 uppercase tracking-widest">
+        <a href="/privacy-policy" class="hover:text-[#4d78c0] transition font-bold">Privacy Policy</a>
+        <a href="/terms" class="hover:text-[#4d78c0] transition">Terms of Service</a>
+        <a href="/" class="hover:text-[#4d78c0] transition">Back to Store</a>
+    </div>
+</footer>
+
+<div th:replace="~{fragments/loading :: loading}"></div>
+</body>
+</html>

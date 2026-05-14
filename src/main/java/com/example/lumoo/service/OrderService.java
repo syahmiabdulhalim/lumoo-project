@@ -44,7 +44,7 @@ public class OrderService {
         order.setAddress(address.trim());
         order.setOrderDate(LocalDateTime.now());
         order.setPaymentMethod(paymentMethod);
-        order.setStatus(paymentMethod.equals("COD") ? "PENDING" : "PAID");
+        order.setStatus(paymentMethod.equals("COD") ? "PENDING" : "AWAITING_PROOF");
         order.setTotalAmount(total);
         order.setAdminCommission(commission);
         order.setVendorEarnings(vendorEarnings);
@@ -70,7 +70,8 @@ public class OrderService {
         Order order = orderRepository.findById(id).orElse(null);
         if (order == null) return CancelResult.NOT_FOUND;
         if (!order.getUser().getId().equals(user.getId())) return CancelResult.UNAUTHORIZED;
-        if (!order.getStatus().equals("PENDING")) return CancelResult.CANNOT_CANCEL;
+        String st = order.getStatus();
+        if (!st.equals("PENDING") && !st.equals("AWAITING_PROOF")) return CancelResult.CANNOT_CANCEL;
         orderRepository.delete(order);
         return CancelResult.CANCELLED;
     }
@@ -86,7 +87,7 @@ public class OrderService {
                         && i.getProduct().getVendor().getId().equals(vendorId));
         if (!isVendorOrder) return ShipResult.UNAUTHORIZED;
         String s = order.getStatus();
-        if (!s.equals("PENDING") && !s.equals("PAID")) return ShipResult.INVALID_STATUS;
+        if (!s.equals("PAID")) return ShipResult.INVALID_STATUS;
         order.setStatus("SHIPPED");
         if (trackingNumber != null && !trackingNumber.isBlank())
             order.setTrackingNumber(trackingNumber.trim());
@@ -122,6 +123,21 @@ public class OrderService {
     public void resolveReturn(Long orderId) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setStatus("RETURNED");
+            orderRepository.save(o);
+        });
+    }
+
+    public void submitProof(Long orderId, String proofUrl) {
+        orderRepository.findById(orderId).ifPresent(o -> {
+            o.setPaymentProofUrl(proofUrl);
+            o.setStatus("PROOF_UPLOADED");
+            orderRepository.save(o);
+        });
+    }
+
+    public void verifyPayment(Long orderId) {
+        orderRepository.findById(orderId).ifPresent(o -> {
+            o.setStatus("PAID");
             orderRepository.save(o);
         });
     }

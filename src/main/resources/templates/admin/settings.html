@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f5f6fa] text-gray-900 font-['Inter']">
+
+<nav class="bg-[#1a2336] text-white flex justify-between items-center px-10 py-4 sticky top-0 z-50">
+    <a href="/admin/dashboard" class="text-[10px] font-black uppercase tracking-[0.3em]">← Admin Dashboard</a>
+    <span class="text-[10px] text-gray-400 uppercase tracking-widest">Settings</span>
+</nav>
+
+<main class="max-w-4xl mx-auto py-14 px-6">
+
+    <header class="mb-10">
+        <h1 class="text-3xl font-light tracking-tight">Site <span class="font-black italic text-[#4d78c0]">Settings</span></h1>
+        <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-1">Payment setup & privacy compliance</p>
+    </header>
+
+    <!-- Tab nav -->
+    <div class="flex gap-1 mb-8 border-b border-gray-200">
+        <button onclick="showTab('payment')" id="tab-payment"
+                class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-[#4d78c0] text-[#4d78c0]">
+            Payment Setup
+        </button>
+        <button onclick="showTab('pdpa')" id="tab-pdpa"
+                class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition">
+            Privacy & PDPA
+        </button>
+        <button onclick="showTab('business')" id="tab-business"
+                class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition">
+            Business Info
+        </button>
+        <button onclick="showTab('subscribers')" id="tab-subscribers"
+                class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition">
+            Subscribers <span th:text="'(' + ${#lists.size(subscribers)} + ')'" class="text-gray-300"></span>
+        </button>
+    </div>
+
+    <form th:action="@{/admin/settings}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <!-- ── PAYMENT SETUP ───────────────────────────────────────────────── -->
+        <div id="panel-payment">
+
+            <!-- Bank Transfer -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Bank Transfer Details</h2>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="label">Bank Name</label>
+                        <input type="text" name="bankName" th:value="${settings.bankName}" class="input" placeholder="e.g. Trust Bank Gambia">
+                    </div>
+                    <div>
+                        <label class="label">Branch</label>
+                        <input type="text" name="bankBranch" th:value="${settings.bankBranch}" class="input" placeholder="e.g. Kairaba Avenue">
+                    </div>
+                    <div>
+                        <label class="label">Account Name</label>
+                        <input type="text" name="bankAccountName" th:value="${settings.bankAccountName}" class="input" placeholder="e.g. LUMOO GAMBIA LTD">
+                    </div>
+                    <div>
+                        <label class="label">Account Number</label>
+                        <input type="text" name="bankAccountNumber" th:value="${settings.bankAccountNumber}" class="input" placeholder="e.g. 1234567890">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Afrimoney -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Afrimoney</h2>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="label">Afrimoney Number</label>
+                        <input type="text" name="afrimoneyNumber" th:value="${settings.afrimoneyNumber}" class="input" placeholder="+220 3XX XXXX">
+                    </div>
+                    <div>
+                        <label class="label">Account Name</label>
+                        <input type="text" name="afrimoneyName" th:value="${settings.afrimoneyName}" class="input" placeholder="LUMOO GAMBIA">
+                    </div>
+                </div>
+            </div>
+
+            <!-- QMoney -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">QMoney</h2>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="label">QMoney Number</label>
+                        <input type="text" name="qmoneyNumber" th:value="${settings.qmoneyNumber}" class="input" placeholder="+220 7XX XXXX">
+                    </div>
+                    <div>
+                        <label class="label">Account Name</label>
+                        <input type="text" name="qmoneyName" th:value="${settings.qmoneyName}" class="input" placeholder="LUMOO GAMBIA">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── PRIVACY & PDPA ───────────────────────────────────────────────── -->
+        <div id="panel-pdpa" class="hidden">
+
+            <!-- Notice box -->
+            <div class="bg-blue-50 border border-blue-200 px-6 py-4 mb-6">
+                <p class="text-[9px] font-black uppercase tracking-widest text-blue-700 mb-1">Gambia Personal Data Protection Act 2022</p>
+                <p class="text-xs text-blue-600">As a data controller operating in The Gambia, LUMOO must comply with the <strong>Personal Data Protection Act 2022</strong>. Fill in your registration details and configure the cookie consent banner below.</p>
+            </div>
+
+            <!-- PDPA Registration -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">PDPA Registration</h2>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="label">PDPA Registration Number</label>
+                        <input type="text" name="pdpaRegistrationNumber" th:value="${settings.pdpaRegistrationNumber}" class="input" placeholder="e.g. PDPA/2024/0XXX">
+                        <p class="text-[8px] text-gray-400 mt-1">Issued by the Personal Data Protection Agency, The Gambia</p>
+                    </div>
+                    <div>
+                        <label class="label">Data Controller Name</label>
+                        <input type="text" name="dataControllerName" th:value="${settings.dataControllerName}" class="input" placeholder="e.g. LUMOO Gambia Ltd">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="label">Data Controller Email</label>
+                        <input type="email" name="dataControllerEmail" th:value="${settings.dataControllerEmail}" class="input" placeholder="privacy@lumoo.my">
+                        <p class="text-[8px] text-gray-400 mt-1">Published in your privacy policy — users contact this to exercise their data rights</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cookie Consent -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Cookie Consent Banner</h2>
+                <label class="flex items-center gap-3 cursor-pointer mb-4">
+                    <div class="relative">
+                        <input type="checkbox" name="cookieConsentEnabled" value="true"
+                               th:checked="${settings.cookieConsentEnabled}" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-checked:bg-[#4d78c0] rounded-full transition"></div>
+                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider">Enable cookie consent banner</span>
+                </label>
+                <p class="text-[9px] text-gray-400">When enabled, a consent banner appears for new visitors. Required under the Gambia PDPA 2022 for tracking cookies.</p>
+            </div>
+
+            <!-- Data Retention -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Data Retention</h2>
+                <div class="max-w-xs">
+                    <label class="label">Retain personal data for (days)</label>
+                    <input type="number" name="dataRetentionDays" th:value="${settings.dataRetentionDays}" min="30" max="1825" class="input" placeholder="365">
+                    <p class="text-[8px] text-gray-400 mt-1">Default: 365 days. Max recommended: 1825 days (5 years).</p>
+                </div>
+            </div>
+
+            <!-- Privacy Policy Text -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Privacy Policy</h2>
+                <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/privacy-policy</code>. Basic HTML is supported.</p>
+                <textarea name="privacyPolicyText" rows="12"
+                          class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
+                          placeholder="Enter your privacy policy text here..."
+                          th:text="${settings.privacyPolicyText}"></textarea>
+            </div>
+
+            <!-- Terms -->
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Terms of Service</h2>
+                <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/terms</code>. Basic HTML is supported.</p>
+                <textarea name="termsText" rows="12"
+                          class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
+                          placeholder="Enter your terms of service here..."
+                          th:text="${settings.termsText}"></textarea>
+            </div>
+
+        </div>
+
+        <!-- ── BUSINESS INFO ───────────────────────────────────────────────── -->
+        <div id="panel-business" class="hidden">
+
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Business Details</h2>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="label">Business Name</label>
+                        <input type="text" name="businessName" th:value="${settings.businessName}" class="input" placeholder="LUMOO Gambia Ltd">
+                    </div>
+                    <div>
+                        <label class="label">Company Registration No.</label>
+                        <input type="text" name="businessRegNo" th:value="${settings.businessRegNo}" class="input" placeholder="e.g. CR/2024/XXXX">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="label">Business Address</label>
+                        <input type="text" name="businessAddress" th:value="${settings.businessAddress}" class="input" placeholder="e.g. Kairaba Avenue, Banjul, The Gambia">
+                    </div>
+                    <div>
+                        <label class="label">Public Email</label>
+                        <input type="email" name="businessEmail" th:value="${settings.businessEmail}" class="input" placeholder="info@lumoo.my">
+                    </div>
+                    <div>
+                        <label class="label">Phone</label>
+                        <input type="text" name="businessPhone" th:value="${settings.businessPhone}" class="input" placeholder="+220 XXX XXXX">
+                    </div>
+                    <div>
+                        <label class="label">WhatsApp</label>
+                        <input type="text" name="businessWhatsapp" th:value="${settings.businessWhatsapp}" class="input" placeholder="+220 XXX XXXX">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── SUBSCRIBERS ─────────────────────────────────────────────────── -->
+        <div id="panel-subscribers" class="hidden">
+            <div class="bg-white border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400">Newsletter Subscribers</h2>
+                        <p class="text-xs text-gray-500 mt-1" th:text="${#lists.size(subscribers)} + ' total · ' + ${subscribers.stream().filter(s -> s.active).count()} + ' active'"></p>
+                    </div>
+                </div>
+                <table class="w-full text-left" th:if="${!#lists.isEmpty(subscribers)}">
+                    <thead>
+                        <tr class="text-[8px] uppercase tracking-widest text-gray-400 border-b border-gray-100 bg-gray-50">
+                            <th class="px-8 py-3 font-bold">Email</th>
+                            <th class="px-4 py-3 font-bold">Subscribed</th>
+                            <th class="px-4 py-3 font-bold">Status</th>
+                            <th class="px-4 py-3 font-bold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        <tr th:each="sub : ${subscribers}" class="hover:bg-gray-50 transition">
+                            <td class="px-8 py-3 text-xs font-mono" th:text="${sub.email}"></td>
+                            <td class="px-4 py-3 text-[10px] text-gray-400"
+                                th:text="${sub.subscribedAt != null ? #temporals.format(sub.subscribedAt, 'dd MMM yyyy') : '—'}"></td>
+                            <td class="px-4 py-3">
+                                <span th:text="${sub.active ? 'Active' : 'Unsubscribed'}"
+                                      class="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded"
+                                      th:classappend="${sub.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}"></span>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <form th:action="@{/admin/subscriber/{id}/delete(id=${sub.id})}" method="post" class="inline">
+                                    <button type="submit" class="text-[8px] font-black uppercase tracking-widest text-red-400 hover:text-red-600 transition">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${#lists.isEmpty(subscribers)}" class="py-16 text-center">
+                    <p class="text-[9px] text-gray-300 uppercase tracking-widest">No subscribers yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end" th:unless="${#strings.equals(param.tab != null ? param.tab[0] : '', 'subscribers')}">
+            <button type="submit"
+                    class="bg-[#1a2336] text-white px-10 py-3.5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition">
+                Save Settings →
+            </button>
+        </div>
+
+    </form>
+</main>
+
+<style>
+    .label { display:block; font-size:.55rem; font-weight:900; text-transform:uppercase; letter-spacing:.15em; color:#9ca3af; margin-bottom:.5rem; }
+    .input  { width:100%; border-bottom:1px solid #e5e7eb; padding:.5rem 0; font-size:.75rem; background:transparent; outline:none; transition:border-color .2s; }
+    .input:focus { border-color:#4d78c0; }
+</style>
+
+<script>
+    function showTab(name) {
+        ['payment','pdpa','business','subscribers'].forEach(t => {
+            document.getElementById('panel-' + t).classList.add('hidden');
+            var btn = document.getElementById('tab-' + t);
+            btn.classList.remove('border-[#4d78c0]','text-[#4d78c0]');
+            btn.classList.add('border-transparent','text-gray-400');
+        });
+        document.getElementById('panel-' + name).classList.remove('hidden');
+        var active = document.getElementById('tab-' + name);
+        active.classList.add('border-[#4d78c0]','text-[#4d78c0]');
+        active.classList.remove('border-transparent','text-gray-400');
+    }
+    // read ?tab= from URL
+    var urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab) showTab(urlTab);
+</script>
+
+<script th:if="${flashMsg != null}" th:inline="javascript">
+    window._lmFlash = { msg: /*[[${flashMsg}]]*/ '', type: /*[[${flashType ?: 'blue'}]]*/ 'blue' };
+</script>
+<div th:replace="~{fragments/loading :: loading}"></div>
+</body>
+</html>

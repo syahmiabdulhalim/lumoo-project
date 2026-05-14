@@ -17,6 +17,7 @@ public class Order {
     private String paymentMethod;
     private String trackingNumber;
     private String returnReason;
+    private String paymentProofUrl;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -28,7 +29,7 @@ private LocalDateTime createdAt;
     private double adminCommission;
     private double vendorEarnings;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // Guna mappedBy supaya JPA tahu OrderItem yang pegang foreign key
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderItem> items;
 @PrePersist
     protected void onCreate() {
@@ -52,6 +53,9 @@ private LocalDateTime createdAt;
 
     public String getReturnReason() { return returnReason; }
     public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
+
+    public String getPaymentProofUrl() { return paymentProofUrl; }
+    public void setPaymentProofUrl(String paymentProofUrl) { this.paymentProofUrl = paymentProofUrl; }
 
     public User getUser() { return user; } // PULANGKAN 'User', BUKAN 'Object'
     public void setUser(User user) { this.user = user; }
