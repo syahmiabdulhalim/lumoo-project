@@ -40,7 +40,6 @@ public class CartController {
         if (!product.isApproved()) return "redirect:/?error=product_unavailable";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
-        if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
         cartService.addItem(user, product);
         return "redirect:/cart?success_add";
     }

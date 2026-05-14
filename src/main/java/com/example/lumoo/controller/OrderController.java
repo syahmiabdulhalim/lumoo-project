@@ -2,7 +2,6 @@ package com.example.lumoo.controller;
 
 import com.example.lumoo.model.CartItem;
 import com.example.lumoo.model.Order;
-import com.example.lumoo.model.Role;
 import com.example.lumoo.model.User;
 import com.example.lumoo.service.CartService;
 import com.example.lumoo.service.OrderService;
@@ -30,7 +29,6 @@ public class OrderController {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
-        if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart";
         model.addAttribute("cart", items);
@@ -48,7 +46,6 @@ public class OrderController {
 
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
-        if (user.getRole() != Role.USER) return "redirect:/?error=not_a_buyer";
 
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart?error=empty";

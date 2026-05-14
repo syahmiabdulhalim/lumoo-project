@@ -25,7 +25,7 @@
                 <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
                 <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
                 <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
-                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+                <a href="/buyer/dashboard">My Orders</a>
                 <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
                 <form th:action="@{/logout}" method="post" class="inline">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -131,8 +131,8 @@
                     </a>
                 </div>
 
-                <!-- Add to cart — only for logged in USER role -->
-                <div sec:authorize="hasRole('USER')">
+                <!-- Add to cart — all logged in users -->
+                <div sec:authorize="isAuthenticated()">
                     <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit"
@@ -148,13 +148,6 @@
                        class="block w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] text-center hover:bg-[#4d78c0] transition duration-500">
                         Login to Purchase
                     </a>
-                </div>
-
-                <!-- Vendor/admin sees this instead -->
-                <div sec:authorize="hasRole('VENDOR') or hasRole('ADMIN')">
-                    <p class="text-[9px] text-gray-300 uppercase tracking-widest font-bold text-center py-4 border border-dashed border-gray-200">
-                        Only buyers can purchase products
-                    </p>
                 </div>
 
             </div>
@@ -203,7 +196,7 @@
             <div th:if="${param.containsKey('review_success')}" class="max-w-2xl mb-8 border-l-4 border-green-500 bg-green-50 px-4 py-3">
                 <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Review submitted. Thank you!</p>
             </div>
-            <div th:if="${param.containsKey('error')}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
+            <div th:if="${param.error != null and #arrays.length(param.error) > 0}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
                 <p class="text-xs font-bold text-red-600 uppercase tracking-widest"
                    th:text="${param.error[0] == 'already_reviewed' ? 'You have already reviewed this product.' :
                               param.error[0] == 'not_purchased'    ? 'Only buyers who received this product can leave a review.' :

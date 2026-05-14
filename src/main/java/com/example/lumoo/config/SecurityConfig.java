@@ -42,7 +42,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 
     .requestMatchers("/buyer/vendorapply").authenticated()
 
-    .requestMatchers("/buyer/**").hasRole("USER")
+    .requestMatchers("/buyer/**").authenticated()
     .requestMatchers("/cart/**").authenticated()
     .anyRequest().authenticated()
 )
