@@ -1,0 +1,77 @@
+package com.example.lumoo.domain.user;
+
+import com.example.lumoo.domain.user.User;
+import com.example.lumoo.domain.user.UserRepository;
+import com.example.lumoo.infrastructure.email.EmailService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Controller
+public class ForgotPasswordController {
+
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private EmailService emailService;
+
+    @GetMapping("/forgot-password")
+    public String showForgotPage() {
+        return "forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+public String processForgot(@RequestParam String email, Model model) {
+    var userOpt = userRepository.findByEmail(email);
+    if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setTokenExpiry(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+
+        boolean sent = emailService.sendResetEmail(user.getEmail(), token);
+        if (sent) {
+            model.addAttribute("message", "A reset link has been sent to your email. Please check your inbox (and spam folder).");
+        } else {
+            model.addAttribute("error", "We could not send the email right now. Please try again later or contact support at info@lumoo.my.");
+        }
+    } else {
+        model.addAttribute("message", "If an account exists for that email, a reset link has been sent.");
+    }
+    return "forgot-password";
+}
+
+    @GetMapping("/reset-password")
+    public String showResetPage(@RequestParam String token, Model model) {
+        var userOpt = userRepository.findByResetToken(token);
+        if (userOpt.isEmpty() || isTokenExpired(userOpt.get())) {
+            return "redirect:/login?error=invalid_token";
+        }
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
+    @PostMapping("/reset-password")
+    public String handleReset(@RequestParam String token, @RequestParam String password) {
+        var userOpt = userRepository.findByResetToken(token);
+        if (userOpt.isEmpty() || isTokenExpired(userOpt.get())) {
+            return "redirect:/login?error=invalid_token";
+        }
+        User user = userOpt.get();
+        user.setPassword(passwordEncoder.encode(password));
+        user.setResetToken(null); // Clear token lepas guna
+        user.setTokenExpiry(null);
+        userRepository.save(user);
+        return "redirect:/login?reset_success";
+    }
+
+    private boolean isTokenExpired(User user) {
+        return user.getTokenExpiry() == null || user.getTokenExpiry().isBefore(LocalDateTime.now());
+    }
+}
