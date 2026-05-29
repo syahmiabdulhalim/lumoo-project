@@ -83,7 +83,7 @@ public class ModemPayService {
                 "customer_name",  first.getUser().getUsername(),
                 "customer_email", first.getUser().getEmail(),
                 "return_url",     baseUrl + "/buyer/dashboard?paid",
-                "cancel_url",     baseUrl + "/checkout?cancelled",
+                "cancel_url",     baseUrl + "/buyer/dashboard?payment_cancelled",
                 "callback_url",   baseUrl + "/api/payment/webhook",
                 "metadata",       Map.of("order_ids", orderIds),
                 "from_sdk",       false

@@ -212,21 +212,21 @@
             </div>
 
             <!-- Flash messages -->
-            <div th:if="${#request.getParameter('review_success') != null}"
+            <div th:if="${param.containsKey('review_success')}"
                  id="review-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-green-500 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
                 <span class="text-green-500 text-lg">✓</span>
                 <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Review submitted. Thank you!</p>
             </div>
-            <script th:if="${#request.getParameter('review_success') != null}">
+            <script th:if="${param.containsKey('review_success')}">
                 setTimeout(function() {
                     var t = document.getElementById('review-toast');
                     if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
                 }, 4000);
             </script>
-            <div th:if="${#request.getParameter('error') != null}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
+            <div th:if="${param.containsKey('error') and param.error != null}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
                 <p class="text-xs font-bold text-red-600 uppercase tracking-widest"
-                   th:with="errCode=${#request.getParameter('error')}"
+                   th:with="errCode=${param.error != null ? param.error[0] : ''}"
                    th:text="${errCode == 'already_reviewed' ? 'You have already reviewed this product.' :
                               errCode == 'not_purchased'    ? 'Only buyers who received this product can leave a review.' :
                                                              'Invalid submission. Please try again.'}">
@@ -293,13 +293,13 @@
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-10">Send a message to the vendor about this product</p>
 
             <!-- Success toast -->
-            <div th:if="${#request.getParameter('inquiry_sent') != null}"
+            <div th:if="${param.containsKey('inquiry_sent')}"
                  id="inquiry-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
                 <span class="text-[#4d78c0] text-lg">✓</span>
                 <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Message sent! We'll get back to you soon.</p>
             </div>
-            <script th:if="${#request.getParameter('inquiry_sent') != null}">
+            <script th:if="${param.containsKey('inquiry_sent')}">
                 setTimeout(function() {
                     var t = document.getElementById('inquiry-toast');
                     if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
