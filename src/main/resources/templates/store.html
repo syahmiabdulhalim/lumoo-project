@@ -103,10 +103,15 @@
 
             <div th:each="p : ${products}" class="group relative">
                 <a th:href="@{/product/{id}(id=${p.id})}">
-                    <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+                    <div class="aspect-[3/4] overflow-hidden bg-[#f3f3f3] mb-6 relative transition-all duration-700 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
                         <img th:src="${p.imageUrl != null ? p.imageUrl : 'https://placehold.co/600x800/f3f3f3/999?text=No+Image'}"
-                             class="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105 transition duration-700"
+                             th:classappend="${p.stock == 0 ? 'grayscale opacity-60' : 'grayscale-[0.3] group-hover:grayscale-0 group-hover:scale-105'}"
+                             class="w-full h-full object-cover transition duration-700"
                              th:alt="${p.name}">
+                        <span th:if="${p.stock == 0}"
+                              class="absolute top-3 left-3 bg-gray-900 text-white text-[8px] font-black uppercase tracking-widest px-2 py-1">
+                            Out of Stock
+                        </span>
                     </div>
                     <div class="space-y-1">
                         <div class="flex justify-between items-baseline">
@@ -118,8 +123,8 @@
                         </p>
                     </div>
                 </a>
-                <!-- Quick add (buyers only) -->
-                <div class="mt-3" sec:authorize="hasRole('USER')">
+                <!-- Quick add (buyers only, in-stock only) -->
+                <div class="mt-3" th:if="${p.stock > 0}" sec:authorize="hasRole('USER')">
                     <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post">
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit"
@@ -127,6 +132,10 @@
                             Add to Cart +
                         </button>
                     </form>
+                </div>
+                <div th:if="${p.stock == 0}"
+                     class="mt-3 w-full border border-gray-100 py-2 text-[9px] font-black uppercase tracking-widest text-gray-300 text-center cursor-not-allowed">
+                    Out of Stock
                 </div>
             </div>
         </div>

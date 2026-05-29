@@ -210,6 +210,25 @@ public class WebController {
         return "buyer/dashboard";
     }
 
+    @GetMapping("/buyer/order/{id}/pay")
+    public String retryPayment(@PathVariable Long id, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        Order order = orderService.findById(id).orElse(null);
+        if (order == null || user == null || !order.getUser().getId().equals(user.getId()))
+            return "redirect:/buyer/dashboard?error=unauthorized";
+        if (!"AWAITING_PAYMENT".equals(order.getStatus()))
+            return "redirect:/buyer/dashboard";
+        if (!modemPayService.isConfigured())
+            return "redirect:/buyer/dashboard?error=payment_unavailable";
+        try {
+            String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));
+            return "redirect:" + paymentUrl;
+        } catch (Exception e) {
+            return "redirect:/buyer/dashboard?error=payment_failed";
+        }
+    }
+
     @GetMapping("/buyer/order/{id}")
     public String orderDetails(@PathVariable Long id, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";

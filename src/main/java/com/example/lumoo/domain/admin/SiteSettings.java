@@ -27,7 +27,13 @@ public class SiteSettings {
     private String businessAddress;
     private String businessEmail;
     private String businessPhone;
+    private String businessHours;
     private String businessWhatsapp;
+
+    // ── Social media ─────────────────────────────────────────────────────────
+    private String socialFacebook;
+    private String socialInstagram;
+    private String socialTwitter;
 
     // ── PDPA / Privacy (Gambia) ──────────────────────────────────────────────
     private boolean cookieConsentEnabled = true;
@@ -85,8 +91,20 @@ public class SiteSettings {
     public String getBusinessPhone() { return businessPhone; }
     public void setBusinessPhone(String businessPhone) { this.businessPhone = businessPhone; }
 
+    public String getBusinessHours() { return businessHours; }
+    public void setBusinessHours(String businessHours) { this.businessHours = businessHours; }
+
     public String getBusinessWhatsapp() { return businessWhatsapp; }
     public void setBusinessWhatsapp(String businessWhatsapp) { this.businessWhatsapp = businessWhatsapp; }
+
+    public String getSocialFacebook() { return socialFacebook; }
+    public void setSocialFacebook(String socialFacebook) { this.socialFacebook = socialFacebook; }
+
+    public String getSocialInstagram() { return socialInstagram; }
+    public void setSocialInstagram(String socialInstagram) { this.socialInstagram = socialInstagram; }
+
+    public String getSocialTwitter() { return socialTwitter; }
+    public void setSocialTwitter(String socialTwitter) { this.socialTwitter = socialTwitter; }
 
     public boolean isCookieConsentEnabled() { return cookieConsentEnabled; }
     public void setCookieConsentEnabled(boolean cookieConsentEnabled) { this.cookieConsentEnabled = cookieConsentEnabled; }

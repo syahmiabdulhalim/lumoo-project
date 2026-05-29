@@ -149,24 +149,53 @@
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr>
-                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
-                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
-                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
-                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
-                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Image</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Stock</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        <tr th:each="p : ${pendingProducts}" class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-slate-800" th:text="${p.name}">Name</td>
-                            <td class="px-6 py-4 text-slate-500" th:text="${p.category}">Category</td>
-                            <td class="px-6 py-4 text-slate-700 font-mono" th:text="'GMD ' + ${p.price}">Price</td>
-                            <td class="px-6 py-4 text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '-'}">Vendor</td>
-                            <td class="px-6 py-4">
-                                <a th:href="@{/admin/approve-product/{id}(id=${p.id})}"
-                                   class="inline-block bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
-                                    Approve
+                        <tr th:each="p : ${pendingProducts}" class="hover:bg-slate-50 transition-colors align-top">
+                            <!-- Image -->
+                            <td class="px-4 py-4">
+                                <a th:if="${p.imageUrl != null}"
+                                   th:href="${p.imageUrl}" target="_blank"
+                                   class="block w-16 h-16 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                                    <img th:src="${p.imageUrl}" th:alt="${p.name}"
+                                         class="w-full h-full object-cover"
+                                         onerror="this.parentElement.innerHTML='<span class=\'text-slate-300 text-lg flex items-center justify-center h-full\'>🖼</span>'">
                                 </a>
+                                <div th:if="${p.imageUrl == null}"
+                                     class="w-16 h-16 rounded-lg border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-300 text-xs">
+                                    No img
+                                </div>
+                            </td>
+                            <!-- Name + description -->
+                            <td class="px-4 py-4 max-w-[200px]">
+                                <p class="font-semibold text-slate-800 mb-1" th:text="${p.name}">Name</p>
+                                <p th:if="${p.description != null and !p.description.isBlank()}"
+                                   class="text-[11px] text-slate-400 leading-relaxed line-clamp-3"
+                                   th:text="${p.description}">Description</p>
+                            </td>
+                            <td class="px-4 py-4 text-slate-500" th:text="${p.category}">Category</td>
+                            <td class="px-4 py-4 text-slate-700 font-mono whitespace-nowrap" th:text="'GMD ' + ${p.price}">Price</td>
+                            <td class="px-4 py-4 text-slate-500" th:text="${p.stock}">0</td>
+                            <td class="px-4 py-4 text-xs text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '-'}">Vendor</td>
+                            <td class="px-4 py-4">
+                                <div class="flex flex-col gap-2">
+                                    <a th:href="@{/admin/approve-product/{id}(id=${p.id})}"
+                                       class="text-center bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded whitespace-nowrap">
+                                        ✓ Approve
+                                    </a>
+                                    <a th:href="@{/admin/reject-product/{id}(id=${p.id})}"
+                                       class="text-center bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-red-100 transition rounded whitespace-nowrap">
+                                        ✗ Reject
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

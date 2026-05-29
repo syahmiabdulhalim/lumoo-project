@@ -134,10 +134,9 @@ public class UserService {
     }
 
     public List<Notification> getAndMarkNotificationsRead(User user) {
-        List<Notification> notes = notificationRepository.findByUser(user);
+        List<Notification> notes = notificationRepository.findByUserAndIsReadFalse(user);
         if (notes != null && !notes.isEmpty()) {
-            notes.forEach(n -> n.setRead(true));
-            notificationRepository.saveAll(notes);
+            notificationRepository.deleteAll(notes);
         }
         return notes;
     }

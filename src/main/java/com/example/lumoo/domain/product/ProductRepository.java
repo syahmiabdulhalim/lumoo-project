@@ -23,37 +23,40 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true")
     List<Product> findByCategoryIgnoreCaseAndApproved(@org.springframework.data.repository.query.Param("category") String category);
 
+    // ── Public listing queries (approved + in-stock only) ────────────────────
+
     @org.springframework.data.jpa.repository.EntityGraph("Product.withVendor")
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true")
+    @org.springframework.data.jpa.repository.Query(value = "SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true AND p.stock > 0", countQuery = "SELECT COUNT(p) FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true AND p.stock > 0")
     Page<Product> findByCategoryIgnoreCaseAndApprovedPaged(@org.springframework.data.repository.query.Param("category") String category, Pageable pageable);
 
     List<Product> findByApprovedTrue();
 
     @org.springframework.data.jpa.repository.EntityGraph("Product.withVendor")
+    @org.springframework.data.jpa.repository.Query(value = "SELECT p FROM Product p WHERE p.approved = true AND p.stock > 0", countQuery = "SELECT COUNT(p) FROM Product p WHERE p.approved = true AND p.stock > 0")
     Page<Product> findByApprovedTrue(Pageable pageable);
 
     // JOIN FETCH variants — vendor is LAZY, use these when vendor is rendered
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE p.approved = true")
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE p.approved = true AND p.stock > 0")
     List<Product> findByApprovedTrueWithVendor();
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor")
     List<Product> findAllWithVendor();
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true")
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true AND p.stock > 0")
     List<Product> findByCategoryIgnoreCaseAndApprovedWithVendor(@org.springframework.data.repository.query.Param("category") String category);
 
     List<Product> findByApprovedTrueAndNameContainingIgnoreCase(String name);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE p.approved = true AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))")
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p LEFT JOIN FETCH p.vendor WHERE p.approved = true AND p.stock > 0 AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))")
     List<Product> findByApprovedTrueAndNameContainingIgnoreCaseWithVendor(@org.springframework.data.repository.query.Param("kw") String kw);
 
     @org.springframework.data.jpa.repository.EntityGraph("Product.withVendor")
-    @org.springframework.data.jpa.repository.Query(value = "SELECT p FROM Product p WHERE p.approved = true AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))", countQuery = "SELECT COUNT(p) FROM Product p WHERE p.approved = true AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))")
+    @org.springframework.data.jpa.repository.Query(value = "SELECT p FROM Product p WHERE p.approved = true AND p.stock > 0 AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))", countQuery = "SELECT COUNT(p) FROM Product p WHERE p.approved = true AND p.stock > 0 AND LOWER(p.name) LIKE LOWER(CONCAT('%',:kw,'%'))")
     Page<Product> findByApprovedTrueAndNameContainingIgnoreCasePaged(@org.springframework.data.repository.query.Param("kw") String kw, Pageable pageable);
 
     @org.springframework.data.jpa.repository.Query(
-        value = "SELECT * FROM products WHERE approved = 1 AND MATCH(name) AGAINST (:kw IN BOOLEAN MODE) LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}",
-        countQuery = "SELECT COUNT(*) FROM products WHERE approved = 1 AND MATCH(name) AGAINST (:kw IN BOOLEAN MODE)",
+        value = "SELECT * FROM products WHERE approved = 1 AND stock > 0 AND MATCH(name) AGAINST (:kw IN BOOLEAN MODE) LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}",
+        countQuery = "SELECT COUNT(*) FROM products WHERE approved = 1 AND stock > 0 AND MATCH(name) AGAINST (:kw IN BOOLEAN MODE)",
         nativeQuery = true)
     Page<Product> fullTextSearch(@org.springframework.data.repository.query.Param("kw") String kw, Pageable pageable);
 

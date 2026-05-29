@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    List<Review> findByProduct(Product product);
+    @org.springframework.data.jpa.repository.Query("SELECT r FROM Review r JOIN FETCH r.user WHERE r.product.id = :productId ORDER BY r.createdAt DESC")
+    List<Review> findByProductId(@org.springframework.data.repository.query.Param("productId") Long productId);
     boolean existsByUserAndProduct(User user, Product product);
 }

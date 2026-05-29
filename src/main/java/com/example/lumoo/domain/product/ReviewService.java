@@ -18,7 +18,7 @@ public class ReviewService {
     @Autowired private OrderItemRepository orderItemRepository;
 
     public List<Review> getByProduct(Product product) {
-        return reviewRepository.findByProduct(product);
+        return reviewRepository.findByProductId(product.getId());
     }
 
     public double getAverageRating(List<Review> reviews) {

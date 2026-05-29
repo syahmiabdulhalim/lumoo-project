@@ -204,8 +204,24 @@
                         <input type="text" name="businessPhone" th:value="${settings.businessPhone}" class="input" placeholder="+220 XXX XXXX">
                     </div>
                     <div>
+                        <label class="label">Business Hours</label>
+                        <input type="text" name="businessHours" th:value="${settings.businessHours}" class="input" placeholder="Mon–Fri 8am–6pm · Sat 9am–3pm">
+                    </div>
+                    <div>
                         <label class="label">WhatsApp</label>
                         <input type="text" name="businessWhatsapp" th:value="${settings.businessWhatsapp}" class="input" placeholder="+220 XXX XXXX">
+                    </div>
+                    <div>
+                        <label class="label">Facebook URL</label>
+                        <input type="url" name="socialFacebook" th:value="${settings.socialFacebook}" class="input" placeholder="https://facebook.com/lumoogambia">
+                    </div>
+                    <div>
+                        <label class="label">Instagram URL</label>
+                        <input type="url" name="socialInstagram" th:value="${settings.socialInstagram}" class="input" placeholder="https://instagram.com/lumoogambia">
+                    </div>
+                    <div>
+                        <label class="label">X / Twitter URL</label>
+                        <input type="url" name="socialTwitter" th:value="${settings.socialTwitter}" class="input" placeholder="https://x.com/lumoogambia">
                     </div>
                 </div>
             </div>

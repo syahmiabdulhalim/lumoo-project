@@ -44,4 +44,28 @@ public class CartService {
         cartRepository.delete(item);
         return true;
     }
+
+    public enum UpdateResult { UPDATED, REMOVED, NOT_FOUND, UNAUTHORIZED, MAX_STOCK }
+
+    public UpdateResult updateQuantity(Long cartItemId, User user, int delta) {
+        CartItem item = cartRepository.findById(cartItemId).orElse(null);
+        if (item == null) return UpdateResult.NOT_FOUND;
+        if (!item.getUser().getId().equals(user.getId())) return UpdateResult.UNAUTHORIZED;
+
+        int newQty = item.getQuantity() + delta;
+
+        if (newQty <= 0) {
+            cartRepository.delete(item);
+            return UpdateResult.REMOVED;
+        }
+
+        // Cap at available stock
+        if (item.getProduct() != null && newQty > item.getProduct().getStock()) {
+            return UpdateResult.MAX_STOCK;
+        }
+
+        item.setQuantity(newQty);
+        cartRepository.save(item);
+        return UpdateResult.UPDATED;
+    }
 }

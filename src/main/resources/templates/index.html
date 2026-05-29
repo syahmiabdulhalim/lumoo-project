@@ -24,7 +24,7 @@
     <!-- TOP INFO BAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
         <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
-        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+        <span th:text="${siteSettings?.businessHours ?: 'Mon–Fri 8am–6pm | Sat 9am–3pm'}">Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
     <!-- NAV -->

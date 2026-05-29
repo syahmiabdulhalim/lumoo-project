@@ -45,6 +45,21 @@ public class CartController {
         return "redirect:/cart?success_add";
     }
 
+    @PostMapping("/cart/update/{id}")
+    public String updateQty(@PathVariable Long id,
+                            @RequestParam int delta,
+                            Principal principal) {
+        if (principal == null) return "redirect:/login";
+        User user = userService.findByEmail(principal.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+        CartService.UpdateResult result = cartService.updateQuantity(id, user, delta);
+        return switch (result) {
+            case MAX_STOCK -> "redirect:/cart?error=max_stock";
+            case UNAUTHORIZED -> "redirect:/cart?error=unauthorized";
+            default -> "redirect:/cart";
+        };
+    }
+
     @GetMapping("/cart/remove/{id}")
     public String removeFromCart(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";

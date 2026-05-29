@@ -30,13 +30,22 @@
         </header>
 
 
-        <!-- Notifications -->
-        <div th:if="${notifications != null and !#lists.isEmpty(notifications)}" class="mb-10 bg-blue-50 border-l-4 border-[#4d78c0] px-6 py-4">
-            <p class="text-[8px] text-[#4d78c0] font-black uppercase tracking-widest mb-3">Notifications</p>
-            <div class="space-y-1">
-                <p th:each="n : ${notifications}" th:text="${n.message}" class="text-[10px] text-blue-700"></p>
+        <!-- Notifications — show once, auto-dismiss after 5s -->
+        <div th:if="${notifications != null and !#lists.isEmpty(notifications)}"
+             id="notif-toast"
+             class="fixed top-6 right-6 z-50 max-w-sm w-full space-y-2 transition-all duration-500">
+            <div th:each="n : ${notifications}"
+                 class="flex items-start gap-3 bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-4 py-3">
+                <span class="text-base shrink-0" th:text="${#strings.startsWith(n.message, '✅') ? '' : '🔔'}"></span>
+                <p class="text-xs text-slate-700 leading-relaxed" th:text="${n.message}">Message</p>
             </div>
         </div>
+        <script th:if="${notifications != null and !#lists.isEmpty(notifications)}">
+            setTimeout(function() {
+                var t = document.getElementById('notif-toast');
+                if (t) { t.style.opacity = '0'; t.style.transform = 'translateY(-8px)'; setTimeout(function(){ t.remove(); }, 500); }
+            }, 5000);
+        </script>
 
         <!-- Vendor banner — not yet applied -->
         <div th:unless="${alreadyApplied}"
@@ -83,6 +92,16 @@
                                            o.status == 'RETURN_REQUESTED'  ? 'bg-orange-100 text-orange-600' :
                                                                               'bg-blue-100 text-blue-700'}">
                     </span>
+                </div>
+
+                <!-- Complete payment nudge — ModemPay -->
+                <div th:if="${o.status == 'AWAITING_PAYMENT'}"
+                     class="mb-4 bg-blue-50 border border-blue-200 px-4 py-3 flex items-center justify-between">
+                    <p class="text-[8px] font-black uppercase tracking-widest text-blue-700">Payment not completed — continue to payment portal</p>
+                    <a th:href="@{/buyer/order/{id}/pay(id=${o.id})}"
+                       class="text-[8px] font-black uppercase tracking-widest text-white bg-[#4d78c0] px-3 py-1.5 shrink-0 ml-4 hover:bg-[#1a2336] transition">
+                        Pay Now →
+                    </a>
                 </div>
 
                 <!-- Upload proof nudge -->
