@@ -29,7 +29,7 @@ class InquiryServiceTest {
         product.setId(1L);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        inquiryService.send(1L, "Ali", "ali@test.com", "Is this available?");
+        inquiryService.send(1L, "Ali", "ali@test.com", "Product Inquiry", "Is this available?");
 
         ArgumentCaptor<Inquiry> captor = ArgumentCaptor.forClass(Inquiry.class);
         verify(inquiryRepository).save(captor.capture());
@@ -45,7 +45,7 @@ class InquiryServiceTest {
     void send_doesNothing_whenProductNotFound() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        inquiryService.send(99L, "Ali", "ali@test.com", "Hello");
+        inquiryService.send(99L, "Ali", "ali@test.com", "Hello", "Hello");
 
         verify(inquiryRepository, never()).save(any());
     }

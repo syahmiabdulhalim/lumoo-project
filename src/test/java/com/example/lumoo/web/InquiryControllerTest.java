@@ -29,9 +29,10 @@ class InquiryControllerTest {
         mvc.perform(post("/inquiry/send/1")
                         .param("buyerName", "Ali")
                         .param("email", "ali@test.com")
+                        .param("subject", "Product Inquiry")
                         .param("message", "Is this available?"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(header().string("Location", "/?inquiry_sent"));
-        verify(inquiryService).send(1L, "Ali", "ali@test.com", "Is this available?");
+                .andExpect(header().string("Location", "/product/1?inquiry_sent"));
+        verify(inquiryService).send(1L, "Ali", "ali@test.com", "Product Inquiry", "Is this available?");
     }
 }
