@@ -46,6 +46,17 @@
                     <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     <p class="text-sm text-slate-400">No products listed</p>
                 </div>
+                <div th:if="${inventoryTotalPages > 1}"
+                     class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                    <a th:if="${inventoryCurrentPage > 0}"
+                       th:href="@{/admin/sections/inventory(page=${inventoryCurrentPage - 1})}"
+                       class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">← Previous</a>
+                    <span class="text-xs text-slate-400 mx-auto"
+                          th:text="'Page ' + (${inventoryCurrentPage} + 1) + ' of ' + ${inventoryTotalPages}"></span>
+                    <a th:if="${inventoryCurrentPage + 1 < inventoryTotalPages}"
+                       th:href="@{/admin/sections/inventory(page=${inventoryCurrentPage + 1})}"
+                       class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">Next →</a>
+                </div>
             </div>
         </div>
     </section>

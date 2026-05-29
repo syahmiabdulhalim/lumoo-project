@@ -93,6 +93,19 @@
                 <p class="text-sm text-slate-400 mb-4">No blog posts yet.</p>
                 <a href="/admin/blog/new" class="text-sm font-bold text-[#4d78c0] hover:underline">Create your first post →</a>
             </div>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}"
+                 class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/admin/blog(page=${currentPage - 1})}"
+                   class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">← Previous</a>
+                <span class="text-xs text-slate-400 mx-auto"
+                      th:text="'Page ' + (${currentPage} + 1) + ' of ' + ${totalPages}"></span>
+                <a th:if="${currentPage + 1 < totalPages}"
+                   th:href="@{/admin/blog(page=${currentPage + 1})}"
+                   class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">Next →</a>
+            </div>
         </div>
     </main>
 </body>

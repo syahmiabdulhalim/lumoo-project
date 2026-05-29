@@ -130,6 +130,7 @@ public class WebController {
                 model.addAttribute("canReview", reviewService.canReview(user, product));
                 model.addAttribute("alreadyReviewed", reviewService.hasAlreadyReviewed(user, product));
                 model.addAttribute("hasPurchased", reviewService.hasPurchased(user, product));
+                model.addAttribute("currentUser", user);
             });
         }
         return "product-detail";

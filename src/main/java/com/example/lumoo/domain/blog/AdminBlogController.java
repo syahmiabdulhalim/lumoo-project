@@ -25,9 +25,15 @@ public class AdminBlogController {
         return null;
     }
 
+    private static final int PAGE_SIZE = 15;
+
     @GetMapping({"", "/"})
-    public String list(Model model) {
-        model.addAttribute("posts", blogService.getAll());
+    public String list(Model model,
+                       @RequestParam(defaultValue = "0") int page) {
+        var postsPage = blogService.getAllPage(page, PAGE_SIZE);
+        model.addAttribute("posts", postsPage.getContent());
+        model.addAttribute("currentPage", postsPage.getNumber());
+        model.addAttribute("totalPages", postsPage.getTotalPages());
         return "admin/blog-list";
     }
 

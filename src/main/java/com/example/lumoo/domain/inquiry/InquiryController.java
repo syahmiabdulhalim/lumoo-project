@@ -15,8 +15,9 @@ public class InquiryController {
     public String sendInquiry(@PathVariable Long productId,
                               @RequestParam String buyerName,
                               @RequestParam String email,
+                              @RequestParam(required = false) String subject,
                               @RequestParam String message) {
-        inquiryService.send(productId, buyerName, email, message);
-        return "redirect:/?inquiry_sent";
+        inquiryService.send(productId, buyerName, email, subject, message);
+        return "redirect:/product/" + productId + "?inquiry_sent";
     }
 }

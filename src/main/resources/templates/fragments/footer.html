@@ -163,18 +163,21 @@
                     </a>
                 </div>
 
-                <!-- Payment badges -->
-                <div class="flex items-center gap-3">
+                <!-- Payment badges — shown based on configured methods in admin settings -->
+                <div class="flex items-center flex-wrap gap-2">
                     <span class="text-[8px] text-gray-600 uppercase tracking-widest mr-1">We accept</span>
-                    <span class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">VISA</span>
-                    <span class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">MC</span>
-                    <span class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">WAVE</span>
-                    <span class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">AFRI-PAY</span>
+                    <span th:if="${siteSettings?.bankAccountNumber}"
+                          class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">BANK</span>
+                    <span th:if="${siteSettings?.afrimoneyNumber}"
+                          class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">AFRIMONEY</span>
+                    <span th:if="${siteSettings?.qmoneyNumber}"
+                          class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">QMONEY</span>
                     <span class="border border-gray-700 rounded px-2 py-1 text-[9px] font-black text-gray-400">CASH</span>
                 </div>
 
                 <!-- Copyright -->
-                <p class="text-[9px] text-gray-600 uppercase tracking-[0.3em] text-center md:text-right">
+                <p class="text-[9px] text-gray-600 uppercase tracking-[0.3em] text-center md:text-right"
+                   th:text="${siteSettings?.copyrightText ?: '© 2026 LUMOO Gambia. All rights reserved.'}">
                     © 2026 LUMOO Gambia. All rights reserved.
                 </p>
 

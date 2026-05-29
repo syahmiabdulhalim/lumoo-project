@@ -50,6 +50,11 @@ public class BlogService {
         return repo.findAllByOrderByCreatedAtDesc();
     }
 
+    public Page<BlogPost> getAllPage(int page, int size) {
+        return repo.findAll(PageRequest.of(page, size,
+            org.springframework.data.domain.Sort.by("createdAt").descending()));
+    }
+
     public Optional<BlogPost> findById(Long id) {
         return repo.findById(id);
     }

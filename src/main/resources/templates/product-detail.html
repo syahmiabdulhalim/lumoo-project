@@ -212,14 +212,24 @@
             </div>
 
             <!-- Flash messages -->
-            <div th:if="${param.containsKey('review_success')}" class="max-w-2xl mb-8 border-l-4 border-green-500 bg-green-50 px-4 py-3">
-                <p class="text-xs font-bold text-green-700 uppercase tracking-widest">Review submitted. Thank you!</p>
+            <div th:if="${#request.getParameter('review_success') != null}"
+                 id="review-toast"
+                 class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-green-500 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
+                <span class="text-green-500 text-lg">✓</span>
+                <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Review submitted. Thank you!</p>
             </div>
-            <div th:if="${param.error != null and #arrays.length(param.error) > 0}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
+            <script th:if="${#request.getParameter('review_success') != null}">
+                setTimeout(function() {
+                    var t = document.getElementById('review-toast');
+                    if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
+                }, 4000);
+            </script>
+            <div th:if="${#request.getParameter('error') != null}" class="max-w-2xl mb-8 border-l-4 border-red-400 bg-red-50 px-4 py-3">
                 <p class="text-xs font-bold text-red-600 uppercase tracking-widest"
-                   th:text="${param.error[0] == 'already_reviewed' ? 'You have already reviewed this product.' :
-                              param.error[0] == 'not_purchased'    ? 'Only buyers who received this product can leave a review.' :
-                                                                     'Invalid submission. Please try again.'}">
+                   th:with="errCode=${#request.getParameter('error')}"
+                   th:text="${errCode == 'already_reviewed' ? 'You have already reviewed this product.' :
+                              errCode == 'not_purchased'    ? 'Only buyers who received this product can leave a review.' :
+                                                             'Invalid submission. Please try again.'}">
                 </p>
             </div>
 
@@ -268,12 +278,76 @@
 
             <!-- Never purchased -->
             <div th:if="${canReview == null or (canReview == false and hasPurchased != true)}"
-                 class="max-w-2xl py-8 border border-dashed border-gray-200 text-center">
+                 class="max-w-2xl py-8 border border-dashed border-gray-200 text-center mx-auto">
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-2">Only verified buyers can review.</p>
                 <p class="text-[8px] text-gray-300 uppercase tracking-widest">Purchase this product to leave a review.</p>
             </div>
 
         </div>
+
+        <!-- Inquiry / Ask a Question -->
+        <div class="border-t border-gray-100 pt-16 mt-8">
+            <h2 class="text-3xl font-light tracking-tighter mb-2">
+                Ask a <span class="font-black italic text-[#4d78c0]">Question.</span>
+            </h2>
+            <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-10">Send a message to the vendor about this product</p>
+
+            <!-- Success toast -->
+            <div th:if="${#request.getParameter('inquiry_sent') != null}"
+                 id="inquiry-toast"
+                 class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
+                <span class="text-[#4d78c0] text-lg">✓</span>
+                <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Message sent! We'll get back to you soon.</p>
+            </div>
+            <script th:if="${#request.getParameter('inquiry_sent') != null}">
+                setTimeout(function() {
+                    var t = document.getElementById('inquiry-toast');
+                    if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
+                }, 4000);
+            </script>
+
+            <form th:action="@{/inquiry/send/{id}(id=${product.id})}" method="post"
+                  class="max-w-2xl space-y-6">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Your Name *</label>
+                        <input type="text" name="buyerName" required
+                               th:value="${currentUser?.fullName ?: currentUser?.username}"
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="John Smith">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Email *</label>
+                        <input type="email" name="email" required
+                               th:value="${currentUser?.email}"
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="you@email.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Subject</label>
+                    <input type="text" name="subject"
+                           th:value="${'Inquiry about ' + product.name}"
+                           class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none">
+                </div>
+
+                <div>
+                    <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Message *</label>
+                    <textarea name="message" required rows="4"
+                              class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none resize-none"
+                              placeholder="e.g. Do you offer bulk pricing? What is the minimum order quantity?"></textarea>
+                </div>
+
+                <button type="submit"
+                        class="bg-[#1a2336] text-white px-10 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-[#4d78c0] transition duration-300">
+                    Send Message →
+                </button>
+            </form>
+        </div>
+
     </main>
 
     <div th:replace="~{fragments/footer :: footer}"></div>

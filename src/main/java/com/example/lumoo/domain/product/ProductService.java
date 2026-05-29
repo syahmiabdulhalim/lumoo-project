@@ -35,6 +35,12 @@ public class ProductService {
         return productRepository.findAllWithVendor();
     }
 
+    public org.springframework.data.domain.Page<Product> getAllPage(int page, int size) {
+        return productRepository.findAll(
+            org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("id").descending()));
+    }
+
     @Cacheable(value = "products", key = "'all-approved'")
     public List<Product> getAllApprovedList() {
         return productRepository.findByApprovedTrueWithVendor();

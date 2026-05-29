@@ -73,15 +73,26 @@ public class AdminController {
         return "admin/sections/moderation :: content";
     }
 
+    private static final int INVENTORY_PAGE_SIZE = 25;
+    private static final int USERS_PAGE_SIZE = 25;
+
     @GetMapping("/sections/inventory")
-    public String sectionInventory(Model model) {
-        model.addAttribute("products", productService.getAll());
+    public String sectionInventory(Model model,
+                                   @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
+        var productsPage = productService.getAllPage(page, INVENTORY_PAGE_SIZE);
+        model.addAttribute("products", productsPage.getContent());
+        model.addAttribute("inventoryCurrentPage", productsPage.getNumber());
+        model.addAttribute("inventoryTotalPages", productsPage.getTotalPages());
         return "admin/sections/inventory :: content";
     }
 
     @GetMapping("/sections/users")
-    public String sectionUsers(Model model) {
-        model.addAttribute("users", userService.getAll());
+    public String sectionUsers(Model model,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
+        var usersPage = userService.getPage(page, USERS_PAGE_SIZE);
+        model.addAttribute("users", usersPage.getContent());
+        model.addAttribute("usersCurrentPage", usersPage.getNumber());
+        model.addAttribute("usersTotalPages", usersPage.getTotalPages());
         model.addAttribute("inquiries", inquiryService.getAll());
         return "admin/sections/users :: content";
     }

@@ -49,6 +49,12 @@ public class UserService {
 
     public long countAll() { return userRepository.count(); }
 
+    public org.springframework.data.domain.Page<User> getPage(int page, int size) {
+        return userRepository.findAll(
+            org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("id").descending()));
+    }
+
     public void save(User user) {
         userRepository.save(user);
     }

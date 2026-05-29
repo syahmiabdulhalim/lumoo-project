@@ -30,6 +30,8 @@ public class SiteSettings {
     private String businessHours;
     private String businessWhatsapp;
 
+    private String copyrightText;
+
     // ── Social media ─────────────────────────────────────────────────────────
     private String socialFacebook;
     private String socialInstagram;
@@ -96,6 +98,9 @@ public class SiteSettings {
 
     public String getBusinessWhatsapp() { return businessWhatsapp; }
     public void setBusinessWhatsapp(String businessWhatsapp) { this.businessWhatsapp = businessWhatsapp; }
+
+    public String getCopyrightText() { return copyrightText; }
+    public void setCopyrightText(String copyrightText) { this.copyrightText = copyrightText; }
 
     public String getSocialFacebook() { return socialFacebook; }
     public void setSocialFacebook(String socialFacebook) { this.socialFacebook = socialFacebook; }
