@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <section id="inventory">
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-800">Products</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">All listed products on the platform</p>
+                </div>
+                <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(products)} + ' items'">0 items</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr th:each="p : ${products}" class="table-row">
+                            <td class="px-6 py-4 font-medium text-slate-800" th:text="${p.name}">Product Name</td>
+                            <td class="px-6 py-4">
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md" th:text="${p.category}">Category</span>
+                            </td>
+                            <td class="px-6 py-4 mono text-sm font-semibold text-slate-700" th:text="${'GMD ' + p.price}">GMD 0</td>
+                            <td class="px-6 py-4 text-xs text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '—'}">vendor</td>
+                            <td class="px-6 py-4">
+                                <button type="button" class="btn-lm-delete text-slate-300 hover:text-red-500 transition-colors"
+                                   data-title="Delete Product"
+                                   th:data-msg="|Remove '${p.name}' permanently from the marketplace?|"
+                                   th:data-url="@{/admin/delete-product/{id}(id=${p.id})}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${products == null || products.empty}" class="text-center py-16">
+                    <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    <p class="text-sm text-slate-400">No products listed</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

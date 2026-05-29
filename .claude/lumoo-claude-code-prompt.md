@@ -2635,3 +2635,459 @@ Before considering any class complete, verify:
 - Can I test OrderService without starting a real database?
 - Does my controller have any business logic in it? (Should be: No)
 - Does my GlobalExceptionHandler catch every custom exception?
+
+---
+
+## Dependency Security & License Compliance — Mandatory Before Go-Live
+
+> ⚠️ LESSON FROM COURT: A developer was charged under PDPA 2024 (Amendment) partly
+> because they installed packages with backdoor malicious scripts suggested by AI,
+> and used GPL-licensed code with copyright notices removed.
+> These two sections prevent that from happening to lumoo.my.
+
+---
+
+### SECTION A — Dependency Security Scanning
+
+#### A1 — OWASP Dependency Check (pom.xml)
+
+Add this plugin to scan all Maven dependencies for known CVEs (Common Vulnerabilities):
+
+```xml
+<!-- pom.xml — add to <build><plugins> section -->
+<plugin>
+    <groupId>org.owasp</groupId>
+    <artifactId>dependency-check-maven</artifactId>
+    <version>9.0.9</version>
+    <configuration>
+        <failBuildOnCVSS>7</failBuildOnCVSS> <!-- Fail build if CVE score >= 7 (High) -->
+        <suppressionFile>owasp-suppressions.xml</suppressionFile>
+        <formats>
+            <format>HTML</format>
+            <format>JSON</format>
+        </formats>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>check</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run manually:
+```bash
+./mvnw org.owasp:dependency-check-maven:check
+# Report generated at: target/dependency-check-report.html
+# Open in browser — review ALL HIGH and CRITICAL findings before deploying
+```
+
+---
+
+#### A2 — License Compliance Plugin (pom.xml)
+
+Automatically checks that all dependencies use licenses safe for commercial use:
+
+```xml
+<!-- pom.xml — add to <build><plugins> section -->
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>license-maven-plugin</artifactId>
+    <version>2.3.0</version>
+    <configuration>
+        <!-- Licenses ALLOWED for commercial use -->
+        <includedLicenses>
+            MIT License|
+            Apache Software License - Version 2.0|
+            Apache License, Version 2.0|
+            BSD License|
+            BSD 2-Clause License|
+            BSD 3-Clause License|
+            Eclipse Public License - v 1.0|
+            Eclipse Public License - v 2.0|
+            CDDL + GPLv2 with classpath exception|
+            The JSON License
+        </includedLicenses>
+        <!-- Fail build if GPL or other copyleft found -->
+        <failOnBlacklist>true</failOnBlacklist>
+        <excludedGroups>com.lumoo</excludedGroups> <!-- exclude your own code -->
+    </configuration>
+    <executions>
+        <execution>
+            <id>check-licenses</id>
+            <phase>verify</phase>
+            <goals>
+                <goal>check-file-header</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run manually:
+```bash
+# List all dependency licenses
+./mvnw license:add-third-party
+
+# Check for forbidden licenses
+./mvnw license:check
+
+# Output file: target/generated-sources/license/THIRD-PARTY.txt
+# Review this file — every dependency and its license listed
+```
+
+---
+
+#### A3 — GitHub Actions Security Pipeline (.github/workflows/security.yml)
+
+Generate this file — runs automatically on every push and pull request:
+
+```yaml
+# .github/workflows/security.yml
+name: Security & License Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Every Monday 2am — catch new CVEs on existing deps
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    name: OWASP Dependency Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+      - name: Run OWASP Dependency Check
+        run: ./mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}  # Get free at nvd.nist.gov/developers
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()  # Upload even if build fails
+        with:
+          name: owasp-report-${{ github.run_number }}
+          path: target/dependency-check-report.html
+          retention-days: 30
+
+  license-check:
+    runs-on: ubuntu-latest
+    name: License Compliance Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Check dependency licenses
+        run: ./mvnw license:add-third-party license:check
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-report-${{ github.run_number }}
+          path: target/generated-sources/license/THIRD-PARTY.txt
+          retention-days: 30
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    name: Unit Tests & Coverage
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run tests with coverage
+        run: ./mvnw test jacoco:report
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: target/site/jacoco/
+          retention-days: 30
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    name: Secret & Credential Scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history — scan all commits
+
+      - name: Scan for hardcoded secrets (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Fails build if API keys, passwords, or secrets found in any commit
+```
+
+---
+
+#### A4 — Pre-Commit Hook (catches secrets before they reach GitHub)
+
+Generate this file to prevent secrets from ever being committed:
+
+```bash
+# .git/hooks/pre-commit  (or use pre-commit framework)
+#!/bin/sh
+
+echo "Running pre-commit security checks..."
+
+# 1. Check for hardcoded secrets patterns
+SECRETS_FOUND=0
+
+# Check for common secret patterns
+if git diff --cached --name-only | xargs grep -l \
+    -e "password\s*=\s*['\"][^'\"]" \
+    -e "api[_-]key\s*=\s*['\"][^'\"]" \
+    -e "secret\s*=\s*['\"][^'\"]" \
+    -e "APP_KEY=base64:" \
+    -e "sk_live_" \
+    -e "pk_live_" \
+    2>/dev/null; then
+    echo "❌ BLOCKED: Possible hardcoded secret detected in staged files"
+    echo "   Move secrets to .env file and reference via environment variables"
+    SECRETS_FOUND=1
+fi
+
+# 2. Prevent .env from being committed
+if git diff --cached --name-only | grep -q "^\.env$"; then
+    echo "❌ BLOCKED: Attempt to commit .env file detected"
+    echo "   .env must never be committed. Check your .gitignore"
+    SECRETS_FOUND=1
+fi
+
+# 3. Prevent application-prod.properties from being committed
+if git diff --cached --name-only | grep -q "application-prod.properties"; then
+    echo "❌ BLOCKED: Attempt to commit production properties file"
+    SECRETS_FOUND=1
+fi
+
+if [ $SECRETS_FOUND -eq 1 ]; then
+    echo ""
+    echo "Commit blocked for security reasons."
+    echo "Fix the issues above before committing."
+    exit 1
+fi
+
+echo "✅ Pre-commit security checks passed"
+exit 0
+```
+
+Setup instructions to include in README:
+
+```bash
+# Make pre-commit hook executable (run once after cloning)
+chmod +x .git/hooks/pre-commit
+```
+
+---
+
+#### A5 — Manual Checklist Before Installing Any New Package
+
+Generate this as `DEPENDENCY_REVIEW.md` in the project root:
+
+```markdown
+# Dependency Review Checklist
+
+## Before installing ANY new package (npm install / composer require / mvn add):
+
+### Red flags — DO NOT install if any of these are true:
+- [ ] Package has < 1,000 weekly downloads
+- [ ] Last published/updated > 2 years ago
+- [ ] No GitHub repository linked
+- [ ] GitHub repo has < 100 stars (for non-niche libraries)
+- [ ] No maintainer activity in > 1 year
+- [ ] Package name is similar to a popular package (typosquatting risk)
+- [ ] AI suggested this package without you verifying it independently
+
+### Verification steps:
+1. Check Snyk Advisor: https://snyk.io/advisor/
+   → Score must be > 70/100
+2. Check GitHub repository directly
+   → Look for recent commits, open issues, license
+3. Check license is MIT, Apache 2.0, or BSD
+   → GPL = DANGER for commercial projects
+4. Run OWASP check after adding:
+   → ./mvnw org.owasp:dependency-check-maven:check
+5. Read the package source code for any new package
+   → Especially: network calls, file system access, eval() usage
+
+## Current approved dependencies (update when adding new ones):
+| Package | Version | License | Snyk Score | Approved By | Date |
+|---------|---------|---------|-----------|-------------|------|
+| spring-boot-starter | 3.x | Apache 2.0 | 98 | Syahmi | 2026-01-01 |
+| mysql-connector-j | 8.x | GPL+CE | Apache 2.0 | Syahmi | 2026-01-01 |
+| jjwt-api | 0.11.5 | Apache 2.0 | 92 | Syahmi | 2026-01-01 |
+| bucket4j-core | 7.6.0 | Apache 2.0 | 88 | Syahmi | 2026-01-01 |
+| [new package] | [ver] | [license] | [score] | [name] | [date] |
+```
+
+---
+
+### SECTION B — What These Checks Catch (Real Court Case Reference)
+
+Based on forensic findings from an actual Malaysian court case (2026):
+
+```
+Finding 1 — SQL Injection (DB::raw() string concat)
+  → Caught by: OWASP Dependency Check (flagged vulnerable Laravel version)
+  → Prevented by: JPA parameterised queries in lumoo.my ✅
+
+Finding 2 — Path Traversal (storage_path concatenation)
+  → Caught by: Code review + input validation
+  → Prevented by: @Valid + Spring Security in lumoo.my ✅
+
+Finding 3 — Race condition (no transaction locks)
+  → Caught by: Integration tests
+  → Prevented by: @Lock(PESSIMISTIC_WRITE) + @Transactional ✅
+
+Finding 4 — Hardcoded credentials in GitHub
+  → Caught by: Gitleaks secret scan in CI + pre-commit hook
+  → Prevented by: .env + .gitignore + pre-commit hook ✅
+
+Finding 5 — No audit trail
+  → Caught by: Forensic review (nothing to find = problem)
+  → Prevented by: audit_logs table (append-only) ✅
+
+Finding 6 — No testing evidence
+  → Caught by: No test files found in repository
+  → Prevented by: JUnit tests + CI pipeline with reports ✅
+
+Finding 7 — Backdoor package from AI suggestion
+  → Caught by: OWASP Dependency Check + Gitleaks
+  → Prevented by: DEPENDENCY_REVIEW.md checklist ✅ (NEW)
+
+Finding 8 — GPL code with copyright removed
+  → Caught by: License compliance plugin
+  → Prevented by: license-maven-plugin + license check CI job ✅ (NEW)
+```
+
+---
+
+### SECTION C — Evidence Package for Legal Defence
+
+The CI/CD pipeline above automatically generates an **evidence package** on every build:
+
+```
+artifacts/
+├── owasp-report-{build}.html      ← Proves you checked for vulnerabilities
+├── license-report-{build}.txt     ← Proves all dependencies are legally compliant
+├── coverage-report-{build}/       ← Proves the system was tested
+└── test-results-{build}.xml       ← Proves tests passed before go-live
+```
+
+**If ever called as defendant (not expert witness):**
+- "Did you check for vulnerabilities?" → "Yes — OWASP report from build #47, dated X"
+- "Did you test the system?" → "Yes — 94% coverage, JUnit reports from build #47"
+- "Are your dependencies legally compliant?" → "Yes — license report shows all Apache 2.0/MIT"
+- "Were there secrets in your code?" → "No — Gitleaks scan on every commit, zero findings"
+
+This is the difference between a developer who gets convicted and one who walks free.
+
+---
+
+### SECTION D — Additional pom.xml Plugins to Add
+
+```xml
+<!-- JaCoCo — test coverage reporting -->
+<plugin>
+    <groupId>org.jacoco</groupId>
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.11</version>
+    <configuration>
+        <rules>
+            <rule>
+                <element>CLASS</element>
+                <limits>
+                    <!-- Minimum 70% line coverage required -->
+                    <limit>
+                        <counter>LINE</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>0.70</minimum>
+                    </limit>
+                </limits>
+            </rule>
+        </rules>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>prepare-agent</goal>
+                <goal>report</goal>
+                <goal>check</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
+<!-- SpotBugs — static code analysis for bug patterns -->
+<plugin>
+    <groupId>com.github.spotbugs</groupId>
+    <artifactId>spotbugs-maven-plugin</artifactId>
+    <version>4.8.3.0</version>
+    <configuration>
+        <effort>Max</effort>
+        <threshold>Medium</threshold>
+        <failOnError>true</failOnError>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>check</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+---
+
+### Security Scanning Checklist — Before Every Go-Live
+
+- [ ] `./mvnw org.owasp:dependency-check-maven:check` — zero HIGH or CRITICAL CVEs
+- [ ] `./mvnw license:add-third-party` — all licenses listed and reviewed
+- [ ] `./mvnw license:check` — no GPL or forbidden licenses
+- [ ] `./mvnw test jacoco:report` — minimum 70% test coverage
+- [ ] `./mvnw spotbugs:check` — no HIGH severity bug patterns
+- [ ] Gitleaks scan on full git history — zero secrets detected
+- [ ] DEPENDENCY_REVIEW.md updated with all packages
+- [ ] All new packages checked on snyk.io/advisor (score > 70)
+- [ ] GitHub Actions security workflow passing on main branch
+- [ ] Pre-commit hook installed and tested
+- [ ] CI artifacts (OWASP report, license report, test results) archived

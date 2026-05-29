@@ -3,13 +3,14 @@
 <head>
     <title th:text="${'LUMOO | ' + (vendor.fullName != null and !vendor.fullName.isEmpty() ? vendor.fullName : vendor.email)}">LUMOO | Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
 
     <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.my</span>
+        <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -63,7 +64,7 @@
             <!-- Stats -->
             <div class="text-right shrink-0">
                 <p class="text-[9px] uppercase tracking-widest text-gray-400 font-bold">Products</p>
-                <p class="text-4xl font-black text-[#4d78c0]" th:text="${#lists.size(products)}">0</p>
+                <p class="text-4xl font-black text-[#4d78c0]" th:text="${totalProductCount ?: #lists.size(products)}">0</p>
             </div>
         </div>
     </div>
@@ -136,6 +137,18 @@
             <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2">No products in this category yet.</p>
             <a th:href="@{/store/{id}(id=${vendor.id})}"
                class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">View All Products</a>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${totalPages > 1}" class="flex justify-center items-center gap-4 py-12">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/store/{id}(id=${vendor.id}, page=${currentPage - 1}, category=${selectedCategory})}"
+               class="text-xs font-bold uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Prev</a>
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest"
+                  th:text="'Page ' + (${currentPage} + 1) + ' / ' + ${totalPages}"></span>
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/store/{id}(id=${vendor.id}, page=${currentPage + 1}, category=${selectedCategory})}"
+               class="text-xs font-bold uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Next →</a>
         </div>
 
     </main>

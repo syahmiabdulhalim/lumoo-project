@@ -5,7 +5,10 @@ import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.order.CartService;
 import com.example.lumoo.domain.order.OrderService;
+import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.user.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -26,14 +29,17 @@ import java.util.UUID;
 @Controller
 public class OrderController {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
+
     @Autowired private OrderService orderService;
     @Autowired private CartService cartService;
     @Autowired private UserService userService;
+    @Autowired private ModemPayService modemPayService;
 
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
 
-    private static final Set<String> VALID_PAYMENT_METHODS = Set.of("COD", "TRANSFER", "AFRIMONEY", "QMONEY");
+    private static final Set<String> VALID_PAYMENT_METHODS = Set.of("COD", "TRANSFER", "AFRIMONEY", "QMONEY", "MODEMPAY");
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/jpg");
 
     @GetMapping("/checkout")
@@ -51,10 +57,14 @@ public class OrderController {
     @PostMapping("/order/place")
     public String placeOrder(@RequestParam String address,
                              @RequestParam String paymentMethod,
+                             @RequestParam(defaultValue = "false") boolean privacyAccepted,
+                             @RequestParam(defaultValue = "false") boolean termsAccepted,
+                             @RequestParam(defaultValue = "false") boolean marketingConsent,
                              Principal principal) {
         if (principal == null) return "redirect:/login";
         if (address == null || address.trim().isEmpty()) return "redirect:/checkout?error=address_required";
         if (!VALID_PAYMENT_METHODS.contains(paymentMethod)) return "redirect:/checkout?error=invalid_payment";
+        if (!privacyAccepted || !termsAccepted) return "redirect:/checkout?error=consent_required";
 
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
@@ -62,11 +72,35 @@ public class OrderController {
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart?error=empty";
 
-        Order saved = orderService.placeOrder(user, address, paymentMethod, items);
-        if ("COD".equals(paymentMethod)) {
-            return "redirect:/buyer/order/" + saved.getId() + "?success";
+        List<Order> orders;
+        try {
+            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent);
+        } catch (IllegalStateException e) {
+            return "redirect:/cart?error=out_of_stock";
         }
-        return "redirect:/checkout/success/" + saved.getId();
+
+        if ("COD".equals(paymentMethod)) {
+            return orders.size() == 1
+                    ? "redirect:/buyer/order/" + orders.get(0).getId() + "?success"
+                    : "redirect:/buyer/dashboard?orders_placed";
+        }
+
+        if ("MODEMPAY".equals(paymentMethod)) {
+            if (!modemPayService.isConfigured()) {
+                return "redirect:/buyer/dashboard?error=payment_unavailable";
+            }
+            try {
+                String paymentUrl = modemPayService.createPaymentIntent(orders);
+                return "redirect:" + paymentUrl;
+            } catch (Exception e) {
+                log.error("[OrderController] ModemPay intent failed for {} orders", orders.size(), e);
+                return "redirect:/buyer/dashboard?error=payment_failed";
+            }
+        }
+
+        return orders.size() == 1
+                ? "redirect:/checkout/success/" + orders.get(0).getId()
+                : "redirect:/buyer/dashboard?orders_placed";
     }
 
     @GetMapping("/checkout/success/{id}")

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(awk -F: '{print $1}')",
       "Bash(python3)",
-      "Bash(xargs ls)"
+      "Bash(xargs ls)",
+      "Bash(./mvnw test *)"
     ]
   }
 }

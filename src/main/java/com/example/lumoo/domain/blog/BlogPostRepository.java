@@ -11,6 +11,9 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     Optional<BlogPost> findBySlugAndPublishedTrue(String slug);
     List<BlogPost> findByPublishedTrueOrderByPublishedAtDesc();
     List<BlogPost> findByCategoryAndPublishedTrueOrderByPublishedAtDesc(String category);
+
+    org.springframework.data.domain.Page<BlogPost> findByPublishedTrueOrderByPublishedAtDesc(org.springframework.data.domain.Pageable pageable);
+    org.springframework.data.domain.Page<BlogPost> findByCategoryAndPublishedTrueOrderByPublishedAtDesc(String category, org.springframework.data.domain.Pageable pageable);
     List<BlogPost> findAllByOrderByCreatedAtDesc();
     boolean existsBySlug(String slug);
 

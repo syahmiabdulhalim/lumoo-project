@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,8 +21,8 @@ private CustomSuccessHandler customSuccessHandler;
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf
-            // Webhook receives external POST from ModemPay — no CSRF token
-            .ignoringRequestMatchers("/api/payment/webhook")
+            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+            .ignoringRequestMatchers("/api/payment/webhook", "/subscribe")
         )
         .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
@@ -39,7 +41,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/uploads/products/**", "/uploads/avatars/**").permitAll()
     .requestMatchers("/uploads/proofs/**").hasRole("ADMIN")
     .requestMatchers("/uploads/kyc/**").hasRole("ADMIN")
-    .requestMatchers("/stores", "/store/**", "/product/**", "/category/**", "/blog", "/blog/**", "/sitemap.xml", "/privacy-policy", "/terms", "/subscribe").permitAll()
+    .requestMatchers("/stores", "/store/**", "/product/**", "/category/**", "/blog", "/blog/**", "/sitemap.xml", "/privacy-policy", "/terms", "/cookie-policy", "/returns", "/subscribe").permitAll()
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
     .requestMatchers("/api/customer-rights/**").permitAll()
@@ -65,6 +67,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .maximumSessions(5).expiredUrl("/login?expired")
         )
         .logout(logout -> logout
+            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
             .logoutSuccessUrl("/")
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID")

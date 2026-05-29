@@ -1,6 +1,7 @@
 package com.example.lumoo.domain.payment;
 
 import com.example.lumoo.domain.order.Order;
+import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.domain.order.OrderRepository;
 import com.example.lumoo.domain.payment.WebhookEventRepository;
@@ -19,8 +20,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ModemPayService {
@@ -33,9 +37,6 @@ public class ModemPayService {
     @Value("${modempay.webhook-secret:}")
     private String webhookSecret;
 
-    @Value("${modempay.merchant-id:}")
-    private String merchantId;
-
     @Value("${modempay.api-url:https://api.modempay.com/v1}")
     private String apiUrl;
 
@@ -44,6 +45,8 @@ public class ModemPayService {
 
     @Autowired private OrderRepository orderRepository;
     @Autowired private WebhookEventRepository webhookEventRepository;
+    @Autowired private PayoutService payoutService;
+    @Autowired private OrderService orderService;
     @Autowired private ObjectMapper objectMapper;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -51,36 +54,45 @@ public class ModemPayService {
     // ── Configuration check ──────────────────────────────────────────────────
 
     public boolean isConfigured() {
-        return !apiKey.isBlank() && !webhookSecret.isBlank() && !merchantId.isBlank();
+        return !apiKey.isBlank() && !webhookSecret.isBlank();
     }
 
     // ── Payment Intent ───────────────────────────────────────────────────────
 
     /**
-     * Creates a ModemPay payment intent and returns the hosted checkout URL.
-     * Order status must be AWAITING_PROOF before calling this.
+     * Creates a single ModemPay payment intent covering all orders (one checkout per cart).
+     * Stores the intent_secret on every order so each can be reconciled via webhook.
      *
      * @return checkout URL to redirect the customer to
      */
-    public String createPaymentIntent(Order order) throws Exception {
+    public String createPaymentIntent(List<Order> orders) throws Exception {
         if (!isConfigured()) {
-            throw new IllegalStateException("ModemPay credentials not configured. Set MODEMPAY_API_KEY, MODEMPAY_MERCHANT_ID, and MODEMPAY_WEBHOOK_SECRET.");
+            throw new IllegalStateException("ModemPay credentials not configured.");
         }
+        if (orders == null || orders.isEmpty()) throw new IllegalArgumentException("No orders");
 
-        Map<String, Object> body = Map.of(
-                "merchantId",   merchantId,
-                "orderId",      order.getId().toString(),
-                "amount",       order.getTotalAmount(),
-                "currency",     "GMD",
-                "description",  "LUMOO Order #" + order.getId(),
-                "callbackUrl",  baseUrl + "/api/payment/webhook",
-                "returnUrl",    baseUrl + "/buyer/order/" + order.getId() + "?paid"
+        Order first   = orders.get(0);
+        long  total   = orders.stream().mapToLong(o -> Math.round(o.getTotalAmount())).sum();
+        String orderIds = orders.stream()
+                .map(o -> o.getId().toString())
+                .collect(Collectors.joining(","));
+
+        Map<String, Object> payload = Map.of(
+                "amount",         total,
+                "currency",       "GMD",
+                "customer_name",  first.getUser().getUsername(),
+                "customer_email", first.getUser().getEmail(),
+                "return_url",     baseUrl + "/buyer/dashboard?paid",
+                "cancel_url",     baseUrl + "/checkout?cancelled",
+                "callback_url",   baseUrl + "/api/payment/webhook",
+                "metadata",       Map.of("order_ids", orderIds),
+                "from_sdk",       false
         );
 
-        String requestBody = objectMapper.writeValueAsString(body);
+        String requestBody = objectMapper.writeValueAsString(Map.of("data", payload));
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl + "/payment-intents"))
+                .uri(URI.create(apiUrl + "/payments"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + apiKey)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
@@ -94,15 +106,58 @@ public class ModemPayService {
         }
 
         JsonNode json = objectMapper.readTree(response.body());
-        String paymentId  = json.path("paymentId").asText();
-        String paymentUrl = json.path("paymentUrl").asText();
+        JsonNode data  = json.path("data");
+        String intentSecret = data.path("intent_secret").asText();
+        String paymentLink  = data.path("payment_link").asText();
 
-        // Persist the ModemPay payment ID against the order for reconciliation
-        order.setModempayPaymentId(paymentId);
-        orderRepository.save(order);
+        for (Order order : orders) {
+            order.setModempayPaymentId(intentSecret);
+            orderRepository.save(order);
+        }
 
-        log.info("[ModemPay] Payment intent created — orderId={} paymentId={}", order.getId(), paymentId);
-        return paymentUrl;
+        log.info("[ModemPay] Payment intent created — orderIds=[{}] intentSecret={}", orderIds, intentSecret);
+        return paymentLink;
+    }
+
+    // ── Payment verification (fallback when webhook missed) ──────────────────
+
+    /**
+     * Calls ModemPay's verify endpoint and syncs order status.
+     * Used when user returns to dashboard after payment — covers webhook delivery failures.
+     */
+    @Transactional
+    public void verifyAndSync(String intentSecret) {
+        if (!isConfigured() || intentSecret == null || intentSecret.isBlank()) return;
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl + "/payments/verify?intent_secret=" + intentSecret))
+                    .header("Authorization", "Bearer " + apiKey)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) return;
+
+            JsonNode json   = objectMapper.readTree(response.body());
+            String  status  = json.path("data").path("status").asText();
+
+            List<Order> orders = orderRepository.findByModempayPaymentId(intentSecret);
+            for (Order order : orders) {
+                if (!"AWAITING_PAYMENT".equals(order.getStatus())) continue;
+                if ("successful".equals(status)) {
+                    order.setStatus("PAID");
+                    orderRepository.save(order);
+                    log.info("[ModemPay] Order #{} verified PAID via polling (webhook was missed)", order.getId());
+                } else if ("failed".equals(status) || "cancelled".equals(status)) {
+                    order.setStatus("PAYMENT_FAILED");
+                    orderRepository.save(order);
+                    orderService.returnStockForOrder(order);
+                    log.info("[ModemPay] Order #{} verified PAYMENT_FAILED via polling", order.getId());
+                }
+            }
+        } catch (Exception e) {
+            log.warn("[ModemPay] Verification polling failed for secret={}: {}", intentSecret, e.getMessage());
+        }
     }
 
     // ── Webhook signature verification ───────────────────────────────────────
@@ -135,58 +190,79 @@ public class ModemPayService {
     public void processWebhook(String rawPayload) throws Exception {
         JsonNode json = objectMapper.readTree(rawPayload);
 
-        String eventId   = json.path("eventId").asText();
-        String eventType = json.path("eventType").asText();
-        Long   orderId   = json.path("orderId").asLong();
+        // Webhook envelope: { "event": "charge.succeeded", "payload": { "id": "...", "metadata": {...} } }
+        String eventType = json.path("event").asText();
+        JsonNode payload  = json.path("payload");
+        String eventId    = payload.path("id").asText();   // transaction ID — used for idempotency
 
-        // Idempotency check — ignore duplicate deliveries
+        // Support both "order_ids" (multi-vendor, comma-separated) and legacy "order_id"
+        JsonNode metadata = payload.path("metadata");
+        List<Long> orderIds = new ArrayList<>();
+        if (metadata.has("order_ids")) {
+            for (String id : metadata.path("order_ids").asText().split(",")) {
+                try { orderIds.add(Long.parseLong(id.trim())); } catch (NumberFormatException ignored) {}
+            }
+        } else if (metadata.has("order_id")) {
+            try { orderIds.add(Long.parseLong(metadata.path("order_id").asText())); } catch (NumberFormatException ignored) {}
+        }
+        Long firstOrderId = orderIds.isEmpty() ? null : orderIds.get(0);
+
+        // Idempotency check
         if (webhookEventRepository.existsByEventId(eventId)) {
             log.info("[ModemPay] Duplicate webhook ignored — eventId={}", eventId);
             return;
         }
 
-        // Record first so a crash after save doesn't cause double processing
         WebhookEvent event = new WebhookEvent();
         event.setEventId(eventId);
         event.setEventType(eventType);
-        event.setOrderId(orderId);
+        event.setOrderId(firstOrderId);
         webhookEventRepository.save(event);
 
-        // Apply business logic
         switch (eventType) {
-            case "PAYMENT_SUCCESS" -> handlePaymentSuccess(orderId);
-            case "PAYMENT_FAILED"  -> handlePaymentFailed(orderId);
-            case "PAYMENT_EXPIRED" -> handlePaymentExpired(orderId);
+            case "charge.succeeded"     -> orderIds.forEach(this::handlePaymentSuccess);
+            case "charge.failed",
+                 "charge.cancelled"    -> orderIds.forEach(this::handlePaymentFailed);
+            case "charge.expired"      -> orderIds.forEach(this::handlePaymentExpired);
+            case "transfer.succeeded",
+                 "transfer.failed",
+                 "transfer.reversed"   -> payoutService.handleTransferWebhook(eventId, eventType);
             default -> log.warn("[ModemPay] Unknown event type: {}", eventType);
         }
 
-        log.info("[ModemPay] Webhook processed — eventId={} eventType={} orderId={}", eventId, eventType, orderId);
+        log.info("[ModemPay] Webhook processed — eventId={} eventType={} orderIds={}", eventId, eventType, orderIds);
     }
 
     private void handlePaymentSuccess(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
-            order.setStatus("PAID");
-            orderRepository.save(order);
-            log.info("[ModemPay] Order #{} marked PAID", orderId);
+            if ("AWAITING_PAYMENT".equals(order.getStatus())) {
+                order.setStatus("PAID");
+                orderRepository.save(order);
+                log.info("[ModemPay] Order #{} marked PAID", orderId);
+            } else {
+                log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", orderId, order.getStatus());
+            }
         });
     }
 
     private void handlePaymentFailed(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
-            if ("AWAITING_PROOF".equals(order.getStatus())) {
+            if ("AWAITING_PAYMENT".equals(order.getStatus())) {
                 order.setStatus("PAYMENT_FAILED");
                 orderRepository.save(order);
-                log.info("[ModemPay] Order #{} marked PAYMENT_FAILED", orderId);
+                orderService.returnStockForOrder(order);
+                log.info("[ModemPay] Order #{} marked PAYMENT_FAILED — stock returned", orderId);
             }
         });
     }
 
     private void handlePaymentExpired(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
-            if ("AWAITING_PROOF".equals(order.getStatus())) {
+            if ("AWAITING_PAYMENT".equals(order.getStatus())) {
                 order.setStatus("PAYMENT_EXPIRED");
                 orderRepository.save(order);
-                log.info("[ModemPay] Order #{} marked PAYMENT_EXPIRED", orderId);
+                orderService.returnStockForOrder(order);
+                log.info("[ModemPay] Order #{} marked PAYMENT_EXPIRED — stock returned", orderId);
             }
         });
     }

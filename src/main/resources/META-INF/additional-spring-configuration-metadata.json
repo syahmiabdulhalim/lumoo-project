@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "modempay.public-key",
+      "type": "java.lang.String",
+      "description": "ModemPay public key (pk_live_... or pk_test_...) for client-side checkout."
+    },
+    {
+      "name": "modempay.api-key",
+      "type": "java.lang.String",
+      "description": "ModemPay secret API key (sk_live_... or sk_test_...) for server-side API calls."
+    },
+    {
+      "name": "modempay.webhook-secret",
+      "type": "java.lang.String",
+      "description": "ModemPay webhook signing secret — used to verify x-modem-signature header."
+    },
+    {
+      "name": "modempay.api-url",
+      "type": "java.lang.String",
+      "description": "ModemPay API base URL. Defaults to https://api.modempay.com/v1."
+    }
+  ]
+}

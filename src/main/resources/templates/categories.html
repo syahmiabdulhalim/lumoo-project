@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>LUMOO | All Categories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
+</head>
+<body class="bg-gray-50">
+
+    <main class="max-w-6xl mx-auto px-6 py-16">
+        <h1 class="text-2xl font-black uppercase tracking-wider text-[#1a2336] mb-2">All Categories</h1>
+        <p class="text-sm text-gray-500 mb-10">Browse building materials by category</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <a th:each="cat : ${categories}"
+               th:href="@{/category/{name}(name=${cat})}"
+               class="bg-white border border-gray-200 p-6 hover:border-[#1a2336] hover:shadow-md transition text-center">
+                <div class="text-3xl mb-3" th:text="${icons[cat]}">📦</div>
+                <p class="text-xs font-black uppercase tracking-wider text-[#1a2336]" th:text="${cat}">Category</p>
+                <p class="text-[9px] text-gray-400 mt-2" th:text="${descriptions[cat]}">Description</p>
+            </a>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

@@ -55,6 +55,8 @@ class OrderServiceTest {
     @Mock private OrderRepository orderRepository;
     @Mock private OrderItemRepository orderItemRepository;
     @Mock private CartRepository cartRepository;
+    @Mock private com.example.lumoo.domain.payment.PayoutService payoutService;
+    @Mock private com.example.lumoo.domain.product.ProductService productService;
 
     @InjectMocks private OrderService orderService;
 
@@ -77,7 +79,7 @@ class OrderServiceTest {
         CartItem item = cartItem(100.0, 2);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Order result = orderService.placeOrder(buyer, "123 Street", "COD", List.of(item));
+        Order result = orderService.placeOrders(buyer, "123 Street", "COD", List.of(item), true, true, false).get(0);
 
         assertEquals("PENDING", result.getStatus());
     }
@@ -87,7 +89,7 @@ class OrderServiceTest {
         CartItem item = cartItem(100.0, 1);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Order result = orderService.placeOrder(buyer, "123 Street", "BANK", List.of(item));
+        Order result = orderService.placeOrders(buyer, "123 Street", "BANK", List.of(item), true, true, false).get(0);
 
         assertEquals("AWAITING_PROOF", result.getStatus());
     }
@@ -98,7 +100,7 @@ class OrderServiceTest {
         CartItem b = cartItem(25.0, 4);   // 100
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Order result = orderService.placeOrder(buyer, "123 Street", "COD", List.of(a, b));
+        Order result = orderService.placeOrders(buyer, "123 Street", "COD", List.of(a, b), true, true, false).get(0);
 
         assertEquals(200.0, result.getTotalAmount(), 0.001);
     }
@@ -108,7 +110,7 @@ class OrderServiceTest {
         CartItem item = cartItem(200.0, 1);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Order result = orderService.placeOrder(buyer, "123 Street", "COD", List.of(item));
+        Order result = orderService.placeOrders(buyer, "123 Street", "COD", List.of(item), true, true, false).get(0);
 
         assertEquals(20.0, result.getAdminCommission(), 0.001);
         assertEquals(180.0, result.getVendorEarnings(), 0.001);
@@ -119,7 +121,7 @@ class OrderServiceTest {
         CartItem item = cartItem(50.0, 1);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        orderService.placeOrder(buyer, "123 Street", "COD", List.of(item));
+        orderService.placeOrders(buyer, "123 Street", "COD", List.of(item), true, true, false);
 
         verify(cartRepository).deleteAll(List.of(item));
     }
@@ -130,16 +132,51 @@ class OrderServiceTest {
         CartItem b = cartItem(20.0, 2);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        orderService.placeOrder(buyer, "123 Street", "COD", List.of(a, b));
+        orderService.placeOrders(buyer, "123 Street", "COD", List.of(a, b), true, true, false);
 
         verify(orderItemRepository, times(2)).save(any(OrderItem.class));
+    }
+
+    @Test
+    void placeOrder_throwsWhenInsufficientStock() {
+        Product p = new Product();
+        p.setId(10L);
+        p.setVendor(vendor);
+
+        CartItem item = cartItem(100.0, 3);
+        item.setProduct(p);
+
+        when(productService.decrementStock(10L, 3)).thenReturn(false);
+
+        assertThrows(IllegalStateException.class, () ->
+            orderService.placeOrders(buyer, "123 Street", "COD", List.of(item), true, true, false));
+    }
+
+    @Test
+    void placeOrder_splitsOrdersByVendor() {
+        User vendor2 = new User();
+        vendor2.setId(3L);
+
+        Product p1 = new Product(); p1.setId(1L); p1.setVendor(vendor);
+        Product p2 = new Product(); p2.setId(2L); p2.setVendor(vendor2);
+
+        CartItem a = cartItem(50.0, 1); a.setProduct(p1);
+        CartItem b = cartItem(80.0, 1); b.setProduct(p2);
+
+        when(productService.decrementStock(anyLong(), anyInt())).thenReturn(true);
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        List<Order> orders = orderService.placeOrders(buyer, "123 Street", "COD",
+                List.of(a, b), true, true, false);
+
+        assertEquals(2, orders.size());
     }
 
     // ── cancelOrder ──────────────────────────────────────────────────────────
 
     @Test
     void cancelOrder_notFound() {
-        when(orderRepository.findById(99L)).thenReturn(Optional.empty());
+        when(orderRepository.findByIdWithItems(99L)).thenReturn(Optional.empty());
 
         assertEquals(OrderService.CancelResult.NOT_FOUND, orderService.cancelOrder(99L, buyer));
     }
@@ -147,7 +184,7 @@ class OrderServiceTest {
     @Test
     void cancelOrder_unauthorized_whenDifferentUser() {
         Order order = orderWithStatus("PENDING", buyer);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
 
         User attacker = new User();
         attacker.setId(99L);
@@ -158,7 +195,7 @@ class OrderServiceTest {
     @Test
     void cancelOrder_cannotCancel_whenShipped() {
         Order order = orderWithStatus("SHIPPED", buyer);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
 
         assertEquals(OrderService.CancelResult.CANNOT_CANCEL, orderService.cancelOrder(1L, buyer));
     }
@@ -166,7 +203,8 @@ class OrderServiceTest {
     @Test
     void cancelOrder_success_whenPending() {
         Order order = orderWithStatus("PENDING", buyer);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        order.setItems(List.of());
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
 
         assertEquals(OrderService.CancelResult.CANCELLED, orderService.cancelOrder(1L, buyer));
         verify(orderRepository).delete(order);
@@ -175,7 +213,17 @@ class OrderServiceTest {
     @Test
     void cancelOrder_success_whenAwaitingProof() {
         Order order = orderWithStatus("AWAITING_PROOF", buyer);
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        order.setItems(List.of());
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
+
+        assertEquals(OrderService.CancelResult.CANCELLED, orderService.cancelOrder(1L, buyer));
+    }
+
+    @Test
+    void cancelOrder_success_whenAwaitingPayment() {
+        Order order = orderWithStatus("AWAITING_PAYMENT", buyer);
+        order.setItems(List.of());
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
 
         assertEquals(OrderService.CancelResult.CANCELLED, orderService.cancelOrder(1L, buyer));
     }
@@ -267,6 +315,26 @@ class OrderServiceTest {
         assertEquals(OrderService.ReturnResult.REQUESTED, result);
         assertEquals("RETURN_REQUESTED", order.getStatus());
         assertEquals("product damaged", order.getReturnReason());
+    }
+
+    // ── aggregate stats ──────────────────────────────────────────────────────
+
+    @Test
+    void countAll_delegatesToRepository() {
+        when(orderRepository.count()).thenReturn(42L);
+        assertEquals(42L, orderService.countAll());
+    }
+
+    @Test
+    void sumVendorRevenue_delegatesToRepository() {
+        when(orderRepository.sumVendorRevenue(2L)).thenReturn(1500.0);
+        assertEquals(1500.0, orderService.sumVendorRevenue(2L), 0.001);
+    }
+
+    @Test
+    void countVendorOrders_delegatesToRepository() {
+        when(orderRepository.countVendorOrders(2L)).thenReturn(7L);
+        assertEquals(7L, orderService.countVendorOrders(2L));
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

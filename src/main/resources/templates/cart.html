@@ -4,12 +4,13 @@
     <title>LUMOO | Your Cart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] font-['Inter']">
+<body class="bg-[#f9f9f9] font-['Nunito_Sans']">
 
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 

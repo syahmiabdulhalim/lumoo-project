@@ -3,13 +3,14 @@
 <head>
     <title>LUMOO | Checkout</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] font-['Inter']">
+<body class="bg-[#f9f9f9] font-['Nunito_Sans']">
 
     <!-- CONTACT TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -94,6 +95,15 @@
                                 </div>
                             </label>
 
+                            <!-- ModemPay Online -->
+                            <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
+                                <input type="radio" name="paymentMethod" value="MODEMPAY" class="mt-1 accent-black">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-wider">💳 Pay Online (ModemPay)</p>
+                                    <p class="text-[9px] text-gray-400 mt-1">Secure instant payment. You'll be redirected to complete payment — no upload needed.</p>
+                                </div>
+                            </label>
+
                         </div>
 
                         <!-- Bank Transfer Details (shown when selected) -->
@@ -144,7 +154,44 @@
                             <p class="text-[8px] text-green-700 mt-4">Upload your payment screenshot after placing the order.</p>
                         </div>
 
-                        <button type="submit"
+                        <!-- PDPP Consent -->
+                        <div class="border border-gray-100 p-5 mb-6 space-y-4 bg-gray-50">
+                            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3">Your Consent</p>
+
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="privacyAccepted" id="privacyAccepted" required
+                                       class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
+                                <span class="text-[10px] text-gray-600 leading-relaxed">
+                                    I have read and agree to the
+                                    <a href="/privacy-policy" target="_blank" class="underline font-bold text-[#1a2336] hover:text-[#4d78c0]">Privacy Policy</a>.
+                                    I consent to my personal data being processed to fulfil this order.
+                                    <span class="text-red-500">*</span>
+                                </span>
+                            </label>
+
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="termsAccepted" id="termsAccepted" required
+                                       class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
+                                <span class="text-[10px] text-gray-600 leading-relaxed">
+                                    I agree to the
+                                    <a href="/terms" target="_blank" class="underline font-bold text-[#1a2336] hover:text-[#4d78c0]">Terms &amp; Conditions</a>
+                                    and
+                                    <a href="/returns" target="_blank" class="underline font-bold text-[#1a2336] hover:text-[#4d78c0]">Returns Policy</a>.
+                                    <span class="text-red-500">*</span>
+                                </span>
+                            </label>
+
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" name="marketingConsent" id="marketingConsent"
+                                       class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
+                                <span class="text-[10px] text-gray-500 leading-relaxed">
+                                    I would like to receive updates, promotions, and news from LUMOO by email.
+                                    <span class="text-gray-400">(Optional)</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <button type="submit" id="placeOrderBtn"
                                 class="w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-500 mt-2">
                             Place Order →
                         </button>
@@ -215,8 +262,8 @@
                 <!-- Need Help -->
                 <div class="bg-[#1a2336] text-white p-6">
                     <p class="text-[9px] font-black uppercase tracking-[0.3em] mb-3">Need Help?</p>
-                    <p class="text-[9px] text-gray-300 mb-1">📞 +220 XXX XXXX</p>
-                    <p class="text-[9px] text-gray-300">✉ info@lumoo.my</p>
+                    <p class="text-[9px] text-gray-300 mb-1">📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span></p>
+                    <p class="text-[9px] text-gray-300">✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></p>
                 </div>
             </div>
 

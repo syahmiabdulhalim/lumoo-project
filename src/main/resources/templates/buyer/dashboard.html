@@ -3,11 +3,12 @@
 <head>
     <title>LUMOO | Buyer Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-sans">
 
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 

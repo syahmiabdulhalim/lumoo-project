@@ -7,24 +7,31 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Controller
 @RequestMapping("/blog")
 public class BlogController {
 
+    private static final int PAGE_SIZE = 9;
+
     @Autowired private BlogService blogService;
 
     @GetMapping({"", "/"})
-    public String index(@RequestParam(required = false) String category, Model model) {
-        List<BlogPost> posts = (category != null && !category.isBlank())
-                ? blogService.getPublishedByCategory(category)
-                : blogService.getPublished();
+    public String index(@RequestParam(required = false) String category,
+                        @RequestParam(defaultValue = "0") int page,
+                        Model model) {
+        Page<BlogPost> postsPage = (category != null && !category.isBlank())
+                ? blogService.getPublishedByCategoryPaged(category, page, PAGE_SIZE)
+                : blogService.getPublishedPaged(page, PAGE_SIZE);
 
-        model.addAttribute("posts", posts);
+        model.addAttribute("posts", postsPage.getContent());
+        model.addAttribute("currentPage", postsPage.getNumber());
+        model.addAttribute("totalPages", postsPage.getTotalPages());
         model.addAttribute("categories", blogService.getPublishedCategories());
         model.addAttribute("selectedCategory", category);
-        model.addAttribute("featured", posts.isEmpty() ? null : posts.get(0));
+        model.addAttribute("featured", postsPage.getNumber() == 0 && !postsPage.isEmpty()
+                ? postsPage.getContent().get(0) : null);
         return "blog/index";
     }
 

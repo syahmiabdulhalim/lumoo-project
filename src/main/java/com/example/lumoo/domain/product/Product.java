@@ -3,6 +3,7 @@ package com.example.lumoo.domain.product;
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
 
+@NamedEntityGraph(name = "Product.withVendor", attributeNodes = @NamedAttributeNode("vendor"))
 @Entity
 @Table(name = "products", indexes = {
     @Index(name = "idx_product_approved", columnList = "approved"),
@@ -18,11 +19,14 @@ public class Product {
     private String category;
     private Double price;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int stock;
+
     @Column(name = "approved")
-    private boolean approved = false;
+    private Boolean approved = false;
 
     @Column(name = "image_approved")
-    private boolean imageApproved = false;
+    private Boolean imageApproved = false;
 
     @Column(name = "image_url")
     private String imageUrl;
@@ -30,7 +34,7 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private User vendor;
 
@@ -42,9 +46,9 @@ public class Product {
     public void setCategory(String category) { this.category = category; }
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
-    public boolean isApproved() { return approved; }
+    public boolean isApproved() { return approved != null && approved; }
     public void setApproved(boolean approved) { this.approved = approved; }
-    public boolean isImageApproved() { return imageApproved; }
+    public boolean isImageApproved() { return imageApproved != null && imageApproved; }
     public void setImageApproved(boolean imageApproved) { this.imageApproved = imageApproved; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
@@ -52,4 +56,6 @@ public class Product {
     public void setDescription(String description) { this.description = description; }
     public User getVendor() { return vendor; }
     public void setVendor(User vendor) { this.vendor = vendor; }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 }

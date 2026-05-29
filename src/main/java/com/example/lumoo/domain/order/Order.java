@@ -22,6 +22,8 @@ public class Order {
     private String returnReason;
     private String paymentProofUrl;
     private String modempayPaymentId;
+    private String payoutStatus;
+    private String payoutTransferId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -33,7 +35,7 @@ private LocalDateTime createdAt;
     private double adminCommission;
     private double vendorEarnings;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> items;
 
     // PDPP 2025 — consent tracking (s.8 — lawful basis)
@@ -100,6 +102,10 @@ private LocalDateTime createdAt;
 
     public String getModempayPaymentId() { return modempayPaymentId; }
     public void setModempayPaymentId(String modempayPaymentId) { this.modempayPaymentId = modempayPaymentId; }
+    public String getPayoutStatus() { return payoutStatus; }
+    public void setPayoutStatus(String payoutStatus) { this.payoutStatus = payoutStatus; }
+    public String getPayoutTransferId() { return payoutTransferId; }
+    public void setPayoutTransferId(String payoutTransferId) { this.payoutTransferId = payoutTransferId; }
 
     public boolean isPrivacyAccepted() { return privacyAccepted; }
     public void setPrivacyAccepted(boolean privacyAccepted) { this.privacyAccepted = privacyAccepted; }

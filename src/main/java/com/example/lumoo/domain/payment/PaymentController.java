@@ -51,7 +51,7 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(ApiResponse.error("Order is not awaiting payment."));
 
         try {
-            String paymentUrl = modemPayService.createPaymentIntent(order);
+            String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));
             return ResponseEntity.ok(ApiResponse.ok("Payment initiated.", paymentUrl));
         } catch (Exception e) {
             log.error("[Payment] Failed to create intent for order {}", orderId, e);
@@ -69,7 +69,7 @@ public class PaymentController {
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(
             @RequestBody String rawPayload,
-            @RequestHeader(value = "X-ModemPay-Signature", required = false) String signature,
+            @RequestHeader(value = "x-modem-signature", required = false) String signature,
             HttpServletRequest request) {
 
         if (!modemPayService.verifySignature(rawPayload, signature)) {

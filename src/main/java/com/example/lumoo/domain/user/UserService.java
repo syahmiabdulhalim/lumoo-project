@@ -47,6 +47,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public long countAll() { return userRepository.count(); }
+
     public void save(User user) {
         userRepository.save(user);
     }

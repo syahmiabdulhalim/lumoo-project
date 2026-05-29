@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 
 @Service
 public class BlogService {
@@ -27,6 +28,14 @@ public class BlogService {
 
     public List<BlogPost> getPublishedByCategory(String category) {
         return repo.findByCategoryAndPublishedTrueOrderByPublishedAtDesc(category);
+    }
+
+    public Page<BlogPost> getPublishedPaged(int page, int size) {
+        return repo.findByPublishedTrueOrderByPublishedAtDesc(PageRequest.of(page, size));
+    }
+
+    public Page<BlogPost> getPublishedByCategoryPaged(String category, int page, int size) {
+        return repo.findByCategoryAndPublishedTrueOrderByPublishedAtDesc(category, PageRequest.of(page, size));
     }
 
     public List<String> getPublishedCategories() {

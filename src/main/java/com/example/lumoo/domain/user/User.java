@@ -22,6 +22,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean verified;
+    private String payoutPhone;
+    private String payoutNetwork;
     @ManyToOne
     @JoinColumn(name = "vendor_id")
     private User vendor;
@@ -50,4 +52,8 @@ public class User {
     public void setId(Long id) { this.id = id; }
     public boolean isVerified() { return verified; }
     public void setVerified(boolean verified) { this.verified = verified; }
+    public String getPayoutPhone() { return payoutPhone; }
+    public void setPayoutPhone(String payoutPhone) { this.payoutPhone = payoutPhone; }
+    public String getPayoutNetwork() { return payoutNetwork; }
+    public void setPayoutNetwork(String payoutNetwork) { this.payoutNetwork = payoutNetwork; }
 }

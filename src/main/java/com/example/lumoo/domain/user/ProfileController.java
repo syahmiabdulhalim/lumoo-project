@@ -27,6 +27,8 @@ public class ProfileController {
     public String updateProfile(@RequestParam String fullName,
                                 @RequestParam String phone,
                                 @RequestParam String address,
+                                @RequestParam(required = false) String payoutPhone,
+                                @RequestParam(required = false) String payoutNetwork,
                                 @RequestParam(required = false) MultipartFile avatar,
                                 Authentication auth,
                                 RedirectAttributes redirectAttributes) {
@@ -41,6 +43,9 @@ public class ProfileController {
             }
         }
         userService.updateProfile(user, fullName, phone, address);
+        if (payoutPhone != null && !payoutPhone.isBlank()) user.setPayoutPhone(payoutPhone.trim());
+        if (payoutNetwork != null && !payoutNetwork.isBlank()) user.setPayoutNetwork(payoutNetwork.trim());
+        userService.save(user);
         redirectAttributes.addFlashAttribute("success", "Profile updated successfully.");
         return "redirect:/profile";
     }

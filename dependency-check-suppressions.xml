@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <!--
+        FALSE POSITIVES: log4j-api
+
+        All CVEs listed below affect log4j-core (Rfc5424Layout, SyslogAppender, LookupMessagePattern).
+        This project ships only log4j-api (the facade / bridge jar).
+        log4j-core is NOT on the classpath — Spring Boot defaults to Logback as the logging implementation.
+        Without log4j-core, none of these code paths exist at runtime.
+
+        Upstream references confirm "log4j-core" scope:
+          CVE-2026-34477/78/79/80/81 — Rfc5424Layout TCP/TLS framing issues
+          CVE-2025-68161              — LookupMessagePattern in log4j-core
+    -->
+    <suppress>
+        <notes>log4j-api only; log4j-core absent. All CVEs target log4j-core Rfc5424Layout/SyslogAppender.</notes>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2026-34477</cve>
+    </suppress>
+    <suppress>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2026-34478</cve>
+    </suppress>
+    <suppress>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2026-34479</cve>
+    </suppress>
+    <suppress>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2026-34480</cve>
+    </suppress>
+    <suppress>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2026-34481</cve>
+    </suppress>
+    <suppress>
+        <filePath regex="true">.*log4j-api-.*\.jar</filePath>
+        <cve>CVE-2025-68161</cve>
+    </suppress>
+
+    <!--
+        FALSE POSITIVE (platform): CVE-2020-29582 — kotlin-stdlib
+
+        Windows path traversal via System.createTempDir(). This server runs on Linux;
+        the vulnerable code path resolves Windows-specific directory separators and is
+        inert on all POSIX systems. Not exploitable in this deployment.
+    -->
+    <suppress>
+        <notes>CVE-2020-29582 is a Windows-only path traversal. Server runs on Linux.</notes>
+        <filePath regex="true">.*kotlin-stdlib.*\.jar</filePath>
+        <cve>CVE-2020-29582</cve>
+    </suppress>
+
+    <!--
+        CONTEXTUALLY NOT EXPLOITABLE: CVE-2023-3635 — okio
+
+        A crafted gzip stream can cause unbounded memory expansion in GZIPSource.
+        okio is pulled in transitively by OkHttp, which is used only by the
+        resend-java email SDK for outbound HTTPS calls to Resend's API.
+        The application never reads untrusted gzip streams via okio directly.
+        Attack surface does not exist in this usage pattern.
+
+        Suppress until resend-java upgrades its OkHttp / okio dependency.
+    -->
+    <suppress>
+        <notes>okio gzip DoS (CVE-2023-3635) not reachable: okio is used only by Resend email HTTP client, no untrusted stream processing.</notes>
+        <filePath regex="true">.*okio-.*\.jar</filePath>
+        <cve>CVE-2023-3635</cve>
+    </suppress>
+
+    <!--
+        PENDING UPSTREAM PATCH: CVE-2025-7962 — angus-activation (Jakarta Activation)
+
+        angus-activation is the Jakarta EE Activation framework used by Jakarta Mail
+        for MIME type handling. This CVE affects attachment / MIME processing.
+        In this application, angus-activation is invoked only in the email-sending
+        code path (Resend SDK / JavaMail) for transactional emails.
+        No untrusted attachments are processed. Suppress until Eclipse Angus
+        releases a patched version and Spring Boot BOM adopts it.
+    -->
+    <suppress>
+        <notes>CVE-2025-7962 in angus-activation: MIME processing only triggered by internal email sending, no user-controlled attachments. Suppress pending upstream patch.</notes>
+        <filePath regex="true">.*angus-activation-.*\.jar</filePath>
+        <cve>CVE-2025-7962</cve>
+    </suppress>
+
+
+    <!--
+        FALSE POSITIVE: CVE-2026-42582 — netty-transport
+
+        CVE-2026-42582 is an HTTP/3 QPACK unbounded allocation vulnerability in
+        netty-codec-http3. OWASP flags netty-transport because it shares the same
+        generic netty CPE (cpe:2.3:a:netty:netty:4.1.133), but the vulnerable code
+        lives exclusively in netty-codec-http3, which is NOT on this classpath.
+
+        In this application, Netty is used only as the Lettuce Redis client's TCP
+        transport layer for Redis communication. No HTTP/3 or QUIC codec is loaded.
+        Confirmed fix in 4.1.133.Final per Netty release notes (netty-codec-http3
+        module), but netty-transport itself is unaffected.
+    -->
+    <!--
+        The scanner matches the generic netty CPE across all netty-* jars on the classpath.
+        Suppress CVE-2026-42582 for every netty jar — netty-codec-http3 is not loaded.
+    -->
+    <suppress>
+        <notes>CVE-2026-42582 is in netty-codec-http3 (HTTP/3 QPACK). netty-transport and netty-codec are false positive CPE matches; HTTP/3 module absent.</notes>
+        <filePath regex="true">.*netty-.*\.jar</filePath>
+        <cve>CVE-2026-42582</cve>
+    </suppress>
+
+</suppressions>

@@ -38,6 +38,7 @@ public class CartController {
         Product product = productService.findById(id).orElse(null);
         if (product == null) return "redirect:/?error=product_not_found";
         if (!product.isApproved()) return "redirect:/?error=product_unavailable";
+        if (product.getStock() <= 0) return "redirect:/product/" + id + "?error=out_of_stock";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
         cartService.addItem(user, product);

@@ -17,8 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Controller
 @RequestMapping("/vendor")
@@ -28,24 +27,30 @@ public class VendorController {
     @Autowired private OrderService orderService;
     @Autowired private UserService userService;
 
+    private static final int VENDOR_ORDERS_PAGE_SIZE = 20;
+
     @GetMapping("/dashboard")
-    public String vendorDashboard(Model model, @AuthenticationPrincipal UserDetails currentUser) {
+    public String vendorDashboard(Model model,
+                                  @AuthenticationPrincipal UserDetails currentUser,
+                                  @RequestParam(defaultValue = "0") int page) {
         User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
-        List<Product> products = productService.getByVendor(vendor);
-        List<Order> vendorOrders = orderService.getVendorOrders(vendor.getId());
+        Long vendorId = vendor.getId();
 
-        double totalRevenue = vendorOrders.stream().mapToDouble(Order::getTotalAmount).sum();
-        double averageOrder = vendorOrders.isEmpty() ? 0.0 : totalRevenue / vendorOrders.size();
-        double monthlySales = vendorOrders.stream()
-                .filter(o -> o.getCreatedAt() != null && o.getCreatedAt().getMonth() == LocalDate.now().getMonth())
-                .mapToDouble(Order::getTotalAmount).sum();
+        double totalRevenue  = orderService.sumVendorRevenue(vendorId);
+        double monthlySales  = orderService.sumVendorMonthlySales(vendorId);
+        long   orderCount    = orderService.countVendorOrders(vendorId);
+        double averageOrder  = orderCount == 0 ? 0.0 : totalRevenue / orderCount;
 
-        model.addAttribute("products", products);
-        model.addAttribute("vendorOrders", vendorOrders);
+        Page<Order> ordersPage = orderService.getVendorOrdersPage(vendorId, page, VENDOR_ORDERS_PAGE_SIZE);
+
+        model.addAttribute("products", productService.getByVendor(vendor));
+        model.addAttribute("vendorOrders", ordersPage.getContent());
+        model.addAttribute("ordersCurrentPage", ordersPage.getNumber());
+        model.addAttribute("ordersTotalPages", ordersPage.getTotalPages());
         model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("averageOrder", averageOrder);
         model.addAttribute("monthlySales", monthlySales);
-        model.addAttribute("totalSalesCount", vendorOrders.size());
+        model.addAttribute("totalSalesCount", orderCount);
         model.addAttribute("vendorName", vendor.getUsername());
         return "vendor/dashboard";
     }

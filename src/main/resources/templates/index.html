@@ -3,10 +3,11 @@
 <head>
     <title>LUMOO | Construction Materials</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Nunito Sans', sans-serif; }
         .hero-swiper { width: 100%; height: 600px; }
         .hero-swiper .swiper-slide { height: 600px; background-size: cover; background-position: center; }
         .swiper-pagination-bullet { background: white; opacity: 0.6; }
@@ -18,11 +19,11 @@
         .marquee-inner:hover { animation-play-state: paused; }
     </style>
 </head>
-<body class="bg-white text-black font-['Inter']">
+<body class="bg-white text-black font-['Nunito_Sans']">
 
     <!-- TOP INFO BAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
-        <span>📞 +220 XXX XXXX &nbsp;|&nbsp; ✉ info@lumoo.my</span>
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -245,6 +246,23 @@
              class="text-center py-20 border border-dashed border-gray-200">
             <p class="text-[10px] uppercase tracking-widest text-gray-300 font-black mb-4">No products listed yet.</p>
             <a href="/stores" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0]">Browse Stores →</a>
+        </div>
+
+        <!-- PAGINATION -->
+        <div th:if="${totalPages != null and totalPages > 1}"
+             class="flex items-center justify-center gap-1 pt-10 pb-4">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
+               class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest border border-gray-200 hover:border-black transition">← Prev</a>
+            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <a th:href="@{/(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == currentPage} ? ' bg-black text-white' : ' border border-gray-200 hover:border-black'"
+                   class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest transition">1</a>
+            </th:block>
+            <a th:if="${currentPage < totalPages - 1}"
+               th:href="@{/(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
+               class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest border border-gray-200 hover:border-black transition">Next →</a>
         </div>
     </section>
 

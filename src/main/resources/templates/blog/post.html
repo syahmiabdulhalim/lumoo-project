@@ -37,7 +37,8 @@
     <meta th:if="${post.featuredImageUrl != null}" name="twitter:image" th:content="${post.featuredImageUrl}">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- JSON-LD: Article -->
     <script type="application/ld+json" th:inline="javascript">
@@ -83,8 +84,8 @@
 
     <style>
         .prose { font-family: 'Lora', Georgia, serif; color: #374151; line-height: 1.9; }
-        .prose h2 { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: #111827; margin: 2.5rem 0 1rem; }
-        .prose h3 { font-family: 'Inter', sans-serif; font-size: 1.125rem; font-weight: 700; color: #1f2937; margin: 2rem 0 0.75rem; }
+        .prose h2 { font-family: 'Nunito Sans', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: #111827; margin: 2.5rem 0 1rem; }
+        .prose h3 { font-family: 'Nunito Sans', sans-serif; font-size: 1.125rem; font-weight: 700; color: #1f2937; margin: 2rem 0 0.75rem; }
         .prose p { margin-bottom: 1.5rem; font-size: 1.0625rem; }
         .prose ul, .prose ol { margin: 1.5rem 0; padding-left: 1.5rem; }
         .prose li { margin-bottom: 0.5rem; }
@@ -94,16 +95,16 @@
         .prose a { color: #4d78c0; text-decoration: underline; }
         .prose blockquote { border-left: 4px solid #4d78c0; padding-left: 1.5rem; margin: 2rem 0; color: #6b7280; font-style: italic; }
         .prose img { width: 100%; border-radius: 0; margin: 2rem 0; }
-        .prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-family: 'Inter', sans-serif; font-size: 0.875rem; }
+        .prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-family: 'Nunito Sans', sans-serif; font-size: 0.875rem; }
         .prose th { background: #f9fafb; border: 1px solid #e5e7eb; padding: 0.75rem 1rem; text-align: left; font-weight: 700; }
         .prose td { border: 1px solid #e5e7eb; padding: 0.75rem 1rem; }
     </style>
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
 
     <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.my</span>
+        <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 

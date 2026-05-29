@@ -29,6 +29,10 @@ public class ReviewService {
         return orderItemRepository.existsByOrderUserAndOrderStatusAndProduct(user, "DELIVERED", product);
     }
 
+    public boolean hasPurchased(User user, Product product) {
+        return orderItemRepository.existsByOrderUserAndProduct(user, product);
+    }
+
     public boolean hasAlreadyReviewed(User user, Product product) {
         return reviewRepository.existsByUserAndProduct(user, product);
     }

@@ -3,13 +3,14 @@
 <head>
     <title th:text="${'LUMOO | ' + product.name}">LUMOO | Product</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
 
     <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>+220 XXX XXXX &nbsp;|&nbsp; info@lumoo.my</span>
+        <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
 
@@ -82,11 +83,21 @@
                 <h1 class="text-5xl font-light tracking-tighter leading-tight mb-6"
                     th:text="${product.name}">Product Name</h1>
 
-                <!-- Price -->
-                <div class="flex items-baseline gap-2 mb-6">
+                <!-- Price + Stock -->
+                <div class="flex items-baseline gap-4 mb-6">
                     <p class="text-3xl font-black tracking-tighter text-gray-900">
                         GMD <span th:text="${product.price}">0.00</span>
                     </p>
+                    <span th:if="${product.stock > 10}"
+                          class="text-[9px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded"
+                          th:text="${product.stock} + ' in stock'">In Stock</span>
+                    <span th:if="${product.stock > 0 and product.stock <= 10}"
+                          class="text-[9px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-0.5 rounded"
+                          th:text="'Only ' + ${product.stock} + ' left'">Low Stock</span>
+                    <span th:if="${product.stock <= 0}"
+                          class="text-[9px] font-bold uppercase tracking-widest text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                        Out of Stock
+                    </span>
                 </div>
 
                 <!-- Average rating -->
@@ -133,13 +144,21 @@
 
                 <!-- Add to cart — all logged in users -->
                 <div sec:authorize="isAuthenticated()">
-                    <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
-                        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button type="submit"
-                                class="w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-500">
-                            Add to Cart +
+                    <th:block th:if="${product.stock > 0}">
+                        <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit"
+                                    class="w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-500">
+                                Add to Cart +
+                            </button>
+                        </form>
+                    </th:block>
+                    <th:block th:if="${product.stock <= 0}">
+                        <button disabled
+                                class="w-full bg-gray-200 text-gray-400 py-5 text-[10px] font-black uppercase tracking-[0.3em] cursor-not-allowed">
+                            Out of Stock
                         </button>
-                    </form>
+                    </th:block>
                 </div>
 
                 <!-- Not logged in -->
@@ -240,10 +259,18 @@
                 <p class="text-[9px] text-green-600 uppercase tracking-widest font-bold">✓ You have already reviewed this product.</p>
             </div>
 
-            <!-- Not a verified buyer -->
-            <div th:if="${canReview == null or canReview == false}" class="max-w-2xl py-8 border border-dashed border-gray-200 text-center">
+            <!-- Purchased but awaiting delivery -->
+            <div th:if="${canReview == false and hasPurchased == true and alreadyReviewed != true}"
+                 class="max-w-2xl py-8 border border-dashed border-amber-200 bg-amber-50 text-center">
+                <p class="text-[9px] text-amber-600 uppercase tracking-widest font-bold mb-2">⏳ Awaiting Delivery</p>
+                <p class="text-[8px] text-amber-500 uppercase tracking-widest">You'll be able to leave a review once your order has been delivered.</p>
+            </div>
+
+            <!-- Never purchased -->
+            <div th:if="${canReview == null or (canReview == false and hasPurchased != true)}"
+                 class="max-w-2xl py-8 border border-dashed border-gray-200 text-center">
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-2">Only verified buyers can review.</p>
-                <p class="text-[8px] text-gray-300 uppercase tracking-widest">Purchase this product and mark your order as received to unlock reviews.</p>
+                <p class="text-[8px] text-gray-300 uppercase tracking-widest">Purchase this product to leave a review.</p>
             </div>
 
         </div>

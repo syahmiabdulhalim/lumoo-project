@@ -43,6 +43,9 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +61,8 @@ public class WebController {
     @Autowired private VendorApplicationService vendorApplicationService;
     @Autowired private BlogService blogService;
     @Autowired private SubscriberService subscriberService;
+    @Autowired private SiteSettingsService siteSettingsService;
+    @Autowired private ModemPayService modemPayService;
 
     @GetMapping("/stores")
     public String stores(Model model) {
@@ -69,38 +74,43 @@ public class WebController {
     @GetMapping("/store/{vendorId}")
     public String store(@PathVariable Long vendorId,
                         @RequestParam(required = false) String category,
+                        @RequestParam(defaultValue = "0") int page,
                         Model model) {
         User vendor = userService.findById(vendorId).orElse(null);
         if (vendor == null) return "redirect:/stores";
-        List<Product> products = productService.getApprovedByVendor(vendor);
-        if (category != null && !category.isEmpty()) {
-            products = products.stream()
-                    .filter(p -> category.equalsIgnoreCase(p.getCategory()))
-                    .toList();
-        }
-        List<String> categories = productService.getApprovedByVendor(vendor).stream()
-                .map(Product::getCategory)
-                .distinct().sorted().toList();
+        PageRequest pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id").descending());
+        Page<Product> productPage = (category != null && !category.isEmpty())
+                ? productService.getApprovedByVendorAndCategoryPaged(vendor, category, pageable)
+                : productService.getApprovedByVendorPaged(vendor, pageable);
         model.addAttribute("vendor", vendor);
-        model.addAttribute("products", products);
-        model.addAttribute("categories", categories);
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", productPage.getNumber());
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("totalProductCount", productPage.getTotalElements());
+        model.addAttribute("categories", productService.getDistinctCategoriesByVendor(vendor));
         model.addAttribute("selectedCategory", category);
         return "store";
     }
 
+    private static final int PAGE_SIZE = 12;
+
     @GetMapping("/")
     public String home(Model model,
                        @RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) String category) {
-        List<Product> products;
+                       @RequestParam(required = false) String category,
+                       @RequestParam(defaultValue = "0") int page) {
+        PageRequest pageable = PageRequest.of(page, PAGE_SIZE, Sort.by("id").descending());
+        Page<Product> productPage;
         if (keyword != null && !keyword.isEmpty()) {
-            products = productService.searchByName(keyword);
+            productPage = productService.searchApprovedPaged(keyword, pageable);
         } else if (category != null && !category.isEmpty()) {
-            products = productService.getByCategory(category);
+            productPage = productService.getApprovedByCategoryPaged(category, pageable);
         } else {
-            products = productService.getAll();
+            productPage = productService.getAllApproved(pageable);
         }
-        model.addAttribute("products", products);
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", productPage.getNumber());
+        model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("recentPosts", blogService.getPublished().stream().limit(3).toList());
@@ -119,6 +129,7 @@ public class WebController {
             userService.findByEmail(principal.getName()).ifPresent(user -> {
                 model.addAttribute("canReview", reviewService.canReview(user, product));
                 model.addAttribute("alreadyReviewed", reviewService.hasAlreadyReviewed(user, product));
+                model.addAttribute("hasPurchased", reviewService.hasPurchased(user, product));
             });
         }
         return "product-detail";
@@ -173,10 +184,20 @@ public class WebController {
     }
 
     @GetMapping("/buyer/dashboard")
-    public String buyerDashboard(Model model, Principal principal) {
+    public String buyerDashboard(Model model, Principal principal,
+                                 @org.springframework.web.bind.annotation.RequestParam(required = false) String paid) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user != null) {
+            // If returning from ModemPay payment, verify any pending orders to cover missed webhooks
+            if (paid != null) {
+                orderService.getUserOrders(user).stream()
+                        .filter(o -> "AWAITING_PAYMENT".equals(o.getStatus())
+                                && o.getModempayPaymentId() != null)
+                        .map(Order::getModempayPaymentId)
+                        .distinct()
+                        .forEach(modemPayService::verifyAndSync);
+            }
             List<Order> orders = orderService.getUserOrders(user);
             if (orders != null) orders.removeIf(Objects::isNull);
             model.addAttribute("orders", orders);
@@ -193,7 +214,7 @@ public class WebController {
     public String orderDetails(@PathVariable Long id, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
         User currentUser = userService.findByEmail(principal.getName()).orElse(null);
-        Order order = orderService.findById(id).orElse(null);
+        Order order = orderService.findByIdWithItems(id).orElse(null);
         if (order == null || currentUser == null || !order.getUser().getId().equals(currentUser.getId())) {
             return "redirect:/buyer/dashboard?error=unauthorized";
         }
@@ -247,12 +268,26 @@ public class WebController {
     }
 
     @GetMapping("/privacy-policy")
-    public String privacyPolicy() {
+    public String privacyPolicy(Model model) {
+        model.addAttribute("siteSettings", siteSettingsService.get());
         return "privacy-policy";
     }
 
     @GetMapping("/terms")
-    public String terms() {
+    public String terms(Model model) {
+        model.addAttribute("siteSettings", siteSettingsService.get());
         return "terms";
+    }
+
+    @GetMapping("/cookie-policy")
+    public String cookiePolicy(Model model) {
+        model.addAttribute("siteSettings", siteSettingsService.get());
+        return "cookie-policy";
+    }
+
+    @GetMapping("/returns")
+    public String returns(Model model) {
+        model.addAttribute("siteSettings", siteSettingsService.get());
+        return "returns";
     }
 }

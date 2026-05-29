@@ -4,27 +4,37 @@ services:
     container_name: lumoo-app
     ports:
       - "8080:8080"
-    mem_limit: 512m        # ← kena kat sini, bukan dalam depends_on
+    mem_limit: 512m
     environment:
       JAVA_OPTS: "-Xms128m -Xmx384m"
-      ADMIN_PASSWORD: admin123
+      SPRING_PROFILES_ACTIVE: prod
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/lumoo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: lumoo_user
       SPRING_DATASOURCE_PASSWORD: lumoo_pass
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       UPLOAD_DIR: /app/uploads/products
-      RESEND_API_KEY: ${RESEND_API_KEY}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      RESEND_API_KEY: ${RESEND_API_KEY:-dummy-key}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      MODEMPAY_PUBLIC_KEY: ${MODEMPAY_PUBLIC_KEY:-}
+      MODEMPAY_API_KEY: ${MODEMPAY_API_KEY:-}
+      MODEMPAY_WEBHOOK_SECRET: ${MODEMPAY_WEBHOOK_SECRET:-}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - lumoo_uploads:/app/uploads
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
   db:
     image: mysql:8.0
     container_name: lumoo-db
-    mem_limit: 256m        # ← sama, kat level service
+    mem_limit: 256m
     environment:
       MYSQL_DATABASE: lumoo
       MYSQL_USER: lumoo_user
@@ -39,6 +49,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: lumoo-redis
+    mem_limit: 64m
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
 volumes:

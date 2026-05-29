@@ -1,10 +1,12 @@
 package com.example.lumoo.domain.order;
 
 import com.example.lumoo.domain.product.Product;
+import com.example.lumoo.domain.product.ProductService;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderItem;
 import com.example.lumoo.domain.order.CartItem;
+import com.example.lumoo.domain.payment.PayoutService;
 import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.Role;
@@ -40,8 +42,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -49,68 +54,134 @@ public class OrderService {
     @Autowired private OrderRepository orderRepository;
     @Autowired private OrderItemRepository orderItemRepository;
     @Autowired private CartRepository cartRepository;
+    @Autowired private PayoutService payoutService;
+    @Autowired private ProductService productService;
 
     public List<Order> getUserOrders(User user) {
-        return orderRepository.findByUserOrderByOrderDateDesc(user);
+        return orderRepository.findByUserWithItems(user);
     }
 
     public List<Order> getVendorOrders(Long vendorId) {
-        return orderRepository.findOrdersByVendorId(vendorId);
+        return orderRepository.findVendorOrdersWithItems(vendorId);
     }
 
     public List<Order> getAll() {
         return orderRepository.findAll();
     }
 
+    public long countAll() { return orderRepository.count(); }
+
+    public org.springframework.data.domain.Page<Order> getPage(int page, int size) {
+        return orderRepository.findAll(
+            org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("createdAt").descending()));
+    }
+    public double sumTotalRevenue() { return orderRepository.sumTotalRevenue(); }
+    public double sumTotalCommission() { return orderRepository.sumTotalCommission(); }
+
+    public double sumVendorRevenue(Long vendorId) { return orderRepository.sumVendorRevenue(vendorId); }
+    public double sumVendorMonthlySales(Long vendorId) { return orderRepository.sumVendorMonthlySales(vendorId); }
+    public long countVendorOrders(Long vendorId) { return orderRepository.countVendorOrders(vendorId); }
+
+    public org.springframework.data.domain.Page<Order> getVendorOrdersPage(Long vendorId, int page, int size) {
+        return orderRepository.findVendorOrdersPaged(vendorId,
+            org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("createdAt").descending()));
+    }
+
     public Optional<Order> findById(Long id) {
         return orderRepository.findById(id);
     }
 
+    public Optional<Order> findByIdWithItems(Long id) {
+        return orderRepository.findByIdWithItems(id);
+    }
+
+    /**
+     * Splits cart items by vendor and creates one Order per vendor (Shopee-style).
+     * Returns all created orders.
+     */
     @Transactional
-    public Order placeOrder(User user, String address, String paymentMethod, List<CartItem> cartItems) {
-        double total = cartItems.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
+    public List<Order> placeOrders(User user, String address, String paymentMethod,
+                                   List<CartItem> cartItems,
+                                   boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
+        Map<Long, List<CartItem>> byVendor = cartItems.stream()
+                .collect(Collectors.groupingBy(ci ->
+                        ci.getProduct() != null && ci.getProduct().getVendor() != null
+                                ? ci.getProduct().getVendor().getId() : 0L));
+
+        // Atomic stock deduction — whole transaction rolls back if any item runs out
+        for (CartItem ci : cartItems) {
+            if (ci.getProduct() != null) {
+                boolean ok = productService.decrementStock(ci.getProduct().getId(), ci.getQuantity());
+                if (!ok) throw new IllegalStateException(
+                        "Insufficient stock for: " + ci.getName() + ". Please update your cart.");
+            }
+        }
+
+        List<Order> orders = new ArrayList<>();
+        for (List<CartItem> vendorItems : byVendor.values()) {
+            orders.add(createOrder(user, address, paymentMethod, vendorItems,
+                    privacyAccepted, termsAccepted, marketingConsent));
+        }
+        cartRepository.deleteAll(cartItems);
+        return orders;
+    }
+
+    private Order createOrder(User user, String address, String paymentMethod,
+                              List<CartItem> items,
+                              boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
+        double total      = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
         double commission = total * 0.10;
-        double vendorEarnings = total - commission;
 
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address.trim());
         order.setOrderDate(LocalDateTime.now());
         order.setPaymentMethod(paymentMethod);
-        order.setStatus(paymentMethod.equals("COD") ? "PENDING" : "AWAITING_PROOF");
+        order.setStatus(switch (paymentMethod) {
+            case "COD"      -> "PENDING";
+            case "MODEMPAY" -> "AWAITING_PAYMENT";
+            default         -> "AWAITING_PROOF";
+        });
         order.setTotalAmount(total);
         order.setAdminCommission(commission);
-        order.setVendorEarnings(vendorEarnings);
+        order.setVendorEarnings(total - commission);
+        order.setPrivacyAccepted(privacyAccepted);
+        order.setTermsAccepted(termsAccepted);
+        order.setMarketingConsent(marketingConsent);
 
         Order saved = orderRepository.save(order);
 
-        for (CartItem ci : cartItems) {
+        for (CartItem ci : items) {
             OrderItem oi = new OrderItem();
             oi.setOrder(saved);
+            oi.setProduct(ci.getProduct());
             oi.setProductName(ci.getName());
             oi.setPrice(ci.getPrice());
             oi.setQuantity(ci.getQuantity());
             orderItemRepository.save(oi);
         }
-
-        cartRepository.deleteAll(cartItems);
         return saved;
     }
 
     public enum CancelResult { CANCELLED, NOT_FOUND, UNAUTHORIZED, CANNOT_CANCEL }
 
+    @Transactional
     public CancelResult cancelOrder(Long id, User user) {
-        Order order = orderRepository.findById(id).orElse(null);
+        Order order = orderRepository.findByIdWithItems(id).orElse(null);
         if (order == null) return CancelResult.NOT_FOUND;
         if (!order.getUser().getId().equals(user.getId())) return CancelResult.UNAUTHORIZED;
         String st = order.getStatus();
-        if (!st.equals("PENDING") && !st.equals("AWAITING_PROOF")) return CancelResult.CANNOT_CANCEL;
+        if (!st.equals("PENDING") && !st.equals("AWAITING_PROOF") && !st.equals("AWAITING_PAYMENT")) return CancelResult.CANNOT_CANCEL;
+        returnStockForOrder(order);
         orderRepository.delete(order);
         return CancelResult.CANCELLED;
     }
 
     public enum ShipResult { SHIPPED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
 
+    @Transactional
     public ShipResult markShipped(Long orderId, Long vendorId, String trackingNumber) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) return ShipResult.NOT_FOUND;
@@ -175,14 +246,29 @@ public class OrderService {
         });
     }
 
+    @Transactional
     public void updateStatus(Long orderId, String status) {
-        orderRepository.findById(orderId).ifPresent(o -> {
+        orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
             o.setStatus(status);
             orderRepository.save(o);
+            if ("DELIVERED".equals(status)) {
+                payoutService.tryPayoutVendor(o);
+            }
         });
     }
 
     public void delete(Long id) {
         orderRepository.deleteById(id);
+    }
+
+    /** Returns stock for all items in an order. Called on cancel and payment failure. */
+    @Transactional
+    public void returnStockForOrder(Order order) {
+        if (order.getItems() == null) return;
+        for (OrderItem item : order.getItems()) {
+            if (item.getProduct() != null) {
+                productService.returnStock(item.getProduct().getId(), item.getQuantity());
+            }
+        }
     }
 }

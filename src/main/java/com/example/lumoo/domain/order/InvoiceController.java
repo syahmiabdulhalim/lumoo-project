@@ -22,7 +22,7 @@ public class InvoiceController {
 
     @GetMapping("/buyer/invoice/{id}")
     public void generateInvoice(@PathVariable Long id, HttpServletResponse response, Principal principal) throws IOException {
-        Order order = orderRepository.findById(id).orElseThrow();
+        Order order = orderRepository.findByIdWithItems(id).orElseThrow();
 
         if (principal == null || !order.getUser().getEmail().equals(principal.getName())) {
             response.sendError(HttpStatus.FORBIDDEN.value(), "Access denied");
@@ -51,11 +51,13 @@ public class InvoiceController {
 
         // Items Table
         document.add(new Paragraph("Items Purchased:"));
-        order.getItems().forEach(item -> {
-            try {
-                document.add(new Paragraph("- " + item.getProductName() + " x " + item.getQuantity() + " : GMD " + (item.getPrice() * item.getQuantity())));
-            } catch (DocumentException e) { e.printStackTrace(); }
-        });
+        if (order.getItems() != null) {
+            order.getItems().forEach(item -> {
+                try {
+                    document.add(new Paragraph("- " + item.getProductName() + " x " + item.getQuantity() + " : GMD " + (item.getPrice() * item.getQuantity())));
+                } catch (DocumentException e) { e.printStackTrace(); }
+            });
+        }
 
         document.add(new Paragraph("------------------------------------------------------------------"));
         Font fontTotal = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);

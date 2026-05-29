@@ -42,20 +42,48 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
-        List<Order> orders = orderService.getAll();
-        model.addAttribute("totalOrders", orders.size());
-        model.addAttribute("totalRevenue", orders.stream().mapToDouble(Order::getTotalAmount).sum());
-        model.addAttribute("totalCommission", orders.stream().mapToDouble(Order::getAdminCommission).sum());
-        model.addAttribute("products", productService.getAll());
-        model.addAttribute("users", userService.getAll());
-        model.addAttribute("orders", orders);
-        model.addAttribute("inquiries", inquiryService.getAll());
+        model.addAttribute("totalOrders", orderService.countAll());
+        model.addAttribute("totalRevenue", orderService.sumTotalRevenue());
+        model.addAttribute("totalCommission", orderService.sumTotalCommission());
+        model.addAttribute("totalUsers", userService.countAll());
+        return "admin/dashboard";
+    }
+
+    // ── Lazy-loaded dashboard sections ──────────────────────────────────────
+
+    private static final int ORDERS_PAGE_SIZE = 50;
+
+    @GetMapping("/sections/orders")
+    public String sectionOrders(Model model,
+                                @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
+        var ordersPage = orderService.getPage(page, ORDERS_PAGE_SIZE);
+        model.addAttribute("orders", ordersPage.getContent());
+        model.addAttribute("ordersCurrentPage", ordersPage.getNumber());
+        model.addAttribute("ordersTotalPages", ordersPage.getTotalPages());
+        model.addAttribute("proofOrders", ordersPage.getContent().stream()
+                .filter(o -> "PROOF_UPLOADED".equals(o.getStatus())).toList());
+        return "admin/sections/orders :: content";
+    }
+
+    @GetMapping("/sections/moderation")
+    public String sectionModeration(Model model) {
         model.addAttribute("pendingProducts", productService.getPendingApproval());
         model.addAttribute("vendorApplications", vendorApplicationService.getPending());
         model.addAttribute("pendingImages", productService.getPendingImageApproval());
-        model.addAttribute("proofOrders", orders.stream()
-                .filter(o -> "PROOF_UPLOADED".equals(o.getStatus())).toList());
-        return "admin/dashboard";
+        return "admin/sections/moderation :: content";
+    }
+
+    @GetMapping("/sections/inventory")
+    public String sectionInventory(Model model) {
+        model.addAttribute("products", productService.getAll());
+        return "admin/sections/inventory :: content";
+    }
+
+    @GetMapping("/sections/users")
+    public String sectionUsers(Model model) {
+        model.addAttribute("users", userService.getAll());
+        model.addAttribute("inquiries", inquiryService.getAll());
+        return "admin/sections/users :: content";
     }
 
     @GetMapping("/approve-product/{id}")
@@ -163,8 +191,10 @@ public class AdminController {
 
     @GetMapping("/settings")
     public String settings(Model model) {
+        var subs = subscriberService.getAll();
         model.addAttribute("settings", siteSettingsService.get());
-        model.addAttribute("subscribers", subscriberService.getAll());
+        model.addAttribute("subscribers", subs);
+        model.addAttribute("activeSubscriberCount", subs.stream().filter(s -> s.isActive()).count());
         return "admin/settings";
     }
 

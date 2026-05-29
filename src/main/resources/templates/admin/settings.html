@@ -3,9 +3,10 @@
 <head>
     <title>LUMOO Admin | Settings</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f5f6fa] text-gray-900 font-['Inter']">
+<body class="bg-[#f5f6fa] text-gray-900 font-['Nunito_Sans']">
 
 <nav class="bg-[#1a2336] text-white flex justify-between items-center px-10 py-4 sticky top-0 z-50">
     <a href="/admin/dashboard" class="text-[10px] font-black uppercase tracking-[0.3em]">← Admin Dashboard</a>
@@ -40,7 +41,6 @@
     </div>
 
     <form th:action="@{/admin/settings}" method="post">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <!-- ── PAYMENT SETUP ───────────────────────────────────────────────── -->
         <div id="panel-payment">
@@ -218,7 +218,7 @@
                 <div class="px-8 py-5 border-b border-gray-100 flex justify-between items-center">
                     <div>
                         <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400">Newsletter Subscribers</h2>
-                        <p class="text-xs text-gray-500 mt-1" th:text="${#lists.size(subscribers)} + ' total · ' + ${subscribers.stream().filter(s -> s.active).count()} + ' active'"></p>
+                        <p class="text-xs text-gray-500 mt-1" th:text="${#lists.size(subscribers)} + ' total · ' + ${activeSubscriberCount} + ' active'"></p>
                     </div>
                 </div>
                 <table class="w-full text-left" th:if="${!#lists.isEmpty(subscribers)}">

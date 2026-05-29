@@ -72,6 +72,7 @@ public class CustomerRightsService {
             for (Order order : orders) {
                 if (!"ANONYMISED".equals(order.getCustomerName())) {
                     order.setCustomerName("ANONYMISED");
+                    order.setAddress(null);
                     orderRepository.save(order);
                     ordersAnonymised++;
                 }

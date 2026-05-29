@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <!-- VENDOR APPLICATIONS -->
+    <section id="vendor-applications">
+        <div class="bg-white rounded-xl border border-violet-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-violet-100 flex items-center justify-between bg-violet-50">
+                <div>
+                    <h2 class="text-sm font-semibold text-violet-800">Vendor Applications</h2>
+                    <p class="text-xs text-violet-600 mt-0.5">Users requesting to become vendors</p>
+                </div>
+                <span class="bg-violet-100 text-violet-700 text-xs font-mono px-2 py-1 rounded-md"
+                      th:text="${#lists.size(vendorApplications)} + ' pending'">0 pending</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Applicant</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Business</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Owner</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Region</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Turnover</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Docs</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr th:each="app : ${vendorApplications}" class="table-row">
+                            <td class="px-6 py-4">
+                                <p class="text-sm text-slate-700" th:text="${app.user.email}">email</p>
+                                <p class="text-xs text-slate-400" th:text="${app.phone}">phone</p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-medium text-slate-800 text-sm" th:text="${app.businessName}">Business</p>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md" th:text="${app.businessType}">Type</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="text-xs font-medium text-slate-700" th:text="${app.ownerFullName}">Owner</p>
+                                <p class="text-xs text-slate-400" th:text="${app.ownerIdType}">ID Type</p>
+                                <p class="text-xs text-slate-400 font-mono" th:text="${app.ownerIdNumber}">ID Number</p>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.businessRegion}">Region</td>
+                            <td class="px-6 py-4 text-xs text-slate-500" th:text="${app.estimatedMonthlyTurnover}">Turnover</td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-1">
+                                    <a th:if="${app.nationalIdDocUrl != null}"
+                                       th:href="${app.nationalIdDocUrl}" target="_blank"
+                                       class="text-xs text-[#4d78c0] hover:underline font-medium">View ID Doc</a>
+                                    <span th:if="${app.nationalIdDocUrl == null}"
+                                          class="text-xs text-red-400 font-medium">No ID uploaded</span>
+                                    <a th:if="${app.businessRegDocUrl != null}"
+                                       th:href="${app.businessRegDocUrl}" target="_blank"
+                                       class="text-xs text-slate-500 hover:underline">View Biz Reg</a>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-2">
+                                    <a th:href="@{/admin/application/{id}(id=${app.id})}"
+                                       class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
+                                        Full KYC
+                                    </a>
+                                    <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
+                                       class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
+                                        Approve
+                                    </a>
+                                    <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post"
+                                          th:id="'reject-form-' + ${app.id}"
+                                          onsubmit="return fillRejectNote(this)">
+                                        <input type="hidden" name="note">
+                                        <button type="submit"
+                                                class="w-full text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${vendorApplications == null || vendorApplications.empty}" class="text-center py-12">
+                    <p class="text-sm text-slate-400">No pending vendor applications</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- IMAGE REVIEW -->
+    <section id="images">
+        <div class="bg-white rounded-xl border border-orange-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-orange-100 flex items-center justify-between bg-orange-50">
+                <div>
+                    <h2 class="text-sm font-semibold text-orange-800">Image Review</h2>
+                    <p class="text-xs text-orange-500 mt-0.5">Product images awaiting approval — review before they go live</p>
+                </div>
+                <span class="bg-orange-100 text-orange-700 text-xs font-mono px-2 py-1 rounded-md"
+                      th:text="${(pendingImages != null ? #lists.size(pendingImages) : 0)} + ' pending'">0 pending</span>
+            </div>
+            <div th:if="${pendingImages != null and !#lists.isEmpty(pendingImages)}"
+                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+                <div th:each="p : ${pendingImages}" class="border border-slate-100 rounded-lg overflow-hidden bg-slate-50">
+                    <div class="aspect-video bg-slate-100 overflow-hidden">
+                        <img th:if="${p.imageUrl != null}" th:src="${p.imageUrl}"
+                             class="w-full h-full object-cover" th:alt="${p.name}"
+                             onerror="this.style.display='none'">
+                        <div th:if="${p.imageUrl == null}" class="w-full h-full flex items-center justify-center text-slate-300">
+                            <span class="text-3xl">🖼</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-sm font-bold text-slate-800 mb-1" th:text="${p.name}">Product</p>
+                        <p class="text-xs text-slate-400 mb-1" th:text="${p.category}">Category</p>
+                        <p class="text-xs text-slate-400 mb-3" th:text="${'Vendor: ' + (p.vendor != null ? p.vendor.email : 'Unknown')}">Vendor</p>
+                        <div class="flex gap-2">
+                            <a th:href="@{/admin/approve-image/{id}(id=${p.id})}"
+                               class="flex-1 text-center bg-green-600 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
+                                Approve
+                            </a>
+                            <button type="button" class="btn-lm-delete flex-1 text-center bg-red-500 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-red-600 transition rounded"
+                               data-title="Reject Image" data-msg="This image will be removed from the product listing."
+                               data-btn="Reject Image"
+                               th:data-url="@{/admin/reject-image/{id}(id=${p.id})}">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${pendingImages == null || #lists.isEmpty(pendingImages)}" class="text-center py-12">
+                <p class="text-sm text-slate-400">No images pending review</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PENDING PRODUCT APPROVAL -->
+    <section id="moderation">
+        <div class="bg-white rounded-xl border border-blue-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-blue-100 flex items-center justify-between bg-blue-50">
+                <div>
+                    <h2 class="text-sm font-semibold text-blue-800">Product Approval</h2>
+                    <p class="text-xs text-blue-500 mt-0.5">New products submitted by vendors awaiting approval</p>
+                </div>
+                <span class="bg-blue-100 text-blue-700 text-xs font-mono px-2 py-1 rounded-md"
+                      th:text="${(pendingProducts != null ? #lists.size(pendingProducts) : 0)} + ' pending'">0 pending</span>
+            </div>
+            <div th:if="${pendingProducts != null and !#lists.isEmpty(pendingProducts)}" class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-100">
+                        <tr>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Vendor</th>
+                            <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <tr th:each="p : ${pendingProducts}" class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-slate-800" th:text="${p.name}">Name</td>
+                            <td class="px-6 py-4 text-slate-500" th:text="${p.category}">Category</td>
+                            <td class="px-6 py-4 text-slate-700 font-mono" th:text="'GMD ' + ${p.price}">Price</td>
+                            <td class="px-6 py-4 text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '-'}">Vendor</td>
+                            <td class="px-6 py-4">
+                                <a th:href="@{/admin/approve-product/{id}(id=${p.id})}"
+                                   class="inline-block bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
+                                    Approve
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${pendingProducts == null || #lists.isEmpty(pendingProducts)}" class="text-center py-10">
+                <p class="text-sm text-slate-400">No products pending approval</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

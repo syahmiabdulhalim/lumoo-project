@@ -3,9 +3,10 @@
 <head>
     <title>LUMOO | My Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#f9f9f9] text-gray-900 font-['Inter']">
+<body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
 
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
         <a href="/">
@@ -120,6 +121,29 @@
                     <input type="text" th:value="${user.email}" disabled
                            class="w-full border-b border-gray-100 py-2.5 text-sm text-gray-300 bg-transparent cursor-not-allowed">
                     <p class="text-[9px] text-gray-300 mt-1">Email cannot be changed.</p>
+                </div>
+
+                <!-- Vendor payout details — only shown to vendors -->
+                <div th:if="${user.role.name() == 'VENDOR'}"
+                     class="pt-4 mt-4 border-t border-gray-100 space-y-4">
+                    <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">Payout Details</p>
+                    <p class="text-[9px] text-gray-400">Your mobile money number to receive vendor earnings when orders are delivered.</p>
+                    <div>
+                        <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Payout Network</label>
+                        <select name="payoutNetwork"
+                                class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition">
+                            <option value="" th:selected="${user.payoutNetwork == null}">— Select network —</option>
+                            <option value="afrimoney" th:selected="${user.payoutNetwork == 'afrimoney'}">Afrimoney</option>
+                            <option value="wave"      th:selected="${user.payoutNetwork == 'wave'}">Wave</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Payout Phone Number</label>
+                        <input type="tel" name="payoutPhone"
+                               th:value="${user.payoutPhone}"
+                               placeholder="7XXXXXXX (7-digit, no country code)"
+                               class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition">
+                    </div>
                 </div>
 
                 <button type="submit"

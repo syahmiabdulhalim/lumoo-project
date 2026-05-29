@@ -14,10 +14,11 @@ public class OrderItem {
     private String productName;
     private Integer quantity;
     private Double price;
-    @ManyToOne // <--- WAJIB ADA INI
-@JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
-@ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
     // --- GETTERS ---
