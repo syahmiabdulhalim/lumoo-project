@@ -72,27 +72,9 @@ public class PaymentController {
             @RequestHeader(value = "x-modem-signature", required = false) String signature,
             HttpServletRequest request) {
 
-        log.info("[Webhook] Received from={} signature={} payload={}",
-                request.getRemoteAddr(), signature,
-                rawPayload.length() > 200 ? rawPayload.substring(0, 200) : rawPayload);
-
-        // Log all headers for debugging
-        java.util.Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames != null && headerNames.hasMoreElements()) {
-            String h = headerNames.nextElement();
-            if (h.toLowerCase().contains("sign") || h.toLowerCase().contains("modem") || h.toLowerCase().contains("hash")) {
-                log.info("[Webhook] Header: {}={}", h, request.getHeader(h));
-            }
-        }
-
-        if (!modemPayService.verifySignature(rawPayload, signature)) {
-            log.warn("[Webhook] Invalid signature — received={} from={}", signature, request.getRemoteAddr());
-            // In test mode, still process but log the mismatch
-            if (signature == null || signature.isBlank()) {
-                log.warn("[Webhook] No signature header — processing anyway for debug");
-            } else {
-                return ResponseEntity.status(401).body("Invalid signature");
-            }
+if (!modemPayService.verifySignature(rawPayload, signature)) {
+            log.warn("[Webhook] Invalid signature from={}", request.getRemoteAddr());
+            return ResponseEntity.status(401).body("Invalid signature");
         }
 
         try {

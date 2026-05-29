@@ -169,9 +169,9 @@ public class ModemPayService {
     public boolean verifySignature(String rawPayload, String receivedSignature) {
         if (webhookSecret.isBlank() || receivedSignature == null) return false;
         try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(webhookSecret.getBytes(), "HmacSHA256"));
-            byte[] computed = mac.doFinal(rawPayload.getBytes());
+            Mac mac = Mac.getInstance("HmacSHA512");
+            mac.init(new SecretKeySpec(webhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA512"));
+            byte[] computed = mac.doFinal(rawPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             String computedHex = HexFormat.of().formatHex(computed);
             return computedHex.equalsIgnoreCase(receivedSignature.trim());
         } catch (Exception e) {
