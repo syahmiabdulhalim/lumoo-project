@@ -7,20 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f5f6fa] text-gray-900 font-['Nunito_Sans']">
-
 <nav class="bg-[#1a2336] text-white flex justify-between items-center px-10 py-4 sticky top-0 z-50">
     <a href="/admin/dashboard" class="text-[10px] font-black uppercase tracking-[0.3em]">← Admin Dashboard</a>
     <span class="text-[10px] text-gray-400 uppercase tracking-widest">Settings</span>
 </nav>
-
 <main class="max-w-4xl mx-auto py-14 px-6">
-
     <header class="mb-10">
         <h1 class="text-3xl font-light tracking-tight">Site <span class="font-black italic text-[#4d78c0]">Settings</span></h1>
         <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-1">Payment setup & privacy compliance</p>
     </header>
-
-    <!-- Tab nav -->
     <div class="flex gap-1 mb-8 border-b border-gray-200">
         <button onclick="showTab('payment')" id="tab-payment"
                 class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-[#4d78c0] text-[#4d78c0]">
@@ -39,13 +34,8 @@
             Subscribers <span th:text="'(' + ${#lists.size(subscribers)} + ')'" class="text-gray-300"></span>
         </button>
     </div>
-
     <form th:action="@{/admin/settings}" method="post">
-
-        <!-- ── PAYMENT SETUP ───────────────────────────────────────────────── -->
         <div id="panel-payment">
-
-            <!-- Bank Transfer -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Bank Transfer Details</h2>
                 <div class="grid grid-cols-2 gap-5">
@@ -67,8 +57,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Afrimoney -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Afrimoney</h2>
                 <div class="grid grid-cols-2 gap-5">
@@ -82,8 +70,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- QMoney -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">QMoney</h2>
                 <div class="grid grid-cols-2 gap-5">
@@ -97,19 +83,12 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- ── PRIVACY & PDPA ───────────────────────────────────────────────── -->
         <div id="panel-pdpa" class="hidden">
-
-            <!-- Notice box -->
             <div class="bg-blue-50 border border-blue-200 px-6 py-4 mb-6">
                 <p class="text-[9px] font-black uppercase tracking-widest text-blue-700 mb-1">Gambia Personal Data Protection Act 2022</p>
                 <p class="text-xs text-blue-600">As a data controller operating in The Gambia, LUMOO must comply with the <strong>Personal Data Protection Act 2022</strong>. Fill in your registration details and configure the cookie consent banner below.</p>
             </div>
-
-            <!-- PDPA Registration -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">PDPA Registration</h2>
                 <div class="grid grid-cols-2 gap-5">
@@ -129,8 +108,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Cookie Consent -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Cookie Consent Banner</h2>
                 <label class="flex items-center gap-3 cursor-pointer mb-4">
@@ -144,8 +121,6 @@
                 </label>
                 <p class="text-[9px] text-gray-400">When enabled, a consent banner appears for new visitors. Required under the Gambia PDPA 2022 for tracking cookies.</p>
             </div>
-
-            <!-- Data Retention -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Data Retention</h2>
                 <div class="max-w-xs">
@@ -154,8 +129,6 @@
                     <p class="text-[8px] text-gray-400 mt-1">Default: 365 days. Max recommended: 1825 days (5 years).</p>
                 </div>
             </div>
-
-            <!-- Privacy Policy Text -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Privacy Policy</h2>
                 <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/privacy-policy</code>. Basic HTML is supported.</p>
@@ -164,8 +137,6 @@
                           placeholder="Enter your privacy policy text here..."
                           th:text="${settings.privacyPolicyText}"></textarea>
             </div>
-
-            <!-- Terms -->
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Terms of Service</h2>
                 <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/terms</code>. Basic HTML is supported.</p>
@@ -174,12 +145,8 @@
                           placeholder="Enter your terms of service here..."
                           th:text="${settings.termsText}"></textarea>
             </div>
-
         </div>
-
-        <!-- ── BUSINESS INFO ───────────────────────────────────────────────── -->
         <div id="panel-business" class="hidden">
-
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Business Details</h2>
                 <div class="grid grid-cols-2 gap-5">
@@ -229,10 +196,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- ── SUBSCRIBERS ─────────────────────────────────────────────────── -->
         <div id="panel-subscribers" class="hidden">
             <div class="bg-white border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-8 py-5 border-b border-gray-100 flex justify-between items-center">
@@ -273,23 +237,19 @@
                 </div>
             </div>
         </div>
-
         <div class="flex justify-end" th:unless="${#strings.equals(param.tab != null ? param.tab[0] : '', 'subscribers')}">
             <button type="submit"
                     class="bg-[#1a2336] text-white px-10 py-3.5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition">
                 Save Settings →
             </button>
         </div>
-
     </form>
 </main>
-
 <style>
     .label { display:block; font-size:.55rem; font-weight:900; text-transform:uppercase; letter-spacing:.15em; color:#9ca3af; margin-bottom:.5rem; }
     .input  { width:100%; border-bottom:1px solid #e5e7eb; padding:.5rem 0; font-size:.75rem; background:transparent; outline:none; transition:border-color .2s; }
     .input:focus { border-color:#4d78c0; }
 </style>
-
 <script>
     function showTab(name) {
         ['payment','pdpa','business','subscribers'].forEach(t => {
@@ -307,7 +267,6 @@
     var urlTab = new URLSearchParams(window.location.search).get('tab');
     if (urlTab) showTab(urlTab);
 </script>
-
 <script th:if="${flashMsg != null}" th:inline="javascript">
     window._lmFlash = { msg: /*[[${flashMsg}]]*/ '', type: /*[[${flashType ?: 'blue'}]]*/ 'blue' };
 </script>

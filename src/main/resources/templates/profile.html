@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
         <a href="/">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-12 w-auto object-contain">
@@ -21,10 +20,7 @@
             </form>
         </div>
     </nav>
-
     <main class="max-w-3xl mx-auto px-6 py-16">
-
-        <!-- Header -->
         <div class="flex items-center gap-6 mb-12">
             <div class="relative group">
                 <img th:if="${user.profilePicture != null}"
@@ -48,8 +44,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Flash messages -->
         <div th:if="${success}" class="mb-6 border-l-4 border-green-500 bg-green-50 px-6 py-3">
             <p class="text-xs font-bold text-green-700 uppercase tracking-widest" th:text="${success}"></p>
         </div>
@@ -62,14 +56,9 @@
         <div th:if="${passwordError}" class="mb-6 border-l-4 border-red-400 bg-red-50 px-6 py-3">
             <p class="text-xs font-bold text-red-600 uppercase tracking-widest" th:text="${passwordError}"></p>
         </div>
-
-        <!-- Edit Profile -->
         <div class="bg-white border border-gray-100 shadow-sm p-10 mb-6">
             <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-8">Profile Information</h2>
-
             <form action="/profile/update" method="post" enctype="multipart/form-data" class="space-y-6">
-
-                <!-- Profile Picture -->
                 <div>
                     <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">Profile Picture</label>
                     <div class="flex items-center gap-5">
@@ -90,7 +79,6 @@
                         <span class="text-[9px] text-gray-300 uppercase">JPG, PNG — max 5MB</span>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-6">
                     <div>
                         <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Full Name</label>
@@ -107,7 +95,6 @@
                                class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Delivery Address</label>
                     <textarea name="address" rows="2"
@@ -115,15 +102,12 @@
                               placeholder="Street, City, Region"
                               class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition resize-none"></textarea>
                 </div>
-
                 <div>
                     <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Email Address</label>
                     <input type="text" th:value="${user.email}" disabled
                            class="w-full border-b border-gray-100 py-2.5 text-sm text-gray-300 bg-transparent cursor-not-allowed">
                     <p class="text-[9px] text-gray-300 mt-1">Email cannot be changed.</p>
                 </div>
-
-                <!-- Vendor payout details — only shown to vendors -->
                 <div th:if="${user.role.name() == 'VENDOR'}"
                      class="pt-4 mt-4 border-t border-gray-100 space-y-4">
                     <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">Payout Details</p>
@@ -145,27 +129,21 @@
                                class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
-
                 <button type="submit"
                         class="bg-[#1a2336] text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-300">
                     Save Changes →
                 </button>
             </form>
         </div>
-
-        <!-- Change Password -->
         <div class="bg-white border border-gray-100 shadow-sm p-10">
             <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-8">Change Password</h2>
-
             <form action="/profile/change-password" method="post" class="space-y-6" id="pwForm">
-
                 <div>
                     <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Current Password</label>
                     <input type="password" name="currentPassword" required
                            placeholder="••••••••"
                            class="w-full border-b border-gray-200 py-2.5 text-sm bg-transparent focus:border-blue-500 outline-none transition">
                 </div>
-
                 <div class="grid grid-cols-2 gap-6">
                     <div>
                         <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">New Password</label>
@@ -181,18 +159,14 @@
                         <p id="pwError" class="text-red-500 text-[9px] mt-1 hidden">Passwords do not match.</p>
                     </div>
                 </div>
-
                 <button type="submit" id="pwBtn"
                         class="bg-[#1a2336] text-white px-10 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-300">
                     Update Password →
                 </button>
             </form>
         </div>
-
     </main>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <script>
         function previewAvatar(event) {
             const file = event.target.files[0];
@@ -214,23 +188,19 @@
             };
             reader.readAsDataURL(file);
         }
-
         const newPw     = document.getElementById('newPw');
         const confirmPw = document.getElementById('confirmPw');
         const pwError   = document.getElementById('pwError');
         const pwBtn     = document.getElementById('pwBtn');
-
         function validatePw() {
             const mismatch = confirmPw.value && newPw.value !== confirmPw.value;
             pwError.classList.toggle('hidden', !mismatch);
             pwBtn.disabled = mismatch;
             pwBtn.classList.toggle('opacity-40', mismatch);
         }
-
         newPw.addEventListener('input', validatePw);
         confirmPw.addEventListener('input', validatePw);
     </script>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

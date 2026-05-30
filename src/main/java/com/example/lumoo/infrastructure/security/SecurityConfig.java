@@ -1,5 +1,4 @@
 package com.example.lumoo.infrastructure.security;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +9,8 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 @Configuration
 @EnableWebSecurity
-
 public class SecurityConfig {
 @Autowired
 private CustomSuccessHandler customSuccessHandler;
@@ -42,6 +39,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/uploads/proofs/**").hasRole("ADMIN")
     .requestMatchers("/uploads/kyc/**").hasRole("ADMIN")
     .requestMatchers("/stores", "/store/**", "/product/**", "/category/**", "/blog", "/blog/**", "/sitemap.xml", "/privacy-policy", "/terms", "/cookie-policy", "/returns", "/subscribe").permitAll()
+    .requestMatchers("/careers", "/careers/**", "/partnerships", "/partnerships/**").permitAll()
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
     .requestMatchers("/api/customer-rights/**").permitAll()
@@ -49,9 +47,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/api/payment/initiate").authenticated()
     .requestMatchers("/admin/**").hasRole("ADMIN")
     .requestMatchers("/vendor/**").hasRole("VENDOR")
-
     .requestMatchers("/buyer/vendorapply").authenticated()
-
     .requestMatchers("/buyer/**").authenticated()
     .requestMatchers("/cart/**").authenticated()
     .anyRequest().authenticated()
@@ -73,10 +69,8 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .deleteCookies("JSESSIONID")
             .permitAll()
         );
-
     return http.build();
 }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

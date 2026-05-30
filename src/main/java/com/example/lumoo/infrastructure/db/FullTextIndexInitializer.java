@@ -1,23 +1,17 @@
 package com.example.lumoo.infrastructure.db;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
 @Component
 public class FullTextIndexInitializer {
-
     private static final Logger log = LoggerFactory.getLogger(FullTextIndexInitializer.class);
-
     private final JdbcTemplate jdbc;
-
     public FullTextIndexInitializer(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
-
     @EventListener(ApplicationReadyEvent.class)
     public void createFullTextIndex() {
         try {

@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.pdpp;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.order.Order;
@@ -39,36 +38,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.*;
-
 @Service
 public class CustomerRightsService {
-
     @Autowired private UserRepository userRepository;
     @Autowired private OrderRepository orderRepository;
     @Autowired private ErasureRequestRepository erasureRequestRepository;
     @Autowired private DataAccessRequestRepository dataAccessRequestRepository;
     @Autowired private AuditService auditService;
-
     @Transactional
     public Map<String, Object> processErasureRequest(String email, HttpServletRequest request) {
         String refId = UUID.randomUUID().toString();
-
         ErasureRequest er = new ErasureRequest();
         er.setEmail(email);
         er.setReferenceId(refId);
         er.setStatus(ErasureRequest.Status.PROCESSING);
         erasureRequestRepository.save(er);
-
         Optional<User> userOpt = userRepository.findByEmail(email);
         int ordersAnonymised = 0;
-
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             List<Order> orders = orderRepository.findByUserOrderByOrderDateDesc(user);
-
             for (Order order : orders) {
                 if (!"ANONYMISED".equals(order.getCustomerName())) {
                     order.setCustomerName("ANONYMISED");
@@ -77,8 +68,6 @@ public class CustomerRightsService {
                     ordersAnonymised++;
                 }
             }
-
-            // Anonymise the user account — PDPP s.24
             String anonSuffix = user.getId().toString();
             user.setEmail("anonymised-" + anonSuffix + "@deleted.invalid");
             user.setFullName("ANONYMISED");
@@ -87,17 +76,14 @@ public class CustomerRightsService {
             user.setUsername("deleted-" + anonSuffix);
             userRepository.save(user);
         }
-
         er.setStatus(ErasureRequest.Status.COMPLETED);
         er.setProcessedAt(LocalDateTime.now());
         er.setOrdersAffected(ordersAnonymised);
         erasureRequestRepository.save(er);
-
         auditService.log("ERASURE_REQUEST_PROCESSED", "User", email,
                 Map.of("ordersAnonymised", ordersAnonymised, "referenceId", refId),
                 Map.of("status", "COMPLETED", "processedAt", LocalDateTime.now().toString()),
                 request);
-
         return Map.of(
                 "message", "Your data erasure request has been processed. " +
                            "We will retain financial records as required by Gambian law (7 years). " +
@@ -107,19 +93,15 @@ public class CustomerRightsService {
                 "governingLaw", "PDPP 2025 — The Gambia, s.24"
         );
     }
-
     @Transactional
     public Map<String, Object> processDataAccessRequest(String email, HttpServletRequest request) {
         String refId = UUID.randomUUID().toString();
-
         DataAccessRequest dar = new DataAccessRequest();
         dar.setEmail(email);
         dar.setReferenceId(refId);
         dataAccessRequestRepository.save(dar);
-
         Optional<User> userOpt = userRepository.findByEmail(email);
         List<Map<String, Object>> ordersSummary = new ArrayList<>();
-
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             List<Order> orders = orderRepository.findByUserOrderByOrderDateDesc(user);
@@ -133,13 +115,10 @@ public class CustomerRightsService {
                 ordersSummary.add(entry);
             }
         }
-
         dar.setFulfilledAt(LocalDateTime.now());
         dataAccessRequestRepository.save(dar);
-
         auditService.log("DATA_ACCESS_REQUEST", "User", email, null,
                 Map.of("referenceId", refId, "ordersReturned", ordersSummary.size()), request);
-
         return Map.of(
                 "email", email,
                 "ordersCount", ordersSummary.size(),

@@ -2,7 +2,6 @@ package com.example.lumoo.domain.user;
 import com.example.lumoo.infrastructure.security.EncryptedStringConverter;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
-
 @Entity @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,6 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "vendor_id")
     private User vendor;
-
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getPassword() { return password; }

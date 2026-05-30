@@ -1,31 +1,22 @@
 package com.example.lumoo.domain.product;
-
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
 @Entity @Table(name = "reviews")
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
     private String reviewerName;
-    private int rating; // 1-5 stars [cite: 47]
-    
+    private int rating; 
     @Column(columnDefinition = "TEXT")
-    private String comment; // [cite: 48]
-    
+    private String comment; 
     private LocalDateTime createdAt;
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getReviewerName() { return reviewerName; }

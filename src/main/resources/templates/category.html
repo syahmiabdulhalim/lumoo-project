@@ -15,14 +15,10 @@
     </style>
 </head>
 <body class="bg-white text-black font-['Nunito_Sans']">
-
-    <!-- TOP INFO BAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
         <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-6 md:px-12 py-5 bg-white border-b border-gray-100 sticky top-0 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain">
@@ -48,10 +44,7 @@
             </div>
         </div>
     </nav>
-
-    <!-- CATEGORY HEADER BANNER -->
     <div class="bg-[#0d0d0d] text-white">
-        <!-- Category tab bar -->
         <div class="border-b border-white/10 px-6 md:px-12 overflow-x-auto">
             <div class="flex gap-0 min-w-max">
                 <a href="/"
@@ -66,8 +59,6 @@
                 </a>
             </div>
         </div>
-
-        <!-- Category title area -->
         <div class="px-6 md:px-12 py-10">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
@@ -84,8 +75,6 @@
             </div>
         </div>
     </div>
-
-    <!-- BREADCRUMB -->
     <div class="bg-gray-50 border-b border-gray-100 px-6 md:px-12 py-3">
         <div class="max-w-7xl mx-auto flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-400">
             <a href="/" class="hover:text-black transition">Home</a>
@@ -93,15 +82,9 @@
             <span class="text-black font-bold" th:text="${categoryName}">Category</span>
         </div>
     </div>
-
-    <!-- MAIN: Filters Sidebar + Products -->
     <div class="max-w-7xl mx-auto px-6 md:px-12 py-8 flex gap-10 items-start">
-
-        <!-- LEFT FILTERS SIDEBAR -->
         <aside class="w-56 shrink-0 sticky top-24">
             <p class="text-[11px] uppercase tracking-widest font-black mb-6 pb-3 border-b border-gray-200">Filters</p>
-
-            <!-- Category filter -->
             <details class="filter-section" open>
                 <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
                     <span class="text-[10px] uppercase tracking-widest font-black">Category</span>
@@ -118,8 +101,6 @@
                     </a>
                 </div>
             </details>
-
-            <!-- Price range -->
             <details class="filter-section" open>
                 <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
                     <span class="text-[10px] uppercase tracking-widest font-black">Price</span>
@@ -144,8 +125,6 @@
                     </label>
                 </div>
             </details>
-
-            <!-- Availability -->
             <details class="filter-section">
                 <summary class="flex justify-between items-center py-3 cursor-pointer select-none">
                     <span class="text-[10px] uppercase tracking-widest font-black">Availability</span>
@@ -159,11 +138,7 @@
                 </div>
             </details>
         </aside>
-
-        <!-- RIGHT: Sort + Products Grid -->
         <div class="flex-1 min-w-0">
-
-            <!-- Sort bar -->
             <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
                 <span class="text-[10px] text-gray-500 uppercase tracking-widest">
                     <span class="font-black text-black" th:text="${productCount}">0</span> Products
@@ -175,19 +150,14 @@
                     </span>
                 </div>
             </div>
-
-            <!-- Products grid (3 cols like JD Sports) -->
             <div th:if="${products != null && !products.empty}"
                  class="grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-10">
-
                 <div th:each="p : ${products}" class="group relative cursor-pointer">
                     <a th:href="@{/product/{id}(id=${p.id})}">
-                        <!-- Image wrapper -->
                         <div class="aspect-[3/4] overflow-hidden bg-gray-100 mb-4 relative">
                             <img th:src="${(p.imageUrl != null and p.imageApproved) ? p.imageUrl : 'https://placehold.co/600x800/f0f0f0/999?text=No+Image'}"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                  th:alt="${p.name}">
-                            <!-- Quick add overlay -->
                             <div class="absolute bottom-0 left-0 right-0 bg-black text-white text-center py-3 text-[9px] font-black uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                 <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post" onclick="event.stopPropagation()">
                                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -195,7 +165,6 @@
                                 </form>
                             </div>
                         </div>
-                        <!-- Product info -->
                         <div>
                             <p class="text-[9px] uppercase tracking-widest text-gray-400 mb-1"
                                th:text="${p.vendor != null ? p.vendor.username : 'LUMOO'}">Vendor</p>
@@ -207,10 +176,7 @@
                         </div>
                     </a>
                 </div>
-
             </div>
-
-            <!-- PAGINATION -->
             <div th:if="${totalPages > 1}" class="mt-16 flex items-center justify-center gap-1">
                 <a th:if="${currentPage > 0}"
                    th:href="@{/category/{n}(n=${categoryName}, page=${currentPage - 1})}"
@@ -230,8 +196,6 @@
                     Next →
                 </a>
             </div>
-
-            <!-- EMPTY STATE -->
             <div th:if="${products == null || products.empty}" class="py-32 text-center border-y border-gray-100">
                 <p class="text-5xl mb-6" th:text="${icon}">📦</p>
                 <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-2"
@@ -239,10 +203,8 @@
                 <p class="text-xs text-gray-300 mb-8">Vendors are adding products daily — check back soon.</p>
                 <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse All Categories</a>
             </div>
-
         </div>
     </div>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>

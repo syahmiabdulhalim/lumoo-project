@@ -7,12 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain"></a>
         <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
@@ -23,15 +21,11 @@
             </form>
         </div>
     </nav>
-
     <main class="max-w-4xl mx-auto px-6 md:px-12 py-12 md:py-20">
-
         <header class="mb-12">
             <h2 class="text-4xl font-light tracking-tighter">Become a <span class="font-black italic text-[#4d78c0]">Vendor.</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Join Gambia's premier construction marketplace — verified sellers only</p>
         </header>
-
-        <!-- ── SUBMITTED FLASH (one-time, via flash attribute only) ── -->
         <div th:if="${submitted}">
             <div class="bg-white p-12 border border-gray-100 shadow-sm text-center max-w-xl mx-auto">
                 <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
@@ -47,17 +41,11 @@
                 </a>
             </div>
         </div>
-
-        <!-- ── MAIN CONTENT ── -->
         <div th:unless="${submitted}">
-
-            <!-- Error banner -->
             <div th:if="${errorMsg != null}"
                  class="mb-8 border-l-4 border-red-400 bg-red-50 px-6 py-4">
                 <p class="text-xs font-bold text-red-600 uppercase tracking-widest" th:text="${errorMsg}"></p>
             </div>
-
-            <!-- ── PENDING STATE ── -->
             <div th:if="${state == 'PENDING'}">
                 <div class="bg-white p-10 border border-gray-100 shadow-sm text-center max-w-xl mx-auto mb-12">
                     <div class="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-6">
@@ -70,8 +58,6 @@
                     <a href="/buyer/dashboard" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Back to Dashboard →</a>
                 </div>
             </div>
-
-            <!-- ── REJECTED IN COOLDOWN ── -->
             <div th:if="${state == 'REJECTED_COOLDOWN'}">
                 <div class="bg-white p-10 border border-red-100 shadow-sm text-center max-w-xl mx-auto mb-12">
                     <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
@@ -91,8 +77,6 @@
                     <a href="/buyer/dashboard" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Back to Dashboard →</a>
                 </div>
             </div>
-
-            <!-- ── APPLICATION HISTORY ── -->
             <div th:if="${applications != null and !#lists.isEmpty(applications)}" class="mb-12">
                 <h3 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Application History</h3>
                 <div class="bg-white border border-gray-100 shadow-sm overflow-x-auto">
@@ -135,11 +119,7 @@
                     </table>
                 </div>
             </div>
-
-            <!-- ── FORM STATE ── -->
             <div th:if="${state == 'FORM'}">
-
-                <!-- Compliance notice -->
                 <div class="border border-blue-100 bg-blue-50 px-8 py-6 mb-10 flex gap-5">
                     <div class="shrink-0 mt-0.5">
                         <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,11 +135,8 @@
                         </p>
                     </div>
                 </div>
-
                 <form th:action="@{/buyer/vendorapply}" method="post" enctype="multipart/form-data" class="space-y-0">
                     <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-                    <!-- ─── SECTION 1: Business Information ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">1</span>
@@ -227,8 +204,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 2: Business Location ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">2</span>
@@ -267,8 +242,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 3: Owner / Beneficial Owner ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">3</span>
@@ -310,8 +283,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 4: Banking & Payments ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">4</span>
@@ -359,8 +330,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 5: Products & Operations ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">5</span>
@@ -384,8 +353,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 6: Document Upload ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-1">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">6</span>
@@ -404,7 +371,6 @@
                                 <input type="file" name="nationalIdDoc" accept="image/*,application/pdf"
                                        class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-[#1a2336] file:text-white hover:file:bg-[#4d78c0] file:cursor-pointer file:transition">
                             </div>
-
                             <div class="border border-dashed border-gray-200 p-6 bg-gray-50">
                                 <p class="text-[9px] font-black uppercase tracking-widest text-gray-700 mb-1">
                                     Business Registration Certificate
@@ -414,7 +380,6 @@
                                 <input type="file" name="businessRegDoc" accept="image/*,application/pdf"
                                        class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-[#1a2336] file:text-white hover:file:bg-[#4d78c0] file:cursor-pointer file:transition">
                             </div>
-
                             <div class="border border-blue-100 bg-blue-50 px-5 py-4 flex gap-3 items-start">
                                 <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -425,8 +390,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- ─── SECTION 7: Legal Declaration ─── -->
                     <div class="bg-white border border-gray-100 shadow-sm mb-8">
                         <div class="bg-gray-900 text-white px-8 py-4 flex items-center gap-4">
                             <span class="text-[9px] font-black bg-[#4d78c0] text-white w-6 h-6 flex items-center justify-center rounded-full shrink-0">7</span>
@@ -457,7 +420,6 @@
                                     I consent to LUMOO verifying my identity and business details with the <strong>Gambia Revenue Authority (GRA), Ministry of Trade, and other relevant Gambian authorities</strong> as part of its compliance obligations. I agree to cooperate with any additional verification requests.
                                 </span>
                             </label>
-
                             <div class="pt-6 border-t border-gray-100 flex items-center justify-between">
                                 <a href="/buyer/dashboard"
                                    class="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition">
@@ -470,26 +432,20 @@
                             </div>
                         </div>
                     </div>
-
                 </form>
-            </div><!-- end FORM state -->
-
-        </div><!-- end not-submitted -->
+            </div>
+        </div>
     </main>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <style>
         .field-label { display: block; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af; margin-bottom: 0.5rem; }
         .field-input { width: 100%; background: transparent; border-bottom: 1px solid #e5e7eb; padding: 0.625rem 0; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
         .field-input:focus { border-color: #1d4ed8; }
         select.field-input { cursor: pointer; }
     </style>
-
     <script>
         const checkboxes = document.querySelectorAll('#decl1, #decl2, #decl3');
         const submitBtn  = document.getElementById('submitBtn');
-
         function updateSubmit() {
             const allChecked = Array.from(checkboxes).every(c => c.checked);
             submitBtn.disabled = !allChecked;
@@ -497,7 +453,6 @@
         checkboxes.forEach(c => c.addEventListener('change', updateSubmit));
         updateSubmit();
     </script>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

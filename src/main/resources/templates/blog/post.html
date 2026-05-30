@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO Title -->
     <title th:text="${post.effectiveMetaTitle + ' — LUMOO Blog'}">Post Title — LUMOO Blog</title>
-
-    <!-- Meta Description -->
     <meta name="description" th:content="${post.effectiveMetaDescription}">
     <meta name="author" th:content="${post.author}">
     <meta name="robots" content="index, follow">
-
-    <!-- Tags as keywords -->
     <meta th:if="${post.tags != null}" name="keywords" th:content="${post.tags}">
-
-    <!-- Canonical -->
     <link rel="canonical" th:href="${'https://lumoo.gm/blog/' + post.slug}">
-
-    <!-- Open Graph -->
     <meta property="og:type" content="article">
     <meta property="og:title" th:content="${post.effectiveMetaTitle}">
     <meta property="og:description" th:content="${post.effectiveMetaDescription}">
@@ -29,18 +19,13 @@
           th:content="${#temporals.format(post.publishedAt, 'yyyy-MM-dd')}">
     <meta property="article:author" th:content="${post.author}">
     <meta th:if="${post.category != null}" property="article:section" th:content="${post.category}">
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" th:content="${post.effectiveMetaTitle}">
     <meta name="twitter:description" th:content="${post.effectiveMetaDescription}">
     <meta th:if="${post.featuredImageUrl != null}" name="twitter:image" th:content="${post.featuredImageUrl}">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/lumoo.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- JSON-LD: Article -->
     <script type="application/ld+json" th:inline="javascript">
     {
       "@context": "https://schema.org",
@@ -68,8 +53,6 @@
       }
     }
     </script>
-
-    <!-- JSON-LD: BreadcrumbList -->
     <script type="application/ld+json" th:inline="javascript">
     {
       "@context": "https://schema.org",
@@ -81,7 +64,6 @@
       ]
     }
     </script>
-
     <style>
         .prose { font-family: 'Lora', Georgia, serif; color: #374151; line-height: 1.9; }
         .prose h2 { font-family: 'Nunito Sans', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em; color: #111827; margin: 2.5rem 0 1rem; }
@@ -101,14 +83,10 @@
     </style>
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
-    <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
@@ -134,8 +112,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- FEATURED IMAGE -->
     <div th:if="${post.featuredImageUrl != null}"
          class="w-full h-[480px] overflow-hidden bg-gray-100">
         <img th:src="${post.featuredImageUrl}" th:alt="${post.title}"
@@ -143,10 +119,7 @@
     </div>
     <div th:if="${post.featuredImageUrl == null}"
          class="w-full h-40 bg-gradient-to-r from-[#4d78c0] to-[#1e3d78]"></div>
-
     <main class="max-w-3xl mx-auto px-6 py-16">
-
-        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-10 flex items-center gap-3 text-[9px] uppercase tracking-widest text-gray-400">
             <a href="/" class="hover:text-black transition">Home</a>
             <span>/</span>
@@ -154,8 +127,6 @@
             <span>/</span>
             <span class="text-black font-bold truncate max-w-xs" th:text="${post.title}">Post</span>
         </nav>
-
-        <!-- Article Header -->
         <header class="mb-12">
             <span class="text-[9px] font-black uppercase tracking-[0.5em] text-[#4d78c0] mb-4 block"
                   th:text="${post.category}">Category</span>
@@ -181,13 +152,9 @@
                 </div>
             </div>
         </header>
-
-        <!-- Article Content -->
         <div class="prose max-w-none" th:utext="${post.content}">
             Content goes here.
         </div>
-
-        <!-- Tags -->
         <div th:if="${post.tags != null}" class="mt-12 pt-8 border-t border-gray-100">
             <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Tags</p>
             <div class="flex flex-wrap gap-2">
@@ -196,8 +163,6 @@
                       th:text="${#strings.trim(tag)}"></span>
             </div>
         </div>
-
-        <!-- Share -->
         <div class="mt-10 pt-8 border-t border-gray-100">
             <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Share this article</p>
             <div class="flex gap-4">
@@ -218,8 +183,6 @@
                 </a>
             </div>
         </div>
-
-        <!-- Author Box -->
         <div class="mt-12 bg-white border border-gray-100 shadow-sm p-8 flex items-start gap-6">
             <div class="w-14 h-14 rounded-full bg-[#4d78c0] flex items-center justify-center text-white text-2xl font-black shrink-0"
                  th:text="${#strings.toUpperCase(#strings.substring(post.author, 0, 1))}">A</div>
@@ -229,10 +192,7 @@
                 <p class="text-[10px] text-gray-400 mt-1">LUMOO Gambia — Building the Nation's construction knowledge base.</p>
             </div>
         </div>
-
     </main>
-
-    <!-- Related Posts -->
     <div th:if="${related != null and !#lists.isEmpty(related)}"
          class="bg-white border-t border-gray-100 py-20 mt-10">
         <div class="max-w-7xl mx-auto px-12">
@@ -257,8 +217,6 @@
             </div>
         </div>
     </div>
-
-    <!-- CTA -->
     <div class="bg-[#4d78c0] text-white px-12 py-16 text-center">
         <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-200 mb-3">Ready to Build?</p>
         <h2 class="text-3xl font-black tracking-tighter mb-6">Shop Quality Building Materials in Gambia</h2>
@@ -266,9 +224,7 @@
             Browse LUMOO →
         </a>
     </div>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

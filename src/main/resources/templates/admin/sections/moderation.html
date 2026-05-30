@@ -2,8 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="content">
-
-    <!-- VENDOR APPLICATIONS -->
     <section id="vendor-applications">
         <div class="bg-white rounded-xl border border-violet-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-violet-100 flex items-center justify-between bg-violet-50">
@@ -86,8 +84,6 @@
             </div>
         </div>
     </section>
-
-    <!-- IMAGE REVIEW -->
     <section id="images">
         <div class="bg-white rounded-xl border border-orange-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-orange-100 flex items-center justify-between bg-orange-50">
@@ -133,8 +129,6 @@
             </div>
         </div>
     </section>
-
-    <!-- PENDING PRODUCT APPROVAL -->
     <section id="moderation">
         <div class="bg-white rounded-xl border border-blue-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-blue-100 flex items-center justify-between bg-blue-50">
@@ -160,7 +154,6 @@
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         <tr th:each="p : ${pendingProducts}" class="hover:bg-slate-50 transition-colors align-top">
-                            <!-- Image -->
                             <td class="px-4 py-4">
                                 <a th:if="${p.imageUrl != null}"
                                    th:href="${p.imageUrl}" target="_blank"
@@ -174,7 +167,6 @@
                                     No img
                                 </div>
                             </td>
-                            <!-- Name + description -->
                             <td class="px-4 py-4 max-w-[200px]">
                                 <p class="font-semibold text-slate-800 mb-1" th:text="${p.name}">Name</p>
                                 <p th:if="${p.description != null and !p.description.isBlank()}"
@@ -206,7 +198,6 @@
             </div>
         </div>
     </section>
-
 </div>
 </body>
 </html>

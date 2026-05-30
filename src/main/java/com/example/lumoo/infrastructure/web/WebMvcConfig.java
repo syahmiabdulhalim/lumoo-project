@@ -1,5 +1,4 @@
 package com.example.lumoo.infrastructure.web;
-
 import com.example.lumoo.domain.admin.SiteSettingsInterceptor;
 import com.example.lumoo.infrastructure.security.RateLimitInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,22 +11,16 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
-
     @Autowired private SiteSettingsInterceptor siteSettingsInterceptor;
     @Autowired private RateLimitInterceptor rateLimitInterceptor;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(rateLimitInterceptor);
         registry.addInterceptor(siteSettingsInterceptor);
-        // Eagerly resolve CSRF token before any response bytes are written,
-        // so the footer's ${_csrf.parameterName} access never hits a committed response.
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler) {
@@ -37,7 +30,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
             }
         });
     }
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/products/**")

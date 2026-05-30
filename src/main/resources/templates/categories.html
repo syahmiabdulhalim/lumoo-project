@@ -6,11 +6,9 @@
     <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}">
 </head>
 <body class="bg-gray-50">
-
     <main class="max-w-6xl mx-auto px-6 py-16">
         <h1 class="text-2xl font-black uppercase tracking-wider text-[#1a2336] mb-2">All Categories</h1>
         <p class="text-sm text-gray-500 mb-10">Browse building materials by category</p>
-
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             <a th:each="cat : ${categories}"
                th:href="@{/category/{name}(name=${cat})}"
@@ -21,8 +19,6 @@
             </a>
         </div>
     </main>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
 </body>
 </html>

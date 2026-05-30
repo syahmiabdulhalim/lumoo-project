@@ -6,12 +6,10 @@
     <link rel="stylesheet" href="/css/lumoo.css">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-sans">
-
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
         <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
@@ -21,16 +19,11 @@
             </form>
         </div>
     </nav>
-
     <main class="max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-20">
-
         <header class="mb-12">
             <h2 class="text-4xl font-light tracking-tighter">My <span class="font-black italic text-[#4d78c0]">Orders</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Track your deliveries</p>
         </header>
-
-
-        <!-- Notifications — show once, auto-dismiss after 5s -->
         <div th:if="${notifications != null and !#lists.isEmpty(notifications)}"
              id="notif-toast"
              class="fixed top-6 right-6 z-50 max-w-sm w-full space-y-2 transition-all duration-500">
@@ -46,8 +39,6 @@
                 if (t) { t.style.opacity = '0'; t.style.transform = 'translateY(-8px)'; setTimeout(function(){ t.remove(); }, 500); }
             }, 5000);
         </script>
-
-        <!-- Payment cancelled notice -->
         <div th:if="${param.containsKey('payment_cancelled')}"
              id="cancel-toast"
              class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-orange-400 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
@@ -55,13 +46,12 @@
             <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Payment cancelled. Your order is still saved — you can retry anytime.</p>
         </div>
         <script th:if="${param.containsKey('payment_cancelled')}">
+            history.replaceState(null, '', '/buyer/dashboard');
             setTimeout(function() {
                 var t = document.getElementById('cancel-toast');
                 if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
             }, 6000);
         </script>
-
-        <!-- Vendor banner — not yet applied -->
         <div th:unless="${alreadyApplied}"
              class="mb-8 bg-white border border-dashed border-blue-200 p-6 flex items-center justify-between">
             <div>
@@ -73,8 +63,6 @@
                 Apply Now →
             </a>
         </div>
-
-        <!-- Vendor banner — already applied -->
         <div th:if="${alreadyApplied}"
              class="mb-8 bg-yellow-50 border border-dashed border-yellow-300 p-6 flex items-center justify-between">
             <div>
@@ -83,11 +71,8 @@
             </div>
             <span class="text-[9px] font-black uppercase tracking-widest text-yellow-600 shrink-0 ml-6">Under Review ⏳</span>
         </div>
-
-        <!-- Orders grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" th:if="${orders != null and !#lists.isEmpty(orders)}">
             <div th:each="o : ${orders}" class="bg-white p-6 border border-gray-100 shadow-sm hover:shadow-xl transition duration-500 relative">
-
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <p class="text-[8px] text-gray-400 uppercase font-black tracking-widest" th:text="${'#LMO-' + o.id}"></p>
@@ -107,8 +92,6 @@
                                                                               'bg-blue-100 text-blue-700'}">
                     </span>
                 </div>
-
-                <!-- Complete payment nudge — ModemPay -->
                 <div th:if="${o.status == 'AWAITING_PAYMENT'}"
                      class="mb-4 bg-blue-50 border border-blue-200 px-4 py-3 flex items-center justify-between">
                     <p class="text-[8px] font-black uppercase tracking-widest text-blue-700">Payment not completed — continue to payment portal</p>
@@ -117,22 +100,16 @@
                         Pay Now →
                     </a>
                 </div>
-
-                <!-- Upload proof nudge -->
                 <div th:if="${o.status == 'AWAITING_PROOF'}"
                      class="mb-4 bg-orange-50 border border-orange-200 px-4 py-3 flex items-center justify-between">
                     <p class="text-[8px] font-black uppercase tracking-widest text-orange-700">Upload payment screenshot to confirm order</p>
                     <a th:href="@{/checkout/success/{id}(id=${o.id})}"
                        class="text-[8px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5 shrink-0 ml-4">Upload →</a>
                 </div>
-
-                <!-- Proof submitted notice -->
                 <div th:if="${o.status == 'PROOF_UPLOADED'}"
                      class="mb-4 bg-yellow-50 border border-yellow-200 px-4 py-3">
                     <p class="text-[8px] font-black uppercase tracking-widest text-yellow-700">Proof submitted — waiting for admin verification</p>
                 </div>
-
-                <!-- Progress bar -->
                 <div class="mb-5" th:unless="${o.status == 'CANCELLED' or o.status == 'AWAITING_PROOF' or o.status == 'PROOF_UPLOADED' or o.status == 'AWAITING_PAYMENT' or o.status == 'PAYMENT_FAILED'}">
                     <div class="flex justify-between text-[7px] text-gray-300 uppercase font-black tracking-widest mb-1">
                         <span class="text-[#4d78c0]">Ordered</span>
@@ -149,7 +126,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="border-t border-dashed border-gray-100 pt-4 flex justify-between items-end">
                     <div>
                         <p class="text-[8px] text-gray-400 uppercase mb-1">Total Amount</p>
@@ -158,18 +134,13 @@
                     <a th:href="@{/buyer/order/{id}(id=${o.id})}"
                        class="text-[9px] font-bold text-[#4d78c0] uppercase border-b border-[#4d78c0] pb-1">Details →</a>
                 </div>
-
             </div>
         </div>
-
-        <!-- Empty state -->
         <div th:if="${orders == null or #lists.isEmpty(orders)}" class="text-center py-32">
             <p class="text-[8px] text-gray-300 uppercase tracking-[0.4em] font-black mb-6">No orders yet</p>
             <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1">Start Shopping →</a>
         </div>
-
     </main>
-
     <script>
         (function() {
             var p = new URLSearchParams(window.location.search);
@@ -177,6 +148,9 @@
             if (p.has('success'))             flash = { msg: 'Order placed successfully!',       type: 'green' };
             else if (p.has('order_cancelled')) flash = { msg: 'Order has been cancelled.',        type: 'red'   };
             if (flash) window._lmFlash = flash;
+            if (p.has('success') || p.has('order_cancelled') || p.has('paid')) {
+                history.replaceState(null, '', '/buyer/dashboard');
+            }
         })();
     </script>
     <div th:replace="~{fragments/loading :: loading}"></div>

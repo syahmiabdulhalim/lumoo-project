@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
-
     <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center">
         <div class="flex items-center gap-4">
             <a href="/admin/dashboard#vendor-applications"
@@ -17,10 +16,7 @@
         </div>
         <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">LUMOO Admin — KYC Review</span>
     </nav>
-
     <main class="max-w-4xl mx-auto px-6 py-12">
-
-        <!-- Header -->
         <div class="flex items-start justify-between mb-10">
             <div>
                 <p class="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">Application #<span th:text="${app.id}"></span></p>
@@ -36,10 +32,7 @@
                                   'bg-yellow-100 text-yellow-700')">
             </span>
         </div>
-
         <div class="space-y-6">
-
-            <!-- Section 1: Business Information -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">1 — Business Information</p>
@@ -55,8 +48,6 @@
                     <div><p class="label">Est. Monthly Turnover</p><p class="value" th:text="${app.estimatedMonthlyTurnover}">—</p></div>
                 </div>
             </div>
-
-            <!-- Section 2: Business Location -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">2 — Business Location &amp; Contact</p>
@@ -67,8 +58,6 @@
                     <div><p class="label">Business Phone</p><p class="value" th:text="${app.phone}">—</p></div>
                 </div>
             </div>
-
-            <!-- Section 3: Owner / Beneficial Owner -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">3 — Owner / Beneficial Owner</p>
@@ -80,8 +69,6 @@
                     <div class="col-span-2"><p class="label">Residential Address</p><p class="value" th:text="${app.ownerAddress}">—</p></div>
                 </div>
             </div>
-
-            <!-- Section 4: Banking -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">4 — Banking &amp; Payments</p>
@@ -94,8 +81,6 @@
                         <p class="value" th:text="${app.mobileMoneyNumber != null ? app.mobileMoneyNumber : 'Not provided'}">—</p></div>
                 </div>
             </div>
-
-            <!-- Section 5: Products & Operations -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">5 — Products &amp; Operations</p>
@@ -105,8 +90,6 @@
                     <div><p class="label">Why join LUMOO?</p><p class="value" th:text="${app.reason}">—</p></div>
                 </div>
             </div>
-
-            <!-- Section 6: Documents -->
             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div class="bg-slate-800 text-white px-6 py-3">
                     <p class="text-xs font-bold uppercase tracking-widest">6 — Uploaded Documents</p>
@@ -152,15 +135,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Rejection note (if rejected) -->
             <div th:if="${app.status == 'REJECTED' and app.rejectionNote != null}"
                  class="bg-red-50 border border-red-200 rounded-xl p-6">
                 <p class="text-xs font-bold uppercase tracking-widest text-red-500 mb-2">Rejection Note</p>
                 <p class="text-sm text-red-700" th:text="${app.rejectionNote}"></p>
             </div>
-
-            <!-- Actions (only for PENDING) -->
             <div th:if="${app.status == 'PENDING'}"
                  class="bg-white border border-slate-200 rounded-xl p-6 flex gap-4">
                 <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
@@ -176,15 +155,12 @@
                     </button>
                 </form>
             </div>
-
         </div>
     </main>
-
     <style>
         .label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin-bottom: 0.25rem; }
         .value { font-size: 13px; color: #1e293b; }
     </style>
-
     <script>
         function fillRejectNote(form) {
             var note = prompt('Reason for rejection (shown to applicant):');

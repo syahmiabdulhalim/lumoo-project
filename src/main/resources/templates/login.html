@@ -10,57 +10,43 @@
     </style>
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 flex items-center justify-center min-h-screen p-6">
-
     <div class="w-full max-w-md bg-white p-12 shadow-sm border border-gray-100">
-        
         <div class="text-center mb-10">
             <h1 class="text-3xl font-black tracking-tighter mb-2 text-[#4d78c0]">LUMOO</h1>
             <h2 class="text-sm font-medium uppercase tracking-[0.3em] text-gray-400">Welcome Back</h2>
         </div>
-
         <div th:if="${param.success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
             Please log in.
         </div>
-
         <div th:if="${param.error}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
             Incorrect email or password.
         </div>
-
         <div th:if="${param.logout}" class="mb-6 p-4 bg-blue-50 border-l-2 border-blue-500 text-blue-700 text-[10px] uppercase tracking-widest font-bold">
             You have been logged out.
         </div>
-
-        
             <div th:if="${param.reset_success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
                 Password updated successfully! 
             </div>
-
         <form th:action="@{/login}" method="post" class="space-y-8">
-            
             <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">
     Email Address
 </label>
 <input type="email" name="username" 
     class="w-full border-b border-gray-200 py-2 focus:border-[#1a2336] outline-none transition text-sm bg-transparent" 
     placeholder="Enter your email" required>
-
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Password</label>
                 <input type="password" name="password" class="w-full border-b border-gray-200 py-2 focus:border-[#1a2336] outline-none transition text-sm bg-transparent" placeholder="••••••••" required>
             </div>
-
-
             <div class="flex justify-end">
                 <a th:href="@{/forgot-password}" class="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition">
                     Forgot Password?
                 </a>
             </div>
-
             <button type="submit" class="w-full bg-[#1a2336] text-white py-4 text-xs font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition duration-500 mt-4 shadow-xl">
                 Login to Account
             </button>
         </form>
-
         <div class="mt-12 pt-8 border-t border-gray-50 text-center">
             <p class="text-[11px] text-gray-400 tracking-wide">
                 Don't have an account? 
@@ -68,7 +54,6 @@
             </p>
         </div>
     </div>
-
 </body>
 <div th:replace="~{fragments/loading :: loading}"></div>
 </html>

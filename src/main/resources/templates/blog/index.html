@@ -31,14 +31,10 @@
     </style>
 </head>
 <body class="bg-white text-gray-900 font-['Nunito_Sans']">
-
-    <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
@@ -64,8 +60,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- HERO – JD Sports editorial style -->
     <div class="bg-[#1a2336] text-white relative overflow-hidden">
         <div class="absolute inset-0 opacity-[0.04]"
              style="background-image: repeating-linear-gradient(45deg,white 0,white 1px,transparent 0,transparent 50%);background-size:18px 18px;"></div>
@@ -77,8 +71,6 @@
             </p>
         </div>
     </div>
-
-    <!-- CATEGORY FILTER – sticky tabs -->
     <div th:if="${categories != null and !#lists.isEmpty(categories)}"
          class="bg-white border-b border-gray-200 sticky top-[104px] z-40">
         <div class="max-w-7xl mx-auto px-12 overflow-x-auto scrollbar-hide">
@@ -97,25 +89,17 @@
             </div>
         </div>
     </div>
-
     <main class="max-w-7xl mx-auto px-12 py-12">
-
-        <!-- FEATURED POST – full-width image overlay (JD Sports hero card) -->
         <div th:if="${featured != null and selectedCategory == null}" class="mb-12">
             <a th:href="@{/blog/{slug}(slug=${featured.slug})}"
                class="card-wrap group block relative overflow-hidden bg-gray-900"
                style="aspect-ratio:21/8;min-height:340px;">
-
                 <img th:if="${featured.featuredImageUrl != null}"
                      th:src="${featured.featuredImageUrl}" th:alt="${featured.title}"
                      class="card-img opacity-75">
                 <div th:if="${featured.featuredImageUrl == null}"
                      class="absolute inset-0 bg-gradient-to-br from-[#1a3060] to-black"></div>
-
-                <!-- dark gradient bottom overlay -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent pointer-events-none"></div>
-
-                <!-- text at bottom-left -->
                 <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12">
                     <div class="flex items-center gap-4 mb-3">
                         <span class="bg-[#4d78c0] text-white text-[8px] font-black uppercase tracking-[0.4em] px-3 py-1.5"
@@ -139,22 +123,16 @@
                 </div>
             </a>
         </div>
-
-        <!-- ARTICLES GRID -->
         <div th:if="${posts != null and !#lists.isEmpty(posts)}">
-
             <div class="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
                 <p class="text-[9px] font-black uppercase tracking-[0.5em] text-gray-400"
                    th:text="${selectedCategory != null ? selectedCategory : 'Latest Articles'}">Latest</p>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
                 <article th:each="post, iter : ${posts}"
                          th:if="${selectedCategory != null or iter.index > 0}"
                          class="group">
                     <a th:href="@{/blog/{slug}(slug=${post.slug})}" class="block">
-
-                        <!-- Image block – dominant, category badge top-left -->
                         <div class="card-wrap relative overflow-hidden bg-gray-100" style="aspect-ratio:4/3;">
                             <img th:if="${post.featuredImageUrl != null}"
                                  th:src="${post.featuredImageUrl}" th:alt="${post.title}"
@@ -168,8 +146,6 @@
                                       th:text="${post.category}">Category</span>
                             </div>
                         </div>
-
-                        <!-- Minimal info below image -->
                         <div class="pt-4">
                             <h3 class="font-black text-gray-900 text-sm leading-snug tracking-tight mb-2 group-hover:text-[#4d78c0] transition line-clamp-2"
                                 th:text="${post.title}">Title</h3>
@@ -183,14 +159,10 @@
                 </article>
             </div>
         </div>
-
-        <!-- Empty state -->
         <div th:if="${posts == null or #lists.isEmpty(posts)}" class="py-40 text-center">
             <p class="text-[10px] uppercase tracking-[0.5em] text-gray-300 font-bold mb-4">No articles published yet.</p>
             <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Browse Products</a>
         </div>
-
-        <!-- Pagination -->
         <div th:if="${totalPages > 1}" class="flex justify-center items-center gap-6 py-16">
             <a th:if="${currentPage > 0}"
                th:href="@{/blog(page=${currentPage - 1}, category=${selectedCategory})}"
@@ -201,10 +173,7 @@
                th:href="@{/blog(page=${currentPage + 1}, category=${selectedCategory})}"
                class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Older →</a>
         </div>
-
     </main>
-
-    <!-- CTA Banner – JD style dark -->
     <div class="bg-[#1a2336] text-white px-12 py-20 text-center mt-8">
         <p class="text-[9px] font-black uppercase tracking-[0.6em] text-blue-500 mb-4">Ready to Build?</p>
         <h2 class="text-[clamp(2rem,6vw,4rem)] font-black tracking-tighter leading-none mb-8 uppercase">
@@ -214,7 +183,6 @@
             Browse LUMOO →
         </a>
     </div>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>

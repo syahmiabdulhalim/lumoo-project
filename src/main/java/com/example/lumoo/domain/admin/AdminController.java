@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.admin;
-
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.admin.SiteSettings;
 import com.example.lumoo.domain.vendor.VendorApplication;
@@ -25,13 +24,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.List;
-
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-
     @Autowired private OrderService orderService;
     @Autowired private ProductService productService;
     @Autowired private UserService userService;
@@ -39,7 +35,6 @@ public class AdminController {
     @Autowired private VendorApplicationService vendorApplicationService;
     @Autowired private SiteSettingsService siteSettingsService;
     @Autowired private SubscriberService subscriberService;
-
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
         model.addAttribute("totalOrders", orderService.countAll());
@@ -48,11 +43,7 @@ public class AdminController {
         model.addAttribute("totalUsers", userService.countAll());
         return "admin/dashboard";
     }
-
-    // ── Lazy-loaded dashboard sections ──────────────────────────────────────
-
     private static final int ORDERS_PAGE_SIZE = 50;
-
     @GetMapping("/sections/orders")
     public String sectionOrders(Model model,
                                 @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
@@ -64,7 +55,6 @@ public class AdminController {
                 .filter(o -> "PROOF_UPLOADED".equals(o.getStatus())).toList());
         return "admin/sections/orders :: content";
     }
-
     @GetMapping("/sections/moderation")
     public String sectionModeration(Model model) {
         model.addAttribute("pendingProducts", productService.getPendingApproval());
@@ -72,10 +62,8 @@ public class AdminController {
         model.addAttribute("pendingImages", productService.getPendingImageApproval());
         return "admin/sections/moderation :: content";
     }
-
     private static final int INVENTORY_PAGE_SIZE = 25;
     private static final int USERS_PAGE_SIZE = 25;
-
     @GetMapping("/sections/inventory")
     public String sectionInventory(Model model,
                                    @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
@@ -85,7 +73,6 @@ public class AdminController {
         model.addAttribute("inventoryTotalPages", productsPage.getTotalPages());
         return "admin/sections/inventory :: content";
     }
-
     @GetMapping("/sections/users")
     public String sectionUsers(Model model,
                                @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
@@ -96,31 +83,26 @@ public class AdminController {
         model.addAttribute("inquiries", inquiryService.getAll());
         return "admin/sections/users :: content";
     }
-
     @GetMapping("/approve-product/{id}")
     public String approveProduct(@PathVariable Long id) {
         productService.approve(id);
         return "redirect:/admin/dashboard?approved#moderation";
     }
-
     @GetMapping("/reject-product/{id}")
     public String rejectProduct(@PathVariable Long id) {
         productService.delete(id);
         return "redirect:/admin/dashboard?rejected#moderation";
     }
-
     @GetMapping("/delete-product/{id}")
     public String adminDeleteProduct(@PathVariable Long id) {
         productService.delete(id);
         return "redirect:/admin/dashboard?deleted_product#inventory";
     }
-
     @GetMapping("/delete-user/{id}")
     public String adminDeleteUser(@PathVariable Long id) {
         userService.delete(id);
         return "redirect:/admin/dashboard?deleted_user#users";
     }
-
     @PostMapping("/verify-user/{id}")
     public String verifyUser(@PathVariable Long id, RedirectAttributes ra) {
         boolean done = userService.verifyUser(id);
@@ -128,7 +110,6 @@ public class AdminController {
         ra.addFlashAttribute("flashType", done ? "green" : "blue");
         return "redirect:/admin/dashboard#users";
     }
-
     @PostMapping("/upgrade-vendor/{id}")
     public String upgradeToVendor(@PathVariable Long id, RedirectAttributes ra) {
         boolean done = userService.upgradeToVendor(id);
@@ -136,49 +117,41 @@ public class AdminController {
         ra.addFlashAttribute("flashType", done ? "green" : "blue");
         return "redirect:/admin/dashboard#users";
     }
-
     @PostMapping("/update-order-status")
     public String updateOrderStatus(@RequestParam Long orderId, @RequestParam String status) {
         orderService.updateStatus(orderId, status);
         return "redirect:/admin/dashboard#orders";
     }
-
     @GetMapping("/delete-order/{id}")
     public String deleteOrder(@PathVariable Long id) {
         orderService.delete(id);
         return "redirect:/admin/dashboard#orders";
     }
-
     @GetMapping("/delete-inquiry/{id}")
     public String deleteInquiry(@PathVariable Long id) {
         inquiryService.delete(id);
         return "redirect:/admin/dashboard?deleted_inquiry#inquiries";
     }
-
     @PostMapping("/order/{id}/resolve-return")
     public String resolveReturn(@PathVariable Long id) {
         orderService.resolveReturn(id);
         return "redirect:/admin/dashboard?return_resolved#orders";
     }
-
     @PostMapping("/order/{id}/verify-payment")
     public String verifyPayment(@PathVariable Long id) {
         orderService.verifyPayment(id);
         return "redirect:/admin/dashboard?payment_verified#proof-review";
     }
-
     @GetMapping("/approve-image/{id}")
     public String approveImage(@PathVariable Long id) {
         productService.approveImage(id);
         return "redirect:/admin/dashboard?image_approved#images";
     }
-
     @GetMapping("/reject-image/{id}")
     public String rejectImage(@PathVariable Long id) {
         productService.rejectImage(id);
         return "redirect:/admin/dashboard?image_rejected#images";
     }
-
     @GetMapping("/application/{id}")
     public String applicationDetail(@PathVariable Long id, Model model) {
         VendorApplication app = vendorApplicationService.findById(id).orElse(null);
@@ -186,20 +159,17 @@ public class AdminController {
         model.addAttribute("app", app);
         return "admin/application-detail";
     }
-
     @GetMapping("/approve-vendor/{id}")
     public String approveVendor(@PathVariable Long id) {
         vendorApplicationService.approve(id);
         return "redirect:/admin/dashboard?vendor_approved";
     }
-
     @PostMapping("/reject-vendor/{id}")
     public String rejectVendor(@PathVariable Long id,
                                @RequestParam(required = false) String note) {
         vendorApplicationService.reject(id, note);
         return "redirect:/admin/dashboard?vendor_rejected";
     }
-
     @GetMapping("/settings")
     public String settings(Model model) {
         var subs = subscriberService.getAll();
@@ -208,13 +178,11 @@ public class AdminController {
         model.addAttribute("activeSubscriberCount", subs.stream().filter(s -> s.isActive()).count());
         return "admin/settings";
     }
-
     @PostMapping("/subscriber/{id}/delete")
     public String deleteSubscriber(@PathVariable Long id) {
         subscriberService.delete(id);
         return "redirect:/admin/settings?tab=subscribers";
     }
-
     @PostMapping("/settings")
     public String saveSettings(@ModelAttribute SiteSettings settings, RedirectAttributes ra) {
         siteSettingsService.save(settings);

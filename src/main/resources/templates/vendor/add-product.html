@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm">
         <h1 class="text-2xl font-black tracking-tighter">LUMOO <span class="text-xs font-normal text-gray-400 ml-2">VENDOR</span></h1>
         <div class="flex items-center gap-8 text-[10px] uppercase font-bold tracking-widest">
@@ -17,14 +16,11 @@
             </form>
         </div>
     </nav>
-
     <div class="max-w-2xl mx-auto mt-16 mb-20 p-12 bg-white border border-gray-100 shadow-xl">
         <div class="mb-10">
             <h2 class="text-3xl font-light tracking-tight">Add New <span class="font-bold italic">Material</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-2">List your building materials for buyers across Gambia</p>
         </div>
-
-        <!-- Flash toast -->
         <div th:if="${flashMsg != null}" id="add-flash-toast"
              class="mb-6 flex items-center gap-3 px-4 py-3 text-white text-xs font-bold uppercase tracking-widest"
              th:classappend="${flashType == 'green'} ? 'bg-green-600' : 'bg-red-500'">
@@ -34,17 +30,14 @@
         <script th:if="${flashMsg != null}">
             setTimeout(() => { const t = document.getElementById('add-flash-toast'); if(t){t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500);} }, 3000);
         </script>
-
         <form th:action="@{/vendor/add-product}" th:object="${product}" method="post"
               enctype="multipart/form-data" class="space-y-8">
-
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Material Name *</label>
                 <input type="text" th:field="*{name}" required
                        class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none transition bg-transparent"
                        placeholder="e.g. Portland Cement 50kg">
             </div>
-
             <div class="grid grid-cols-2 gap-8">
                 <div>
                     <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Category *</label>
@@ -75,15 +68,12 @@
                     <p class="text-[8px] text-gray-300 mt-1">Number of units available for sale.</p>
                 </div>
             </div>
-
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Description</label>
                 <textarea th:field="*{description}" rows="3"
                           class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none transition bg-transparent resize-none"
                           placeholder="Describe your product — specifications, uses, packaging, etc."></textarea>
             </div>
-
-            <!-- Image Upload -->
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Product Image</label>
                 <div class="border border-dashed border-gray-200 p-6 bg-gray-50 space-y-4">
@@ -102,14 +92,12 @@
                     <p class="text-[8px] text-[#4d78c0]">⏳ Your image will be reviewed by admin before going live.</p>
                 </div>
             </div>
-
             <button type="submit"
                     class="w-full bg-[#1a2336] text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-500 mt-4">
                 Submit for Review →
             </button>
         </form>
     </div>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

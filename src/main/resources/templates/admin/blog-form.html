@@ -5,7 +5,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/lumoo.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- EasyMDE for Markdown editing -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
     <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
     <style>
@@ -17,7 +16,6 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
-
     <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-6">
             <a href="/admin/blog" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← All Posts</a>
@@ -25,17 +23,11 @@
             <span class="text-sm font-bold" th:text="${editing ? 'Edit Post' : 'New Post'}">Post</span>
         </div>
     </nav>
-
     <main class="max-w-4xl mx-auto px-6 py-12">
         <form th:action="${editing ? '/admin/blog/edit/' + post.id : '/admin/blog/new'}"
               th:object="${post}" method="post" class="space-y-6">
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <!-- Left: Main content -->
                 <div class="lg:col-span-2 space-y-6">
-
-                    <!-- Title -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <label class="field-label">Post Title <span class="text-red-400">*</span></label>
                         <input type="text" th:field="*{title}" required
@@ -43,8 +35,6 @@
                                placeholder="e.g. How to Choose the Right Cement for Building in Gambia"
                                oninput="autoSlug(this.value)">
                     </div>
-
-                    <!-- Excerpt -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <label class="field-label">Excerpt / Summary <span class="text-red-400">*</span></label>
                         <textarea th:field="*{excerpt}" rows="3" required
@@ -52,8 +42,6 @@
                                   placeholder="1–2 sentences summarising the article. Used as meta description (150–160 chars ideal)."></textarea>
                         <p class="text-[9px] text-slate-400 mt-2">This appears in search results and on the blog listing page.</p>
                     </div>
-
-                    <!-- Content -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <label class="field-label">Article Content <span class="text-red-400">*</span></label>
                         <p class="text-[9px] text-slate-400 mb-3">Write in Markdown. Use ## for headings, **bold**, *italic*, - for bullet lists.</p>
@@ -62,11 +50,7 @@
                                   placeholder="Write your article here in Markdown or HTML..."></textarea>
                     </div>
                 </div>
-
-                <!-- Right: Metadata sidebar -->
                 <div class="space-y-6">
-
-                    <!-- Publish settings -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <p class="field-label mb-4">Publish Settings</p>
                         <label class="flex items-center gap-3 cursor-pointer mb-4">
@@ -81,8 +65,6 @@
                                     th:text="${editing ? 'Update Post' : 'Save Post'}">Save</button>
                         </div>
                     </div>
-
-                    <!-- Slug -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <label class="field-label">URL Slug <span class="text-red-400">*</span></label>
                         <input type="text" th:field="*{slug}" id="slugField" required
@@ -90,8 +72,6 @@
                                placeholder="how-to-choose-cement-gambia">
                         <p class="text-[9px] text-slate-400 mt-2">lumoo.gm/blog/<strong id="slugPreview" class="text-[#4d78c0]">your-slug</strong></p>
                     </div>
-
-                    <!-- Category & Author -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
                         <div>
                             <label class="field-label">Category <span class="text-red-400">*</span></label>
@@ -118,8 +98,6 @@
                                    placeholder="cement, construction, gambia, roofing">
                         </div>
                     </div>
-
-                    <!-- Featured Image -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6">
                         <label class="field-label">Featured Image URL</label>
                         <input type="text" th:field="*{featuredImageUrl}"
@@ -131,8 +109,6 @@
                         </div>
                         <p class="text-[9px] text-slate-400 mt-2">Use an Unsplash URL or upload separately</p>
                     </div>
-
-                    <!-- SEO overrides -->
                     <div class="bg-white border border-slate-200 rounded-xl p-6 space-y-5">
                         <p class="field-label">SEO Overrides <span class="text-slate-300">(optional)</span></p>
                         <div>
@@ -150,12 +126,10 @@
                             <p class="text-[9px] text-slate-400 mt-1">Ideal: 150–160 characters</p>
                         </div>
                     </div>
-
                 </div>
             </div>
         </form>
     </main>
-
     <script>
         // Auto-generate slug from title
         function slugify(str) {
@@ -178,7 +152,6 @@
         // Set initial preview
         const existing = document.getElementById('slugField').value;
         if (existing) document.getElementById('slugPreview').textContent = existing;
-
         // Image preview
         function previewImg(url) {
             const wrap = document.getElementById('imgPreview');
@@ -193,7 +166,6 @@
         // Initial preview if editing
         const existingImg = document.getElementById('imgUrlInput').value;
         if (existingImg) previewImg(existingImg);
-
         // EasyMDE Markdown editor
         const easyMDE = new EasyMDE({
             element: document.getElementById('contentEditor'),

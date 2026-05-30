@@ -20,14 +20,10 @@
     </style>
 </head>
 <body class="bg-white text-black font-['Nunito_Sans']">
-
-    <!-- TOP INFO BAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-6 py-2 flex justify-between items-center">
         <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span th:text="${siteSettings?.businessHours ?: 'Mon–Fri 8am–6pm | Sat 9am–3pm'}">Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-6 md:px-12 py-5 bg-white border-b border-gray-100 sticky top-0 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-12 w-auto object-contain">
@@ -53,11 +49,8 @@
             </div>
         </div>
     </nav>
-
-    <!-- HERO SLIDESHOW -->
     <div class="swiper hero-swiper relative overflow-hidden">
         <div class="swiper-wrapper">
-
             <div class="swiper-slide relative" style="background-image:url('https://images.unsplash.com/photo-1751502776559-2ee0612ec54a?q=80&w=1333&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')">
                 <div class="absolute inset-0 bg-black/45 flex items-end pb-16 md:pb-24 px-8 md:px-20">
                     <div class="text-white">
@@ -69,18 +62,11 @@
                     </div>
                 </div>
             </div>
-
-           
-
-            
-
         </div>
         <div class="swiper-pagination"></div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
     </div>
-
-    <!-- MARQUEE TICKER -->
     <div class="bg-black text-white py-3 marquee-track">
         <div class="marquee-inner text-[8px] font-black uppercase tracking-widest">
             <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over RM500</span>
@@ -101,12 +87,9 @@
             <span class="px-3 text-[#4d78c0]">★</span>
         </div>
     </div>
-
-    <!-- SHOP BY CATEGORY -->
     <section class="py-10 px-6 md:px-12">
         <h2 class="text-[9px] uppercase tracking-[0.5em] font-black text-gray-400 mb-6">Shop By Category</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-0.5">
-
             <a href="/category/roofing" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1673645652590-9d21295bf4ac?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -117,7 +100,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Roofing</p>
                 </div>
             </a>
-
             <a href="/category/cement" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1588415796310-b9a124beabb0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -128,7 +110,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Cement</p>
                 </div>
             </a>
-
             <a href="/category/building" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1508450859948-4e04fabaa4ea?q=80&w=779&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -139,7 +120,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Building</p>
                 </div>
             </a>
-
             <a href="/category/electrical" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1625276254563-f0fbbf66a5e7?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -150,7 +130,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Electrical</p>
                 </div>
             </a>
-
             <a href="/category/plumbing" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -161,7 +140,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Plumbing</p>
                 </div>
             </a>
-
             <a href="/category/timber" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1571035089306-e40c9289fe78?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -172,7 +150,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Timber</p>
                 </div>
             </a>
-
             <a href="/category/paint" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1525909002-1b05e0c869d8?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -183,7 +160,6 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Paint</p>
                 </div>
             </a>
-
             <a href="/category/hardware" class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img src="https://images.unsplash.com/photo-1687373969540-20481dec19b5?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -194,11 +170,8 @@
                     <p class="text-[8px] font-black uppercase tracking-widest">Hardware</p>
                 </div>
             </a>
-
         </div>
     </section>
-
-    <!-- BROWSE + SEARCH HEADER -->
     <section class="py-10 px-6 md:px-12 border-t border-gray-100">
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
             <div>
@@ -219,8 +192,6 @@
             </div>
         </div>
     </section>
-
-    <!-- PRODUCT GRID -->
     <section class="pb-16 px-6 md:px-12">
         <div th:if="${products != null and !products.isEmpty()}"
              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-0.5">
@@ -247,8 +218,6 @@
             <p class="text-[10px] uppercase tracking-widest text-gray-300 font-black mb-4">No products listed yet.</p>
             <a href="/stores" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0]">Browse Stores →</a>
         </div>
-
-        <!-- PAGINATION -->
         <div th:if="${totalPages != null and totalPages > 1}"
              class="flex items-center justify-center gap-1 pt-10 pb-4">
             <a th:if="${currentPage > 0}"
@@ -265,8 +234,6 @@
                class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest border border-gray-200 hover:border-black transition">Next →</a>
         </div>
     </section>
-
-    <!-- PROMO BANNER — Our Vendors -->
     <section class="relative overflow-hidden" style="min-height:380px;">
         <div class="absolute inset-0 bg-[#1a2336]"></div>
         <div class="absolute inset-0 opacity-10"
@@ -282,8 +249,6 @@
             </a>
         </div>
     </section>
-
-    <!-- BLOG EDITORIAL -->
     <section class="py-16 px-6 md:px-12">
         <div class="flex items-end justify-between mb-10">
             <div>
@@ -294,9 +259,7 @@
                 View All →
             </a>
         </div>
-
         <div th:if="${recentPosts != null and !recentPosts.isEmpty()}" class="grid grid-cols-1 lg:grid-cols-3 gap-0.5">
-
             <article th:if="${recentPosts.size() > 0}" class="lg:col-span-2 group">
                 <a th:href="@{/blog/{slug}(slug=${recentPosts[0].slug})}"
                    class="block relative overflow-hidden bg-gray-900" style="aspect-ratio:16/10; min-height:280px;">
@@ -319,7 +282,6 @@
                     </div>
                 </a>
             </article>
-
             <div class="flex flex-col gap-0.5">
                 <article th:if="${recentPosts.size() > 1}" class="group flex-1">
                     <a th:href="@{/blog/{slug}(slug=${recentPosts[1].slug})}"
@@ -357,17 +319,13 @@
                 </article>
             </div>
         </div>
-
         <div th:if="${recentPosts == null or recentPosts.isEmpty()}"
              class="py-16 text-center border border-dashed border-gray-200">
             <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-black mb-4">No articles published yet.</p>
             <a href="/blog" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Visit Blog →</a>
         </div>
     </section>
-
-    <!-- FOOTER -->
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -379,8 +337,6 @@
             });
         });
     </script>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
-
 </body>
 </html>

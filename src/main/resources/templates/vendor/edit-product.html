@@ -7,19 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b border-gray-100">
         <h1 class="text-2xl font-black tracking-tighter text-[#4d78c0]">LUMOO <span class="text-xs font-normal text-gray-400 ml-2">VENDOR</span></h1>
         <a href="/vendor/dashboard" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition">← Back to Dashboard</a>
     </nav>
-
     <div class="max-w-2xl mx-auto mt-16 mb-20 p-12 bg-white border border-gray-100 shadow-2xl">
         <div class="mb-10">
             <h2 class="text-3xl font-light tracking-tight italic">Update <span class="font-bold text-[#4d78c0]">Material</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mt-2">Changes to the image will require admin re-approval</p>
         </div>
-
-        <!-- Flash toast -->
         <div th:if="${flashMsg != null}" id="edit-flash-toast"
              class="mb-6 flex items-center gap-3 px-4 py-3 text-white text-xs font-bold uppercase tracking-widest"
              th:classappend="${flashType == 'green'} ? 'bg-green-600' : 'bg-red-500'">
@@ -29,16 +25,13 @@
         <script th:if="${flashMsg != null}">
             setTimeout(() => { const t = document.getElementById('edit-flash-toast'); if(t){t.style.opacity='0';t.style.transition='opacity .5s';setTimeout(()=>t.remove(),500);} }, 3000);
         </script>
-
         <form th:action="@{/vendor/edit-product/{id}(id=${product.id})}" th:object="${product}"
               method="post" enctype="multipart/form-data" class="space-y-8">
-
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Material Name *</label>
                 <input type="text" th:field="*{name}" required
                        class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none transition bg-transparent">
             </div>
-
             <div class="grid grid-cols-2 gap-8">
                 <div>
                     <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Category *</label>
@@ -66,19 +59,14 @@
                     <p class="text-[8px] text-gray-300 mt-1">Units available for sale.</p>
                 </div>
             </div>
-
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Description</label>
                 <textarea th:field="*{description}" rows="3"
                           class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none transition bg-transparent resize-none"
                           placeholder="Describe your product — specifications, uses, packaging, etc."></textarea>
             </div>
-
-            <!-- Image section -->
             <div>
                 <label class="block text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-3">Product Image</label>
-
-                <!-- Current image preview -->
                 <div th:if="${product.imageUrl != null}" class="mb-4">
                     <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-2">Current Image</p>
                     <img th:src="${product.imageUrl}" alt="Current product image"
@@ -88,7 +76,6 @@
                     <p th:if="${product.imageApproved}"
                        class="text-[8px] text-green-600 font-bold uppercase tracking-wider mt-1">✓ Image approved</p>
                 </div>
-
                 <div class="border border-dashed border-gray-200 p-6 bg-gray-50 space-y-4">
                     <div>
                         <p class="text-[8px] text-gray-400 uppercase tracking-wider mb-2">Upload a new photo</p>
@@ -104,7 +91,6 @@
                     <p class="text-[8px] text-[#4d78c0]">⚠ Changing the image will reset it for admin re-approval.</p>
                 </div>
             </div>
-
             <div class="flex items-center gap-4 pt-2">
                 <button type="submit"
                         class="flex-1 bg-[#4d78c0] text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#3d68b0] transition duration-500">

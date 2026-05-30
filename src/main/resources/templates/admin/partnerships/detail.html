@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Partnership Detail</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+    <nav class="bg-slate-900 text-white px-8 py-4 flex items-center gap-6 sticky top-0 z-50">
+        <a href="/admin/partnerships" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Partnerships</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold" th:text="${application.companyName}">Company</span>
+    </nav>
+    <main class="max-w-3xl mx-auto px-6 py-12">
+        <div th:if="${flashMsg != null}" id="flash-toast"
+             class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest bg-[#4d78c0]">
+            <span th:text="${flashMsg}"></span>
+            <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+        </div>
+        <script th:if="${flashMsg != null}">
+            setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+        </script>
+        <div class="bg-white rounded-xl border border-slate-200 p-8 space-y-6">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800" th:text="${application.companyName}">Company</h2>
+                    <p class="text-xs text-slate-400 mt-1"
+                       th:text="'Submitted ' + ${#temporals.format(application.submittedAt, 'dd MMM yyyy, HH:mm')}">Date</p>
+                </div>
+                <span class="text-xs px-3 py-1.5 rounded-full font-bold uppercase tracking-wider"
+                      th:classappend="${application.status.name() == 'NEW'}      ? 'bg-blue-100 text-blue-700'    :
+                                      (${application.status.name() == 'REVIEWED'} ? 'bg-yellow-100 text-yellow-700' :
+                                      (${application.status.name() == 'APPROVED'} ? 'bg-emerald-100 text-emerald-700' :
+                                                                                     'bg-red-100 text-red-600'))"
+                      th:text="${application.status}">Status</span>
+            </div>
+            <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Contact Person</p>
+                    <p class="text-sm font-semibold" th:text="${application.contactName}">Name</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Email</p>
+                    <a th:href="'mailto:' + ${application.email}" th:text="${application.email}"
+                       class="text-sm text-[#4d78c0] hover:underline">email</a>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Phone</p>
+                    <p class="text-sm" th:text="${application.phone ?: '—'}">phone</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">Partnership Type</p>
+                    <span class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded font-semibold"
+                          th:text="${application.partnerType.label()}">Type</span>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-6">
+                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Message</p>
+                <p class="text-sm text-slate-700 whitespace-pre-wrap" th:text="${application.message}">Message</p>
+            </div>
+            <div class="border-t border-slate-100 pt-6">
+                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-3">Update Status</p>
+                <form th:action="@{/admin/partnerships/{id}/status(id=${application.id})}" method="post" class="flex items-center gap-3">
+                    <select name="status" class="border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0]">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${application.status == s}">Status</option>
+                    </select>
+                    <button type="submit" class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition">
+                        Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

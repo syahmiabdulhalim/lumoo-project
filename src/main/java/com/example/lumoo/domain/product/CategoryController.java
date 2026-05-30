@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.product;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,15 +7,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
-
 @Controller
 @RequestMapping("/category")
 public class CategoryController {
-
     @Autowired private ProductService productService;
-
     private static final Map<String, String> CATEGORY_DESCRIPTIONS = Map.of(
         "roofing",    "Find various roofing materials including Decra, corrugated iron sheets, clay tiles, and more.",
         "cement",     "Explore a wide range of cement and concrete products for all your construction needs.",
@@ -27,12 +22,10 @@ public class CategoryController {
         "paint",      "Premium paints and finishes for interior and exterior surfaces. Wide range of colors and brands.",
         "hardware",   "General hardware tools and accessories for professionals and DIY enthusiasts."
     );
-
     private static final Map<String, String> CATEGORY_ICONS = Map.of(
         "roofing", "🏠", "cement", "🧱", "building", "🏗️", "electrical", "⚡",
         "plumbing", "🔧", "timber", "🪵", "paint", "🎨", "hardware", "🔩"
     );
-
     @GetMapping("/{name}")
     public String categoryPage(@PathVariable String name,
                                @RequestParam(defaultValue = "0") int page,
@@ -49,7 +42,6 @@ public class CategoryController {
         model.addAttribute("productCount", productPage.getTotalElements());
         return "category";
     }
-
     @GetMapping
     public String allCategories(Model model) {
         model.addAttribute("categories", CATEGORY_DESCRIPTIONS.keySet());

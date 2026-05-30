@@ -7,14 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
-    <!-- TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <a href="/" class="transition hover:opacity-80">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
@@ -39,10 +35,7 @@
             </div>
         </div>
     </nav>
-
     <main class="max-w-7xl mx-auto px-12 py-20">
-
-        <!-- Breadcrumb -->
         <div class="mb-12 flex items-center gap-3 text-[9px] uppercase tracking-[0.3em] font-bold text-gray-400">
             <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
             <span>/</span>
@@ -55,21 +48,13 @@
             <span>/</span>
             <span th:text="${product.name}" class="text-gray-900">Product</span>
         </div>
-
-        <!-- Product section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-32">
-
-            <!-- Image -->
             <div class="aspect-square overflow-hidden bg-[#f3f3f3] shadow-lg">
                 <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://placehold.co/800x800/f3f3f3/000?text=' + product.name}"
                      th:alt="${product.name}"
                      class="w-full h-full object-cover">
             </div>
-
-            <!-- Info -->
             <div class="flex flex-col justify-center">
-
-                <!-- Category + store -->
                 <div class="flex items-center gap-4 mb-6">
                     <span class="text-[9px] font-black uppercase tracking-[0.5em] text-[#4d78c0]"
                           th:text="${product.category}">Category</span>
@@ -79,11 +64,8 @@
                        class="text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#4d78c0] transition"
                        th:text="${product.vendor.fullName != null and !product.vendor.fullName.isEmpty() ? product.vendor.fullName : product.vendor.email}">Store</a>
                 </div>
-
                 <h1 class="text-5xl font-light tracking-tighter leading-tight mb-6"
                     th:text="${product.name}">Product Name</h1>
-
-                <!-- Price + Stock -->
                 <div class="flex items-baseline gap-4 mb-6">
                     <p class="text-3xl font-black tracking-tighter text-gray-900">
                         GMD <span th:text="${product.price}">0.00</span>
@@ -99,8 +81,6 @@
                         Out of Stock
                     </span>
                 </div>
-
-                <!-- Average rating -->
                 <div class="flex items-center gap-3 mb-8" th:if="${reviews != null and !#lists.isEmpty(reviews)}">
                     <div class="flex gap-0.5">
                         <th:block th:each="i : ${#numbers.sequence(1, 5)}">
@@ -115,15 +95,11 @@
                           th:text="${#numbers.formatDecimal(avgRating, 1, 1)} + ' / 5 (' + ${#lists.size(reviews)} + ' reviews)'">
                     </span>
                 </div>
-
-                <!-- Description -->
                 <div th:if="${product.description != null and !product.description.isEmpty()}"
                      class="mb-8 pb-8 border-b border-gray-100">
                     <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-3">Description</p>
                     <p class="text-sm text-gray-600 leading-relaxed" th:text="${product.description}"></p>
                 </div>
-
-                <!-- Vendor info -->
                 <div th:if="${product.description == null or product.description.isEmpty()}"
                      class="mb-8 pb-8 border-b border-gray-100"></div>
                 <div class="mb-8 pb-8 border-b border-gray-100 flex items-center justify-between">
@@ -141,8 +117,6 @@
                         View Store →
                     </a>
                 </div>
-
-                <!-- Add to cart — all logged in users -->
                 <div sec:authorize="isAuthenticated()">
                     <th:block th:if="${product.stock > 0}">
                         <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
@@ -160,27 +134,20 @@
                         </button>
                     </th:block>
                 </div>
-
-                <!-- Not logged in -->
                 <div sec:authorize="isAnonymous()">
                     <a href="/login"
                        class="block w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] text-center hover:bg-[#4d78c0] transition duration-500">
                         Login to Purchase
                     </a>
                 </div>
-
             </div>
         </div>
-
-        <!-- Reviews section -->
         <div class="border-t border-gray-100 pt-20">
             <h2 class="text-3xl font-light tracking-tighter mb-2">
                 Customer <span class="font-black italic text-[#4d78c0]">Reviews</span>
             </h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] font-bold mb-16"
                th:text="${#lists.size(reviews)} + ' reviews for this product'">0 reviews</p>
-
-            <!-- Review list -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20"
                  th:if="${reviews != null and !#lists.isEmpty(reviews)}">
                 <div th:each="r : ${reviews}"
@@ -204,14 +171,10 @@
                     <p class="text-xs text-gray-600 leading-relaxed" th:text="${r.comment}">Comment</p>
                 </div>
             </div>
-
-            <!-- Empty reviews -->
             <div th:if="${reviews == null or #lists.isEmpty(reviews)}"
                  class="py-16 text-center border border-dashed border-gray-200 mb-20">
                 <p class="text-[9px] text-gray-300 uppercase tracking-[0.4em] font-bold">No reviews yet. Be the first.</p>
             </div>
-
-            <!-- Flash messages -->
             <div th:if="${param.containsKey('review_success')}"
                  id="review-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-green-500 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
@@ -232,8 +195,6 @@
                                                              'Invalid submission. Please try again.'}">
                 </p>
             </div>
-
-            <!-- Write a review -->
             <div th:if="${canReview == true and alreadyReviewed != true}" class="max-w-2xl">
                 <h3 class="text-xl font-light tracking-tighter mb-8">
                     Leave a <span class="font-black italic text-[#4d78c0]">Review</span>
@@ -263,36 +224,25 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Already reviewed -->
             <div th:if="${alreadyReviewed == true}" class="max-w-2xl py-8 border border-dashed border-green-200 text-center bg-green-50">
                 <p class="text-[9px] text-green-600 uppercase tracking-widest font-bold">✓ You have already reviewed this product.</p>
             </div>
-
-            <!-- Purchased but awaiting delivery -->
             <div th:if="${canReview == false and hasPurchased == true and alreadyReviewed != true}"
                  class="max-w-2xl py-8 border border-dashed border-amber-200 bg-amber-50 text-center">
                 <p class="text-[9px] text-amber-600 uppercase tracking-widest font-bold mb-2">⏳ Awaiting Delivery</p>
                 <p class="text-[8px] text-amber-500 uppercase tracking-widest">You'll be able to leave a review once your order has been delivered.</p>
             </div>
-
-            <!-- Never purchased -->
             <div th:if="${canReview == null or (canReview == false and hasPurchased != true)}"
                  class="max-w-2xl py-8 border border-dashed border-gray-200 text-center mx-auto">
                 <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-2">Only verified buyers can review.</p>
                 <p class="text-[8px] text-gray-300 uppercase tracking-widest">Purchase this product to leave a review.</p>
             </div>
-
         </div>
-
-        <!-- Inquiry / Ask a Question -->
         <div class="border-t border-gray-100 pt-16 mt-8">
             <h2 class="text-3xl font-light tracking-tighter mb-2">
                 Ask a <span class="font-black italic text-[#4d78c0]">Question.</span>
             </h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-10">Send a message to the vendor about this product</p>
-
-            <!-- Success toast -->
             <div th:if="${param.containsKey('inquiry_sent')}"
                  id="inquiry-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
@@ -305,11 +255,9 @@
                     if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
                 }, 4000);
             </script>
-
             <form th:action="@{/inquiry/send/{id}(id=${product.id})}" method="post"
                   class="max-w-2xl space-y-6">
                 <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Your Name *</label>
@@ -326,32 +274,26 @@
                                placeholder="you@email.com">
                     </div>
                 </div>
-
                 <div>
                     <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Subject</label>
                     <input type="text" name="subject"
                            th:value="${'Inquiry about ' + product.name}"
                            class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none">
                 </div>
-
                 <div>
                     <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Message *</label>
                     <textarea name="message" required rows="4"
                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none resize-none"
                               placeholder="e.g. Do you offer bulk pricing? What is the minimum order quantity?"></textarea>
                 </div>
-
                 <button type="submit"
                         class="bg-[#1a2336] text-white px-10 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-[#4d78c0] transition duration-300">
                     Send Message →
                 </button>
             </form>
         </div>
-
     </main>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

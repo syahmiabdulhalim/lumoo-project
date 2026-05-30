@@ -1,8 +1,6 @@
 package com.example.lumoo.domain.product;
-
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
-
 @NamedEntityGraph(name = "Product.withVendor", attributeNodes = @NamedAttributeNode("vendor"))
 @Entity
 @Table(name = "products", indexes = {
@@ -11,33 +9,24 @@ import jakarta.persistence.*;
     @Index(name = "idx_product_category_approved", columnList = "category,approved")
 })
 public class Product {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String category;
     private Double price;
-
     @Column(nullable = false, columnDefinition = "int default 0")
     private int stock;
-
     @Column(name = "approved")
     private Boolean approved = false;
-
     @Column(name = "image_approved")
     private Boolean imageApproved = false;
-
     @Column(name = "image_url")
     private String imageUrl;
-
     @Column(columnDefinition = "TEXT")
     private String description;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private User vendor;
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

@@ -1,5 +1,4 @@
 package com.example.lumoo.shared;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.order.Order;
@@ -40,7 +39,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
@@ -50,10 +48,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 @Controller
 public class WebController {
-
     @Autowired private ProductService productService;
     @Autowired private UserService userService;
     @Autowired private OrderService orderService;
@@ -63,14 +59,12 @@ public class WebController {
     @Autowired private SubscriberService subscriberService;
     @Autowired private SiteSettingsService siteSettingsService;
     @Autowired private ModemPayService modemPayService;
-
     @GetMapping("/stores")
     public String stores(Model model) {
         List<User> vendors = productService.getVendorsWithProducts();
         model.addAttribute("vendors", vendors);
         return "stores";
     }
-
     @GetMapping("/store/{vendorId}")
     public String store(@PathVariable Long vendorId,
                         @RequestParam(required = false) String category,
@@ -91,9 +85,7 @@ public class WebController {
         model.addAttribute("selectedCategory", category);
         return "store";
     }
-
     private static final int PAGE_SIZE = 12;
-
     @GetMapping("/")
     public String home(Model model,
                        @RequestParam(required = false) String keyword,
@@ -116,7 +108,6 @@ public class WebController {
         model.addAttribute("recentPosts", blogService.getPublished().stream().limit(3).toList());
         return "index";
     }
-
     @GetMapping("/product/{id}")
     public String productDetail(@PathVariable Long id, Model model, Principal principal) {
         Product product = productService.findById(id).orElse(null);
@@ -135,7 +126,6 @@ public class WebController {
         }
         return "product-detail";
     }
-
     @PostMapping("/product/{id}/review")
     public String addReview(@PathVariable Long id,
                             @RequestParam int rating,
@@ -153,7 +143,6 @@ public class WebController {
         reviewService.addReview(product, currentUser, rating, comment);
         return "redirect:/product/" + id + "?review_success";
     }
-
     @PostMapping("/buyer/order/{id}/received")
     public String markReceived(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -167,7 +156,6 @@ public class WebController {
             case INVALID_STATUS -> "redirect:/buyer/order/" + id + "?error=invalid_status";
         };
     }
-
     @PostMapping("/buyer/order/{id}/return")
     public String requestReturn(@PathVariable Long id,
                                 @RequestParam(required = false) String returnReason,
@@ -183,14 +171,12 @@ public class WebController {
             case INVALID_STATUS -> "redirect:/buyer/order/" + id + "?error=invalid_status";
         };
     }
-
     @GetMapping("/buyer/dashboard")
     public String buyerDashboard(Model model, Principal principal,
                                  @org.springframework.web.bind.annotation.RequestParam(required = false) String paid) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user != null) {
-            // If returning from ModemPay payment, verify any pending orders to cover missed webhooks
             if (paid != null) {
                 orderService.getUserOrders(user).stream()
                         .filter(o -> "AWAITING_PAYMENT".equals(o.getStatus())
@@ -210,7 +196,6 @@ public class WebController {
         }
         return "buyer/dashboard";
     }
-
     @GetMapping("/buyer/order/{id}/pay")
     public String retryPayment(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -229,7 +214,6 @@ public class WebController {
             return "redirect:/buyer/dashboard?error=payment_failed";
         }
     }
-
     @GetMapping("/buyer/order/{id}")
     public String orderDetails(@PathVariable Long id, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -241,7 +225,6 @@ public class WebController {
         model.addAttribute("order", order);
         return "buyer/order-details";
     }
-
     @GetMapping("/settings")
     public String settings(Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -250,7 +233,6 @@ public class WebController {
         model.addAttribute("user", user);
         return "settings";
     }
-
     @PostMapping("/settings/delete-account")
     public String deleteAccount(Principal principal, HttpServletRequest request) {
         if (principal == null) return "redirect:/login";
@@ -261,7 +243,6 @@ public class WebController {
         userService.delete(user.getId());
         return "redirect:/?account_deleted";
     }
-
     @PostMapping("/buyer/order/delete/{id}")
     public String cancelOrder(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -275,7 +256,6 @@ public class WebController {
             case CANNOT_CANCEL -> "redirect:/buyer/dashboard?error=cannot_cancel";
         };
     }
-
     @PostMapping("/subscribe")
     @ResponseBody
     public ResponseEntity<Map<String, String>> subscribe(@RequestParam String email) {
@@ -286,25 +266,21 @@ public class WebController {
             case INVALID -> ResponseEntity.badRequest().body(Map.of("status", "error", "msg", "Invalid email address."));
         };
     }
-
     @GetMapping("/privacy-policy")
     public String privacyPolicy(Model model) {
         model.addAttribute("siteSettings", siteSettingsService.get());
         return "privacy-policy";
     }
-
     @GetMapping("/terms")
     public String terms(Model model) {
         model.addAttribute("siteSettings", siteSettingsService.get());
         return "terms";
     }
-
     @GetMapping("/cookie-policy")
     public String cookiePolicy(Model model) {
         model.addAttribute("siteSettings", siteSettingsService.get());
         return "cookie-policy";
     }
-
     @GetMapping("/returns")
     public String returns(Model model) {
         model.addAttribute("siteSettings", siteSettingsService.get());

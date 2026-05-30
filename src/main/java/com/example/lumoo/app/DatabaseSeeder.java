@@ -1,5 +1,4 @@
 package com.example.lumoo.app;
-
 import com.example.lumoo.domain.blog.BlogPost;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.Role;
@@ -12,39 +11,28 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 @Component
 @Order(2)
 public class DatabaseSeeder implements CommandLineRunner {
-
     @Autowired private UserRepository userRepository;
     @Autowired private ProductRepository productRepository;
     @Autowired private BlogPostRepository blogPostRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-
     @Override
     public void run(String... args) {
         seedVendors();
         seedProducts();
         seedBlogPosts();
     }
-
-    // ─────────────────────────────────────────
-    // VENDOR SEEDER
-    // ─────────────────────────────────────────
     private void seedVendors() {
         if (userRepository.findByEmail("hassan@lumoo.my").isPresent()) return;
-
         User hassan = vendor("hassan@lumoo.my", "Hassan Ibrahim", "+220 771 1001", "Brikama, Gambia");
         User fatou  = vendor("fatou@lumoo.my",  "Fatou Diallo",   "+220 771 1002", "Serrekunda, Gambia");
         User omar   = vendor("omar@lumoo.my",   "Omar Bah",       "+220 771 1003", "Banjul, Gambia");
-
         userRepository.saveAll(List.of(hassan, fatou, omar));
     }
-
     private User vendor(String email, String fullName, String phone, String address) {
         User u = new User();
         u.setEmail(email);
@@ -57,97 +45,69 @@ public class DatabaseSeeder implements CommandLineRunner {
         u.setVerified(true);
         return u;
     }
-
-    // ─────────────────────────────────────────
-    // PRODUCT SEEDER  (18 products, all unique images)
-    // ─────────────────────────────────────────
     private void seedProducts() {
         if (productRepository.count() > 0) return;
-
         User hassan = userRepository.findByEmail("hassan@lumoo.my").orElse(null);
         User fatou  = userRepository.findByEmail("fatou@lumoo.my").orElse(null);
         User omar   = userRepository.findByEmail("omar@lumoo.my").orElse(null);
         if (hassan == null || fatou == null || omar == null) return;
-
         productRepository.saveAll(List.of(
-
-            // ── Hassan Ibrahim — Roofing, Cement, Building ──────────────
             product("Decra Stone Coated Roofing Sheet", "Roofing", 450.00,
                 "Premium stone-coated steel roofing sheet. Durable, weather-resistant, 30-year warranty. Ideal for residential and commercial builds.",
                 "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80", hassan),
-
             product("Corrugated Iron Sheet 26 Gauge (6ft)", "Roofing", 85.00,
                 "Standard corrugated iron sheet, 26 gauge, 6ft length. Suitable for residential roofing and wall cladding.",
                 "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80", hassan),
-
             product("Portland Cement 50kg Bag", "Cement", 28.00,
                 "OPC Portland Cement 50kg bag. High-strength, fast-setting. Suitable for foundations, plastering and all general construction work.",
                 "https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?w=800&q=80", hassan),
-
             product("Ready-Mix Sand & Cement Mortar 25kg", "Cement", 12.00,
                 "Pre-blended dry mortar mix, 25kg bag. Just add water. For bricklaying, blockwork and general repairs. BS EN 998-2 compliant.",
                 "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=800&q=80", hassan),
-
             product("Hollow Concrete Block 6 inch", "Building", 4.50,
                 "Standard 6-inch hollow concrete block. Lightweight and strong. Suitable for load-bearing and non-load-bearing walls.",
                 "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=800&q=80", hassan),
-
             product("Steel Rebar 12mm x 6m (Grade 60)", "Building", 65.00,
                 "High-yield deformed steel reinforcement bar. 12mm diameter, 6m length, Grade 60. For reinforced concrete columns, beams and slabs.",
                 "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&q=80", hassan),
-
-            // ── Fatou Diallo — Electrical, Plumbing ─────────────────────
             product("2.5mm Twin & Earth Cable (50m Roll)", "Electrical", 95.00,
                 "2.5mm twin and earth PVC insulated cable, 50m roll. For domestic ring main and radial circuits up to 20A.",
                 "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800&q=80", fatou),
-
             product("MCB Circuit Breaker 32A Single Pole", "Electrical", 22.00,
                 "Type B single-pole MCB, 32A, DIN rail mounted. Overload and short-circuit protection for domestic circuits.",
                 "https://images.unsplash.com/photo-1509391366636-9f525df0c76e?w=800&q=80", fatou),
-
             product("LED Surface Panel Light 40W (600x600)", "Electrical", 55.00,
                 "40W LED recessed panel light, 600x600mm, cool white 6000K, 3600 lm. Suitable for offices, shops and commercial ceilings.",
                 "https://images.unsplash.com/photo-1558618047-f9d192318ef1?w=800&q=80", fatou),
-
             product("uPVC Pressure Pipe 4 inch x 6m (Class E)", "Plumbing", 38.00,
                 "4-inch diameter uPVC pressure pipe, 6m length, Class E rated. Suitable for water supply mains and drainage systems.",
                 "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&q=80", fatou),
-
             product("Brass Full-Bore Ball Valve 1 inch BSP", "Plumbing", 14.00,
                 "Full-bore brass ball valve, DN25 (1-inch BSP), lead-free. Rated for hot and cold water up to 25 bar. Quarter-turn operation.",
                 "https://images.unsplash.com/photo-1574169208507-84376144848b?w=800&q=80", fatou),
-
             product("Polyethylene Water Storage Tank 1000L", "Plumbing", 320.00,
                 "1000-litre rotomoulded polyethylene tank. UV-stabilised, food-grade, supplied with lid, inlet and outlet fittings.",
                 "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?w=800&q=80", fatou),
-
-            // ── Omar Bah — Timber, Paint, Hardware ──────────────────────
             product("Hardwood Timber 2x4 inch x 12ft", "Timber", 32.00,
                 "Kiln-dried structural hardwood, 2x4 inch, 12ft length. Suitable for roof trusses, floor joists and general framing.",
                 "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80", omar),
-
             product("Marine Plywood Sheet 18mm (8x4ft)", "Timber", 55.00,
                 "18mm WBP marine-grade plywood, 8x4ft sheet, BB/BB grade faces. Fully waterproof bond. For formwork, shuttering and furniture.",
                 "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80", omar),
-
             product("Dulux Weathershield Exterior Paint 20L", "Paint", 110.00,
                 "Premium exterior masonry paint, smooth finish, 20L. 15-year weather resistance guarantee. Available in 50+ colours.",
                 "https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=800&q=80", omar),
-
             product("Interior Matt Emulsion Paint 5L (Brilliant White)", "Paint", 28.00,
                 "High-coverage interior matt emulsion, 5L. One-coat coverage up to 65m². Wipeable, low-odour, quick-dry formula.",
                 "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80", omar),
-
             product("Stainless Steel Anchor Bolt M10 x 100mm (Box 50)", "Hardware", 18.00,
                 "M10 stainless steel sleeve anchor bolts, 100mm length, box of 50. For fixing into concrete, brick and masonry up to 25kN shear.",
                 "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&q=80", omar),
-
             product("Angle Grinder 115mm 900W with Guard & Disc", "Hardware", 145.00,
                 "115mm angle grinder, 900W motor, 11,000 RPM no-load speed. Includes 115mm cutting disc, safety guard and side handle.",
                 "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80", omar)
         ));
     }
-
     private Product product(String name, String category, double price,
                             String description, String imageUrl, User vendor) {
         Product p = new Product();
@@ -161,15 +121,9 @@ public class DatabaseSeeder implements CommandLineRunner {
         p.setImageApproved(true);
         return p;
     }
-
-    // ─────────────────────────────────────────
-    // BLOG SEEDER  (8 posts, all unique images)
-    // ─────────────────────────────────────────
     private void seedBlogPosts() {
         if (blogPostRepository.existsBySlug("how-to-choose-roofing-material-gambia")) return;
-
         blogPostRepository.saveAll(List.of(
-
             post("How to Choose the Right Roofing Material for Gambia's Climate",
                 "how-to-choose-roofing-material-gambia",
                 "Gambia's tropical climate demands roofing materials that handle heavy rains, intense heat and high humidity. Here's what to consider before you buy.",
@@ -183,7 +137,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Roofing", "roofing,climate,materials,gambia",
                 "https://images.unsplash.com/photo-1524634126442-357e0eac3c14?w=1200&q=80",
                 "Hassan Ibrahim", 4, 14),
-
             post("A Complete Guide to Mixing Concrete on Site",
                 "complete-guide-mixing-concrete-site",
                 "Get the mix right and your structure stands for decades. Get it wrong and you risk costly failures. Ratios, water content and common mistakes explained.",
@@ -201,7 +154,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Cement", "cement,concrete,mixing,construction",
                 "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=80",
                 "LUMOO Editorial", 5, 10),
-
             post("Electrical Safety in Construction: What Every Builder Must Know",
                 "electrical-safety-construction-builders",
                 "Electrical accidents on construction sites are preventable. These are the non-negotiables every contractor and site worker must follow.",
@@ -220,7 +172,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Electrical", "electrical,safety,construction,wiring",
                 "https://images.unsplash.com/photo-1603796846097-bee99e4a601f?w=1200&q=80",
                 "Fatou Diallo", 5, 7),
-
             post("Top 5 Plumbing Mistakes Builders Make (And How to Fix Them)",
                 "top-5-plumbing-mistakes-builders",
                 "Plumbing errors are expensive to fix after walls are plastered. Avoid these five mistakes before they become major problems.",
@@ -238,7 +189,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Plumbing", "plumbing,mistakes,construction,pipes",
                 "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&q=80",
                 "Fatou Diallo", 5, 5),
-
             post("Why Quality Timber Makes or Breaks Your Build",
                 "why-quality-timber-matters-construction",
                 "Not all timber is equal. Moisture content, grade and species all affect how your structure performs. Here's what to look for when buying.",
@@ -257,7 +207,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Timber", "timber,wood,construction,materials",
                 "https://images.unsplash.com/photo-1508450859948-4e04fabaa4ea?w=1200&q=80",
                 "Omar Bah", 6, 3),
-
             post("Choosing the Right Paint for Gambia's Humid Climate",
                 "choosing-paint-gambia-humid-climate",
                 "Interior paint that works in a temperate climate can blister and peel in Gambia's heat and humidity. Here's how to choose correctly.",
@@ -273,7 +222,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Paint", "paint,exterior,interior,humid,climate",
                 "https://images.unsplash.com/photo-1553361371-9b4b9f85b9cf?w=1200&q=80",
                 "Omar Bah", 4, 2),
-
             post("Steel vs Timber Roof Trusses: Which is Right for Your Project?",
                 "steel-vs-timber-roof-trusses-comparison",
                 "Both materials can form an excellent roof structure, but the right choice depends on span, budget, climate exposure and build speed. We compare both.",
@@ -287,7 +235,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "Building", "steel,timber,roof,trusses,structure",
                 "https://images.unsplash.com/photo-1621905252472-943afaa20e20?w=1200&q=80",
                 "LUMOO Editorial", 5, 1),
-
             post("How to Read a Construction Materials Price List",
                 "how-to-read-construction-materials-price-list",
                 "Vendor quotes can be confusing. Here's how to decode unit prices, understand what's included and compare quotes accurately.",
@@ -306,7 +253,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 "LUMOO Editorial", 4, 1)
         ));
     }
-
     private BlogPost post(String title, String slug, String excerpt, String content,
                           String category, String tags, String imageUrl,
                           String author, int readingTime, int daysAgo) {

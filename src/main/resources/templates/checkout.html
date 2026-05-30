@@ -7,14 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] font-['Nunito_Sans']">
-
-    <!-- CONTACT TOPBAR -->
     <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
         <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
-
-    <!-- NAV -->
     <nav class="flex justify-between items-center px-12 py-5 bg-white shadow-sm">
         <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
         <div class="flex items-center gap-8 text-[10px] uppercase font-bold tracking-widest">
@@ -22,27 +18,19 @@
             <a href="/buyer/dashboard" class="text-gray-400 hover:text-black transition">My Orders</a>
         </div>
     </nav>
-
     <main class="max-w-6xl mx-auto px-6 md:px-12 py-16">
-
         <header class="mb-12">
             <h1 class="text-4xl font-light tracking-tighter">Complete your <span class="font-black italic text-[#4d78c0]">Order.</span></h1>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Secure checkout — LUMOO Gambia</p>
         </header>
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            <!-- LEFT: SHIPPING + PAYMENT FORM -->
             <div class="lg:col-span-2 space-y-6">
-
-                <!-- Shipping -->
                 <div class="bg-white p-8 border border-gray-100 shadow-sm">
                     <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-8">
                         1. Delivery Details
                     </h2>
                     <form th:action="@{/order/place}" method="post" id="checkoutForm">
                         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
                         <div class="mb-6">
                             <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
                                 Delivery Address <span class="text-red-400">*</span>
@@ -51,15 +39,10 @@
                                    placeholder="e.g. 14 Kairaba Avenue, Banjul, Gambia"
                                    class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none transition placeholder-gray-300">
                         </div>
-
-                        <!-- Payment Method -->
                         <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-8 mt-10">
                             2. Payment Method
                         </h2>
-
                         <div class="space-y-3 mb-8" id="paymentOptions">
-
-                            <!-- Cash on Delivery -->
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="COD" class="mt-1 accent-black" checked>
                                 <div>
@@ -67,8 +50,6 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Pay in cash when your order arrives. Available across Greater Banjul Area.</p>
                                 </div>
                             </label>
-
-                            <!-- Bank Transfer -->
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="TRANSFER" class="mt-1 accent-black">
                                 <div>
@@ -76,8 +57,6 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Transfer directly to our account. Order confirmed after payment is verified.</p>
                                 </div>
                             </label>
-
-                            <!-- Afrimoney -->
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="AFRIMONEY" class="mt-1 accent-black">
                                 <div>
@@ -85,8 +64,6 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Send via Afrimoney. Share your transaction ID after placing the order.</p>
                                 </div>
                             </label>
-
-                            <!-- QMoney -->
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="QMONEY" class="mt-1 accent-black">
                                 <div>
@@ -94,8 +71,6 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Send via QMoney wallet. Share your transaction ID after placing the order.</p>
                                 </div>
                             </label>
-
-                            <!-- ModemPay Online -->
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="MODEMPAY" class="mt-1 accent-black">
                                 <div>
@@ -103,10 +78,7 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Secure instant payment. You'll be redirected to complete payment — no upload needed.</p>
                                 </div>
                             </label>
-
                         </div>
-
-                        <!-- Bank Transfer Details (shown when selected) -->
                         <div id="bankDetails" class="hidden bg-blue-50 border border-blue-200 p-6 mb-8">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-blue-700 mb-4">Bank Transfer Details</p>
                             <div class="space-y-2 text-xs">
@@ -133,8 +105,6 @@
                             </div>
                             <p class="text-[8px] text-[#4d78c0] mt-4">Upload your payment screenshot after placing the order.</p>
                         </div>
-
-                        <!-- Mobile Money Details (shown when Afrimoney/QMoney selected) -->
                         <div id="mobileDetails" class="hidden bg-green-50 border border-green-200 p-6 mb-8">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-green-700 mb-4">Mobile Money Details</p>
                             <div class="space-y-2 text-xs">
@@ -153,11 +123,8 @@
                             </div>
                             <p class="text-[8px] text-green-700 mt-4">Upload your payment screenshot after placing the order.</p>
                         </div>
-
-                        <!-- PDPP Consent -->
                         <div class="border border-gray-100 p-5 mb-6 space-y-4 bg-gray-50">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-3">Your Consent</p>
-
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="privacyAccepted" id="privacyAccepted" required
                                        class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
@@ -168,7 +135,6 @@
                                     <span class="text-red-500">*</span>
                                 </span>
                             </label>
-
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="termsAccepted" id="termsAccepted" required
                                        class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
@@ -180,7 +146,6 @@
                                     <span class="text-red-500">*</span>
                                 </span>
                             </label>
-
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="marketingConsent" id="marketingConsent"
                                        class="mt-0.5 w-4 h-4 accent-[#1a2336] shrink-0">
@@ -190,26 +155,21 @@
                                 </span>
                             </label>
                         </div>
-
                         <button type="submit" id="placeOrderBtn"
                                 class="w-full bg-[#1a2336] text-white py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-500 mt-2">
                             Place Order →
                         </button>
-
                         <p class="text-[8px] text-center text-gray-400 mt-4 uppercase tracking-wider">
                             🔒 Your information is safe and secure with LUMOO
                         </p>
                     </form>
                 </div>
             </div>
-
-            <!-- RIGHT: ORDER SUMMARY -->
             <div class="space-y-6">
                 <div class="bg-white p-8 border border-gray-100 shadow-sm">
                     <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">
                         Order Summary
                     </h2>
-
                     <div class="space-y-4">
                         <div th:each="item : ${cart}" class="flex justify-between items-start text-xs">
                             <div>
@@ -219,7 +179,6 @@
                             <span class="font-bold" th:text="${'GMD ' + #numbers.formatDecimal(item.price * item.quantity, 1, 2)}"></span>
                         </div>
                     </div>
-
                     <div class="border-t border-dashed border-gray-200 mt-6 pt-6">
                         <div class="flex justify-between text-[9px] text-gray-400 uppercase tracking-wider mb-2">
                             <span>Subtotal</span>
@@ -235,8 +194,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Accepted Payments -->
                 <div class="bg-white p-6 border border-gray-100 shadow-sm">
                     <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4">We Accept</p>
                     <div class="grid grid-cols-2 gap-3">
@@ -258,25 +215,19 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Need Help -->
                 <div class="bg-[#1a2336] text-white p-6">
                     <p class="text-[9px] font-black uppercase tracking-[0.3em] mb-3">Need Help?</p>
                     <p class="text-[9px] text-gray-300 mb-1">📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span></p>
                     <p class="text-[9px] text-gray-300">✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></p>
                 </div>
             </div>
-
         </div>
     </main>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-
     <script>
         const radios = document.querySelectorAll('input[name="paymentMethod"]');
         const bankDiv = document.getElementById('bankDetails');
         const mobileDiv = document.getElementById('mobileDetails');
-
         radios.forEach(r => r.addEventListener('change', () => {
             bankDiv.classList.add('hidden');
             mobileDiv.classList.add('hidden');
@@ -284,7 +235,6 @@
             if (r.value === 'AFRIMONEY' || r.value === 'QMONEY') mobileDiv.classList.remove('hidden');
         }));
     </script>
-
     <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

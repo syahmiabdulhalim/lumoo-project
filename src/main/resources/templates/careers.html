@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Careers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-sans">
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+        <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
+        <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/partnerships" class="hover:text-[#4d78c0] transition">Partnerships</a>
+        </div>
+    </nav>
+    <main class="max-w-5xl mx-auto px-6 md:px-12 py-20">
+        <header class="mb-16">
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-3">Join Our Team</p>
+            <h1 class="text-5xl font-light tracking-tighter">
+                Build the future of<br><span class="font-black italic text-[#4d78c0]">Gambian commerce.</span>
+            </h1>
+            <p class="text-sm text-gray-500 mt-6 max-w-xl leading-relaxed">
+                We're looking for passionate people to help grow LUMOO — Gambia's leading construction materials marketplace.
+            </p>
+        </header>
+        <div th:if="${postings != null and !#lists.isEmpty(postings)}">
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-8">Open Positions</p>
+            <div class="space-y-4">
+                <a th:each="p : ${postings}"
+                   th:href="@{/careers/{id}(id=${p.id})}"
+                   class="group block bg-white border border-gray-100 p-6 hover:border-[#4d78c0] hover:shadow-lg transition duration-300">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h2 class="text-base font-black uppercase tracking-tight group-hover:text-[#4d78c0] transition" th:text="${p.title}">Title</h2>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-[9px] text-gray-400 uppercase tracking-widest font-bold" th:text="${p.department}">Dept</span>
+                                <span class="text-gray-300">•</span>
+                                <span class="text-[9px] text-gray-400 uppercase tracking-widest font-bold" th:text="${p.location}">Location</span>
+                                <span class="text-gray-300">•</span>
+                                <span class="text-[9px] text-[#4d78c0] uppercase tracking-widest font-black" th:text="${p.type.label()}">Type</span>
+                            </div>
+                        </div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] group-hover:translate-x-1 transition-transform duration-200">Apply →</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div th:if="${postings == null or #lists.isEmpty(postings)}" class="text-center py-32">
+            <p class="text-[8px] text-gray-300 uppercase tracking-[0.4em] font-black mb-4">No open positions at the moment</p>
+            <p class="text-xs text-gray-400">Check back soon or send your CV to
+                <a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.gm'} + '?subject=Spontaneous Application'"
+                   class="text-[#4d78c0] hover:underline" th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}">info@lumoo.gm</a>
+            </p>
+        </div>
+    </main>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

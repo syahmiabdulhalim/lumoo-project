@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.order;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.ProductService;
 import com.example.lumoo.domain.product.Review;
@@ -40,37 +39,29 @@ import com.example.lumoo.domain.pdpp.BreachIncidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 public class OrderService {
-
     @Autowired private OrderRepository orderRepository;
     @Autowired private OrderItemRepository orderItemRepository;
     @Autowired private CartRepository cartRepository;
     @Autowired private PayoutService payoutService;
     @Autowired private ProductService productService;
-
     public List<Order> getUserOrders(User user) {
         return orderRepository.findByUserWithItems(user);
     }
-
     public List<Order> getVendorOrders(Long vendorId) {
         return orderRepository.findVendorOrdersWithItems(vendorId);
     }
-
     public List<Order> getAll() {
         return orderRepository.findAll();
     }
-
     public long countAll() { return orderRepository.count(); }
-
     public org.springframework.data.domain.Page<Order> getPage(int page, int size) {
         return orderRepository.findAll(
             org.springframework.data.domain.PageRequest.of(page, size,
@@ -78,29 +69,20 @@ public class OrderService {
     }
     public double sumTotalRevenue() { return orderRepository.sumTotalRevenue(); }
     public double sumTotalCommission() { return orderRepository.sumTotalCommission(); }
-
     public double sumVendorRevenue(Long vendorId) { return orderRepository.sumVendorRevenue(vendorId); }
     public double sumVendorMonthlySales(Long vendorId) { return orderRepository.sumVendorMonthlySales(vendorId); }
     public long countVendorOrders(Long vendorId) { return orderRepository.countVendorOrders(vendorId); }
-
     public org.springframework.data.domain.Page<Order> getVendorOrdersPage(Long vendorId, int page, int size) {
         return orderRepository.findVendorOrdersPaged(vendorId,
             org.springframework.data.domain.PageRequest.of(page, size,
                 org.springframework.data.domain.Sort.by("createdAt").descending()));
     }
-
     public Optional<Order> findById(Long id) {
         return orderRepository.findById(id);
     }
-
     public Optional<Order> findByIdWithItems(Long id) {
         return orderRepository.findByIdWithItems(id);
     }
-
-    /**
-     * Splits cart items by vendor and creates one Order per vendor (Shopee-style).
-     * Returns all created orders.
-     */
     @Transactional
     public List<Order> placeOrders(User user, String address, String paymentMethod,
                                    List<CartItem> cartItems,
@@ -109,8 +91,6 @@ public class OrderService {
                 .collect(Collectors.groupingBy(ci ->
                         ci.getProduct() != null && ci.getProduct().getVendor() != null
                                 ? ci.getProduct().getVendor().getId() : 0L));
-
-        // Atomic stock deduction — whole transaction rolls back if any item runs out
         for (CartItem ci : cartItems) {
             if (ci.getProduct() != null) {
                 boolean ok = productService.decrementStock(ci.getProduct().getId(), ci.getQuantity());
@@ -118,7 +98,6 @@ public class OrderService {
                         "Insufficient stock for: " + ci.getName() + ". Please update your cart.");
             }
         }
-
         List<Order> orders = new ArrayList<>();
         for (List<CartItem> vendorItems : byVendor.values()) {
             orders.add(createOrder(user, address, paymentMethod, vendorItems,
@@ -127,13 +106,11 @@ public class OrderService {
         cartRepository.deleteAll(cartItems);
         return orders;
     }
-
     private Order createOrder(User user, String address, String paymentMethod,
                               List<CartItem> items,
                               boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
         double total      = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
         double commission = total * 0.10;
-
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address.trim());
@@ -150,9 +127,7 @@ public class OrderService {
         order.setPrivacyAccepted(privacyAccepted);
         order.setTermsAccepted(termsAccepted);
         order.setMarketingConsent(marketingConsent);
-
         Order saved = orderRepository.save(order);
-
         for (CartItem ci : items) {
             OrderItem oi = new OrderItem();
             oi.setOrder(saved);
@@ -164,9 +139,7 @@ public class OrderService {
         }
         return saved;
     }
-
     public enum CancelResult { CANCELLED, NOT_FOUND, UNAUTHORIZED, CANNOT_CANCEL }
-
     @Transactional
     public CancelResult cancelOrder(Long id, User user) {
         Order order = orderRepository.findByIdWithItems(id).orElse(null);
@@ -178,9 +151,7 @@ public class OrderService {
         orderRepository.delete(order);
         return CancelResult.CANCELLED;
     }
-
     public enum ShipResult { SHIPPED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
-
     @Transactional
     public ShipResult markShipped(Long orderId, Long vendorId, String trackingNumber) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -198,9 +169,7 @@ public class OrderService {
         orderRepository.save(order);
         return ShipResult.SHIPPED;
     }
-
     public enum DeliverResult { DELIVERED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
-
     public DeliverResult markDelivered(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) return DeliverResult.NOT_FOUND;
@@ -210,9 +179,7 @@ public class OrderService {
         orderRepository.save(order);
         return DeliverResult.DELIVERED;
     }
-
     public enum ReturnResult { REQUESTED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
-
     public ReturnResult requestReturn(Long orderId, Long userId, String reason) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) return ReturnResult.NOT_FOUND;
@@ -223,14 +190,12 @@ public class OrderService {
         orderRepository.save(order);
         return ReturnResult.REQUESTED;
     }
-
     public void resolveReturn(Long orderId) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setStatus("RETURNED");
             orderRepository.save(o);
         });
     }
-
     public void submitProof(Long orderId, String proofUrl) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setPaymentProofUrl(proofUrl);
@@ -238,14 +203,12 @@ public class OrderService {
             orderRepository.save(o);
         });
     }
-
     public void verifyPayment(Long orderId) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setStatus("PAID");
             orderRepository.save(o);
         });
     }
-
     @Transactional
     public void updateStatus(Long orderId, String status) {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
@@ -256,12 +219,9 @@ public class OrderService {
             }
         });
     }
-
     public void delete(Long id) {
         orderRepository.deleteById(id);
     }
-
-    /** Returns stock for all items in an order. Called on cancel and payment failure. */
     @Transactional
     public void returnStockForOrder(Order order) {
         if (order.getItems() == null) return;

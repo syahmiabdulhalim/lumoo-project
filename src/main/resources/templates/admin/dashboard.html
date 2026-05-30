@@ -32,12 +32,8 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-
 <div class="flex min-h-screen">
-
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-slate-900 text-slate-300 fixed h-full flex flex-col z-30">
-        <!-- Logo -->
         <div class="px-6 py-6 border-b border-slate-800">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -49,11 +45,8 @@
                 </div>
             </div>
         </div>
-
-        <!-- Nav -->
         <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             <p class="text-slate-600 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">Main</p>
-
             <a href="#stats" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white active">
                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 Overview
@@ -81,12 +74,18 @@
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Inquiries
             </a>
-
             <a href="/admin/blog" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-.586-1.414l-4.5-4.5A2 2 0 0014.5 3H5"/></svg>
                 Blog Posts
             </a>
-
+            <a href="/admin/careers" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Careers
+            </a>
+            <a href="/admin/partnerships" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Partnerships
+            </a>
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <p class="text-slate-600 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">Account</p>
                 <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white">
@@ -103,8 +102,6 @@
                 </a>
             </div>
         </nav>
-
-        <!-- Admin badge -->
         <div class="px-4 py-4 border-t border-slate-800">
             <div class="flex items-center gap-3 px-2">
                 <div class="w-8 h-8 bg-[#4d78c0] rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
@@ -115,11 +112,7 @@
             </div>
         </div>
     </aside>
-
-    <!-- MAIN CONTENT -->
     <main class="flex-1 ml-64 min-h-screen">
-
-        <!-- Flash toast -->
         <div th:if="${flashMsg != null}" id="admin-flash-toast"
              class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
              th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
@@ -129,8 +122,6 @@
         <script th:if="${flashMsg != null}">
             setTimeout(() => { const t = document.getElementById('admin-flash-toast'); if (t) { t.style.opacity='0'; t.style.transition='opacity .5s'; setTimeout(()=>t.remove(),500); }}, 3000);
         </script>
-
-        <!-- Top bar -->
         <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20">
             <div>
                 <h1 class="text-base font-semibold text-slate-800">Dashboard</h1>
@@ -142,14 +133,10 @@
                 <span class="text-xs text-slate-500">System Online</span>
             </div>
         </header>
-
         <div class="p-8 space-y-8">
-
-            <!-- STAT CARDS -->
             <section id="stats">
                 <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-widest mb-4">Overview</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
                     <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-medium text-slate-500">Total Revenue</span>
@@ -160,7 +147,6 @@
                         <p class="text-2xl font-bold text-slate-800 mono" th:text="${'GMD ' + #numbers.formatDecimal(totalRevenue, 1, 2)}">GMD 0.00</p>
                         <p class="text-xs text-slate-400 mt-1">All time sales</p>
                     </div>
-
                     <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-medium text-slate-500">Total Orders</span>
@@ -171,7 +157,6 @@
                         <p class="text-2xl font-bold text-slate-800 mono" th:text="${totalOrders}">0</p>
                         <p class="text-xs text-slate-400 mt-1">Transactions placed</p>
                     </div>
-
                     <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-medium text-slate-500">Commission Earned</span>
@@ -182,7 +167,6 @@
                         <p class="text-2xl font-bold text-slate-800 mono" th:text="${'GMD ' + #numbers.formatDecimal(totalCommission, 1, 2)}">GMD 0.00</p>
                         <p class="text-xs text-slate-400 mt-1">10% platform fee</p>
                     </div>
-
                     <div class="stat-card bg-white rounded-xl border border-slate-200 p-5">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-xs font-medium text-slate-500">Registered Users</span>
@@ -193,11 +177,8 @@
                         <p class="text-2xl font-bold text-slate-800 mono" th:text="${totalUsers}">0</p>
                         <p class="text-xs text-slate-400 mt-1">Total accounts</p>
                     </div>
-
                 </div>
             </section>
-
-            <!-- LAZY-LOADED SECTIONS -->
             <div id="section-orders" data-src="/admin/sections/orders">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse">
                     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
@@ -209,7 +190,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="section-moderation" data-src="/admin/sections/moderation">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse">
                     <div class="px-6 py-4 border-b border-slate-100">
@@ -220,7 +200,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="section-inventory" data-src="/admin/sections/inventory">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse">
                     <div class="px-6 py-4 border-b border-slate-100">
@@ -231,7 +210,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="section-users" data-src="/admin/sections/users">
                 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse">
                     <div class="px-6 py-4 border-b border-slate-100">
@@ -242,7 +220,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 </div>
@@ -254,7 +231,6 @@ function fillRejectNote(form) {
     form.querySelector('input[name=note]').value = note;
     return true;
 }
-
 (function loadSections() {
     var containers = Array.from(document.querySelectorAll('[data-src]'));
     var chain = Promise.resolve();
@@ -274,7 +250,6 @@ function fillRejectNote(form) {
         });
     });
 })();
-
 // Handle pagination links inside lazy sections (event delegation)
 document.addEventListener('click', function(e) {
     var link = e.target.closest('a[href^="/admin/sections/"]');

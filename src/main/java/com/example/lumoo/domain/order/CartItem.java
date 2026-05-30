@@ -1,32 +1,22 @@
 package com.example.lumoo.domain.order;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
-
-@Entity // <--- PENTING: Tanpa ini, ralat tadi akan keluar
+@Entity 
 @Table(name = "cart_items")
 public class CartItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
     private int quantity;
-    
-    // Tambah nama dan harga supaya tally dengan Cart HTML anda
     private String name; 
     private double price;
-
-    // --- GETTERS & SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public User getUser() { return user; }

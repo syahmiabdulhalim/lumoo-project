@@ -7,40 +7,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-
 <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b">
     <a href="/"><h1 class="text-xl font-black tracking-tighter">LUMOO</h1></a>
     <a href="/" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#4d78c0] transition">← Back to Store</a>
 </nav>
-
 <main class="max-w-3xl mx-auto py-16 px-6">
-
     <header class="mb-12 border-b border-gray-100 pb-8">
         <p class="text-[8px] text-gray-400 uppercase tracking-[0.4em] font-black mb-3">Legal</p>
         <h1 class="text-4xl font-light tracking-tight">Terms of <span class="font-black italic text-[#4d78c0]">Service</span></h1>
         <p class="text-[9px] text-gray-400 mt-3 uppercase tracking-widest">LUMOO Gambia Marketplace</p>
     </header>
-
-    <!-- Custom text from admin settings -->
     <div th:if="${siteSettings != null and siteSettings.termsText != null and !#strings.isEmpty(siteSettings.termsText)}"
          class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4"
          th:utext="${siteSettings.termsText}">
     </div>
-
-    <!-- Default template -->
     <div th:if="${siteSettings == null or siteSettings.termsText == null or #strings.isEmpty(siteSettings.termsText)}"
          class="space-y-8 text-sm text-gray-700 leading-relaxed">
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">1. Acceptance of Terms</h2>
             <p class="text-gray-600">By accessing or using LUMOO, you agree to be bound by these Terms of Service and all applicable laws of The Gambia. If you do not agree, please do not use this platform.</p>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">2. Platform Description</h2>
             <p class="text-gray-600">LUMOO is a construction materials marketplace connecting vendors and buyers in The Gambia. We facilitate transactions but are not a party to the sale contract between vendor and buyer.</p>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">3. User Accounts</h2>
             <ul class="list-disc list-inside space-y-1 text-gray-600">
@@ -50,7 +40,6 @@
                 <li>We reserve the right to suspend accounts that violate these terms</li>
             </ul>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">4. Vendor Obligations</h2>
             <ul class="list-disc list-inside space-y-1 text-gray-600">
@@ -61,7 +50,6 @@
                 <li>Vendors must comply with all applicable Gambian business laws</li>
             </ul>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">5. Buyer Obligations</h2>
             <ul class="list-disc list-inside space-y-1 text-gray-600">
@@ -70,29 +58,23 @@
                 <li>Fraudulent payment proofs will result in account termination and may be reported to authorities</li>
             </ul>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">6. Payments</h2>
             <p class="text-gray-600">LUMOO accepts Cash on Delivery, Bank Transfer, Afrimoney, and QMoney. For non-COD payments, orders are only processed after admin verification of payment proof. LUMOO is not liable for payments sent to incorrect account details provided by the user.</p>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">7. Returns & Refunds</h2>
             <p class="text-gray-600">Return requests must be submitted within 7 days of delivery. Approved returns are subject to vendor's agreement. Refunds are processed within 14 business days. LUMOO facilitates the return process but vendor approval is required.</p>
         </section>
-
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">8. Governing Law</h2>
             <p class="text-gray-600">These Terms are governed by the laws of The Republic of The Gambia. Any disputes shall be subject to the exclusive jurisdiction of the courts of The Gambia.</p>
         </section>
-
         <section class="border-t border-gray-100 pt-6">
             <p class="text-[8px] text-gray-400 uppercase tracking-widest">Last updated: 2026 · LUMOO Gambia</p>
         </section>
-
     </div>
 </main>
-
 <footer class="border-t border-gray-100 py-8 text-center">
     <div class="flex justify-center gap-6 text-[9px] text-gray-400 uppercase tracking-widest">
         <a href="/privacy-policy" class="hover:text-[#4d78c0] transition">Privacy Policy</a>
@@ -100,7 +82,6 @@
         <a href="/" class="hover:text-[#4d78c0] transition">Back to Store</a>
     </div>
 </footer>
-
 <div th:replace="~{fragments/loading :: loading}"></div>
 </body>
 </html>

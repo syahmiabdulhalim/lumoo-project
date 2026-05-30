@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.product;
-
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.user.User;
@@ -7,36 +6,27 @@ import com.example.lumoo.domain.order.OrderItemRepository;
 import com.example.lumoo.domain.product.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
-
 @Service
 public class ReviewService {
-
     @Autowired private ReviewRepository reviewRepository;
     @Autowired private OrderItemRepository orderItemRepository;
-
     public List<Review> getByProduct(Product product) {
         return reviewRepository.findByProductId(product.getId());
     }
-
     public double getAverageRating(List<Review> reviews) {
         return reviews.isEmpty() ? 0 : reviews.stream().mapToInt(Review::getRating).average().orElse(0);
     }
-
     public boolean canReview(User user, Product product) {
         return orderItemRepository.existsByOrderUserAndOrderStatusAndProduct(user, "DELIVERED", product);
     }
-
     public boolean hasPurchased(User user, Product product) {
         return orderItemRepository.existsByOrderUserAndProduct(user, product);
     }
-
     public boolean hasAlreadyReviewed(User user, Product product) {
         return reviewRepository.existsByUserAndProduct(user, product);
     }
-
     public void addReview(Product product, User user, int rating, String comment) {
         Review review = new Review();
         review.setUser(user);

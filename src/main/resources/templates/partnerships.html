@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | Partnerships</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-sans">
+    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
+        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+    </div>
+    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+        <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
+        <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <a href="/careers" class="hover:text-[#4d78c0] transition">Careers</a>
+        </div>
+    </nav>
+    <main class="max-w-5xl mx-auto px-6 md:px-12 py-20">
+        <div th:if="${param.containsKey('submitted')}"
+             id="submitted-toast"
+             class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
+            <span class="text-[#4d78c0] text-lg">✓</span>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Application received! We'll be in touch soon.</p>
+        </div>
+        <script th:if="${param.containsKey('submitted')}">
+            history.replaceState(null, '', '/partnerships');
+            setTimeout(function() {
+                var t = document.getElementById('submitted-toast');
+                if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
+            }, 5000);
+        </script>
+        <header class="mb-20">
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-3">Partner With Us</p>
+            <h1 class="text-5xl font-light tracking-tighter">
+                Grow together with<br><span class="font-black italic text-[#4d78c0]">LUMOO Gambia.</span>
+            </h1>
+            <p class="text-sm text-gray-500 mt-6 max-w-xl leading-relaxed">
+                Whether you're a supplier, distributor, or logistics provider — we want to build lasting partnerships that strengthen Gambia's construction materials ecosystem.
+            </p>
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+            <div class="bg-white border border-gray-100 p-6">
+                <p class="text-[8px] text-[#4d78c0] uppercase tracking-widest font-black mb-3">Distributor</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Distribute LUMOO products to retailers and contractors across Gambia.</p>
+            </div>
+            <div class="bg-white border border-gray-100 p-6">
+                <p class="text-[8px] text-[#4d78c0] uppercase tracking-widest font-black mb-3">Supplier</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Supply quality construction materials to our growing vendor network.</p>
+            </div>
+            <div class="bg-white border border-gray-100 p-6">
+                <p class="text-[8px] text-[#4d78c0] uppercase tracking-widest font-black mb-3">Logistics</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Provide reliable delivery and logistics services for our customers.</p>
+            </div>
+        </div>
+        <div class="border-t border-gray-100 pt-16">
+            <h2 class="text-3xl font-light tracking-tighter mb-2">
+                Apply for <span class="font-black italic text-[#4d78c0]">Partnership.</span>
+            </h2>
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] font-black mb-10">Tell us about your company</p>
+            <form th:action="@{/partnerships/apply}" method="post" class="max-w-2xl space-y-6">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Company Name *</label>
+                        <input type="text" name="companyName" required
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Contact Person *</label>
+                        <input type="text" name="contactName" required
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="Your full name">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Email *</label>
+                        <input type="email" name="email" required
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="company@email.com">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Phone</label>
+                        <input type="tel" name="phone"
+                               class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none"
+                               placeholder="+220 XXX XXXX">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Partnership Type *</label>
+                    <select name="partnerType" required
+                            class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none">
+                        <option value="" disabled selected>Select type...</option>
+                        <option th:each="t : ${partnerTypes}" th:value="${t}" th:text="${t.label()}">Type</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-2">Message *</label>
+                    <textarea name="message" required rows="5"
+                              class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none resize-none"
+                              placeholder="Tell us about your company and how you'd like to partner with LUMOO..."></textarea>
+                </div>
+                <button type="submit"
+                        class="bg-[#1a2336] text-white px-10 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-[#4d78c0] transition duration-300">
+                    Submit Application →
+                </button>
+            </form>
+        </div>
+    </main>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Applications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+    <nav class="bg-slate-900 text-white px-8 py-4 flex items-center gap-6 sticky top-0 z-50">
+        <a href="/admin/careers" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Careers</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold" th:text="'Applications — ' + ${posting.title}">Applications</span>
+    </nav>
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        <div th:if="${flashMsg != null}" id="flash-toast"
+             class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+             th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+            <span th:text="${flashMsg}"></span>
+            <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+        </div>
+        <script th:if="${flashMsg != null}">
+            setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+        </script>
+        <div class="mb-6 bg-white border border-slate-200 rounded-xl px-6 py-4 flex items-center justify-between">
+            <div>
+                <p class="font-bold text-slate-800" th:text="${posting.title}">Title</p>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    <span th:text="${posting.department}"></span> •
+                    <span th:text="${posting.location}"></span> •
+                    <span th:text="${posting.type.label()}"></span>
+                </p>
+            </div>
+            <span th:if="${posting.active}" class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold uppercase">Active</span>
+            <span th:unless="${posting.active}" class="text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-bold uppercase">Closed</span>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Applications</h1>
+                <span class="text-xs text-slate-400" th:text="${#lists.size(applications)} + ' total'">0 total</span>
+            </div>
+            <table class="w-full text-sm" th:if="${applications != null and !#lists.isEmpty(applications)}">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="text-left px-6 py-3">Applicant</th>
+                        <th class="text-left px-6 py-3">Contact</th>
+                        <th class="text-left px-6 py-3">Applied</th>
+                        <th class="text-left px-6 py-3">Status</th>
+                        <th class="text-left px-6 py-3">Cover Letter</th>
+                        <th class="text-left px-6 py-3">Update Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="app : ${applications}" class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4 font-semibold text-slate-800" th:text="${app.applicantName}">Name</td>
+                        <td class="px-6 py-4">
+                            <p class="text-xs text-slate-600" th:text="${app.email}">email</p>
+                            <p class="text-xs text-slate-400" th:text="${app.phone}">phone</p>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400"
+                            th:text="${#temporals.format(app.appliedAt, 'dd MMM yyyy')}">Date</td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs px-2 py-1 rounded font-bold uppercase tracking-wider"
+                                  th:classappend="${app.status.name() == 'NEW'}        ? 'bg-blue-100 text-blue-700'    :
+                                                  (${app.status.name() == 'REVIEWED'}  ? 'bg-yellow-100 text-yellow-700' :
+                                                  (${app.status.name() == 'SHORTLISTED'} ? 'bg-emerald-100 text-emerald-700' :
+                                                                                           'bg-red-100 text-red-600'))"
+                                  th:text="${app.status}">Status</span>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs">
+                            <p class="text-xs text-slate-500 line-clamp-3" th:text="${app.coverLetter}">Cover letter</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <form th:action="@{/admin/careers/applications/{appId}/status(appId=${app.id})}" method="post" class="flex items-center gap-2">
+                                <input type="hidden" name="postingId" th:value="${posting.id}">
+                                <select name="status" class="text-xs border border-slate-200 rounded px-2 py-1.5 focus:outline-none">
+                                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${app.status == s}">Status</option>
+                                </select>
+                                <button type="submit" class="text-xs bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-3 py-1.5 rounded font-semibold transition">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div th:if="${applications == null or #lists.isEmpty(applications)}" class="py-20 text-center">
+                <p class="text-sm text-slate-400">No applications yet for this posting.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
