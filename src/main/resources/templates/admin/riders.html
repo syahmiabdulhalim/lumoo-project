@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Riders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">Delivery Riders</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="/admin/dispatch" class="text-xs bg-[#4d78c0] text-white px-4 py-2 rounded-lg font-bold hover:bg-[#3a65ad] transition">Dispatch Panel →</a>
+        <div th:replace="~{fragments/bell :: bell}"></div>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-6 py-12 space-y-8">
+
+    <div th:if="${flashMsg}" id="flash-toast"
+         class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+         th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+        <span th:text="${flashMsg}"></span>
+        <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+    </div>
+    <script th:if="${flashMsg}">setTimeout(function(){var t=document.getElementById('flash-toast');if(t){t.style.opacity='0';setTimeout(function(){t.remove();},400);}},3000);</script>
+
+    <!-- Riders table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Delivery Riders</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Your own delivery team. Assign them to orders from the Dispatch Panel.</p>
+            </div>
+            <span class="text-xs text-slate-400" th:text="${#lists.size(riders)} + ' riders'"></span>
+        </div>
+
+        <table class="w-full text-sm" th:if="${!#lists.isEmpty(riders)}">
+            <thead>
+                <tr class="bg-slate-50 border-b text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="text-left px-6 py-3">Rider</th>
+                    <th class="text-left px-6 py-3">Phone</th>
+                    <th class="text-left px-6 py-3">Vehicle</th>
+                    <th class="text-left px-6 py-3">Area</th>
+                    <th class="text-left px-6 py-3">Deliveries</th>
+                    <th class="text-left px-6 py-3">Status</th>
+                    <th class="text-left px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr th:each="r : ${riders}" class="hover:bg-slate-50">
+                    <td class="px-6 py-4 font-bold text-slate-800" th:text="${r.name}">Rider</td>
+                    <td class="px-6 py-4">
+                        <a th:href="'https://wa.me/' + ${r.phone.replaceAll('[^0-9]','')}"
+                           target="_blank" rel="noopener"
+                           class="text-green-600 font-semibold text-xs hover:underline flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            <span th:text="${r.phone}"></span>
+                        </a>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:text="${r.vehicleType == 'MOTORCYCLE' ? '🏍️' : r.vehicleType == 'VAN' ? '🚐' : r.vehicleType == 'TRUCK' ? '🚛' : '🚲'}"
+                              class="mr-1"></span>
+                        <span class="text-xs text-slate-500" th:text="${r.vehicleType.name()}"></span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500" th:text="${r.area ?: '—'}"></td>
+                    <td class="px-6 py-4">
+                        <span class="text-sm font-black text-[#4d78c0]" th:text="${r.totalDeliveries}">0</span>
+                        <span class="text-xs text-slate-400"> deliveries</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${r.active}" class="text-[9px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded uppercase">Active</span>
+                        <span th:unless="${r.active}" class="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded uppercase">Off duty</span>
+                    </td>
+                    <td class="px-6 py-4 flex items-center gap-2">
+                        <button onclick="openEdit(this)"
+                                th:data-id="${r.id}" th:data-name="${r.name}"
+                                th:data-phone="${r.phone}" th:data-vehicle="${r.vehicleType.name()}"
+                                th:data-area="${r.area}"
+                                class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold">Edit</button>
+                        <form th:action="@{/admin/riders/toggle/{id}(id=${r.id})}" method="post" class="inline">
+                            <button type="submit" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded font-semibold"
+                                    th:text="${r.active} ? 'Off Duty' : 'Activate'">Toggle</button>
+                        </form>
+                        <form th:action="@{/admin/riders/delete/{id}(id=${r.id})}" method="post" class="inline">
+                            <button type="submit" onclick="return confirm('Remove this rider?')"
+                                    class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(riders)}" class="py-16 text-center">
+            <p class="text-2xl mb-3">🏍️</p>
+            <p class="text-sm text-slate-400">No riders yet. Add your first delivery rider below.</p>
+        </div>
+    </div>
+
+    <!-- Add rider form -->
+    <div class="bg-white rounded-xl border border-slate-200 p-8">
+        <h2 class="text-sm font-bold uppercase tracking-wider mb-6">Add New Rider</h2>
+        <form th:action="@{/admin/riders/new}" method="post" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Full Name *</label>
+                <input type="text" name="name" required placeholder="e.g. Lamin Jallow"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">WhatsApp Number *</label>
+                <input type="text" name="phone" required placeholder="e.g. 7654321 or +2207654321"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vehicle</label>
+                <select name="vehicleType" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                    <option th:each="v : ${vehicleTypes}" th:value="${v}" th:text="${v == 'MOTORCYCLE' ? '🏍️ Motorcycle' : v == 'VAN' ? '🚐 Van' : v == 'TRUCK' ? '🚛 Truck' : '🚲 Bicycle'}">Vehicle</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Coverage Area</label>
+                <input type="text" name="area" placeholder="e.g. Serrekunda, Bakau, Kanifing"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-8 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition">
+                    Add Rider →
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Edit modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-sm font-bold uppercase tracking-wider">Edit Rider</h3>
+            <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl">✕</button>
+        </div>
+        <form id="edit-form" method="post" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Name</label>
+                <input type="text" name="name" id="e-name" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Phone</label>
+                <input type="text" name="phone" id="e-phone" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Area</label>
+                <input type="text" name="area" id="e-area" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <input type="hidden" name="vehicleType" id="e-vehicle">
+            <div class="flex justify-end gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('edit-modal').classList.add('hidden')"
+                        class="px-5 py-2 text-xs font-bold text-slate-500 border border-slate-200 rounded-lg">Cancel</button>
+                <button type="submit" class="px-5 py-2 text-xs font-black bg-[#1a2336] text-white rounded-lg hover:bg-[#4d78c0] transition">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+function openEdit(btn) {
+    var d = btn.dataset;
+    document.getElementById('edit-form').action = '/admin/riders/edit/' + d.id;
+    document.getElementById('e-name').value    = d.name;
+    document.getElementById('e-phone').value   = d.phone;
+    document.getElementById('e-area').value    = d.area || '';
+    document.getElementById('e-vehicle').value = d.vehicle;
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+</script>
+</body>
+</html>

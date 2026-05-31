@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Shipping Rates</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">Shipping Rates</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <a href="/shipping" target="_blank" class="text-xs text-slate-400 hover:text-white font-semibold transition">Preview Calculator →</a>
+        <div th:replace="~{fragments/bell :: bell}"></div>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto px-6 py-12 space-y-8">
+
+    <div th:if="${flashMsg != null}" id="flash-toast"
+         class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+         th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+        <span th:text="${flashMsg}"></span>
+        <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+    </div>
+    <script th:if="${flashMsg != null}">
+        setTimeout(function() { var t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(function(){t.remove();},500); }}, 3000);
+    </script>
+
+    <!-- Rates table -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Courier Rates</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Rates are shown to customers in the shipping calculator and checkout.</p>
+            </div>
+            <span class="text-xs text-slate-400" th:text="${#lists.size(rates)} + ' couriers'"></span>
+        </div>
+        <table class="w-full text-sm" th:if="${!#lists.isEmpty(rates)}">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="text-left px-6 py-3">Courier</th>
+                    <th class="text-left px-6 py-3">Coverage</th>
+                    <th class="text-left px-6 py-3">Weight Range</th>
+                    <th class="text-left px-6 py-3">Base Rate</th>
+                    <th class="text-left px-6 py-3">Per KG</th>
+                    <th class="text-left px-6 py-3">Delivery</th>
+                    <th class="text-left px-6 py-3">Tracking</th>
+                    <th class="text-left px-6 py-3">Status</th>
+                    <th class="text-left px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr th:each="r : ${rates}" class="hover:bg-slate-50">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl" th:text="${r.courierEmoji}">📦</span>
+                            <span class="font-bold text-slate-800" th:text="${r.courierName}">Courier</span>
+                        </div>
+                        <p th:if="${r.description}" class="text-[10px] text-slate-400 mt-0.5" th:text="${r.description}"></p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:text="${r.coverage.name()}"
+                              class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+                              th:classappend="${r.coverage.name() == 'NATIONAL'} ? 'bg-blue-100 text-blue-700' :
+                                              (${r.coverage.name() == 'INTERNATIONAL'} ? 'bg-purple-100 text-purple-700' :
+                                              'bg-gray-100 text-gray-600')">
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500"
+                        th:text="${r.minWeightKg} + ' – ' + ${r.maxWeightKg} + ' KG'"></td>
+                    <td class="px-6 py-4 text-sm font-bold text-slate-800"
+                        th:text="'GMD ' + ${#numbers.formatDecimal(r.baseRateGmd, 1, 2)}"></td>
+                    <td class="px-6 py-4 text-xs text-slate-500"
+                        th:text="'GMD ' + ${#numbers.formatDecimal(r.perKgRateGmd, 1, 2)} + '/kg'"></td>
+                    <td class="px-6 py-4 text-xs text-slate-500"
+                        th:text="${r.estimatedDaysMin == r.estimatedDaysMax} ? ${r.estimatedDaysMin} + ' day(s)' : ${r.estimatedDaysMin} + '–' + ${r.estimatedDaysMax} + ' days'"></td>
+                    <td class="px-6 py-4">
+                        <span th:if="${r.trackingUrlTemplate != null and !r.trackingUrlTemplate.isEmpty()}"
+                              class="text-[9px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded uppercase tracking-wider">✓ Live</span>
+                        <span th:unless="${r.trackingUrlTemplate != null and !r.trackingUrlTemplate.isEmpty()}"
+                              class="text-[9px] bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded uppercase tracking-wider">Manual</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${r.active}" class="text-[9px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded uppercase tracking-wider">Active</span>
+                        <span th:unless="${r.active}" class="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded uppercase tracking-wider">Off</span>
+                    </td>
+                    <td class="px-6 py-4 flex items-center gap-2">
+                        <button onclick="openEdit(this)"
+                                th:data-id="${r.id}"
+                                th:data-name="${r.courierName}"
+                                th:data-emoji="${r.courierEmoji}"
+                                th:data-coverage="${r.coverage.name()}"
+                                th:data-min="${r.minWeightKg}"
+                                th:data-max="${r.maxWeightKg}"
+                                th:data-base="${r.baseRateGmd}"
+                                th:data-perkg="${r.perKgRateGmd}"
+                                th:data-dmin="${r.estimatedDaysMin}"
+                                th:data-dmax="${r.estimatedDaysMax}"
+                                th:data-tracking="${r.trackingUrlTemplate}"
+                                th:data-desc="${r.description}"
+                                th:data-order="${r.displayOrder}"
+                                class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold transition">
+                            Edit
+                        </button>
+                        <form th:action="@{/admin/shipping/toggle/{id}(id=${r.id})}" method="post" class="inline">
+                            <button type="submit" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded font-semibold transition"
+                                    th:text="${r.active} ? 'Disable' : 'Enable'">Toggle</button>
+                        </form>
+                        <form th:action="@{/admin/shipping/delete/{id}(id=${r.id})}" method="post" class="inline">
+                            <button type="submit" onclick="return confirm('Delete this courier rate?')"
+                                    class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(rates)}" class="py-16 text-center">
+            <p class="text-sm text-slate-400">No courier rates yet. Add your first one below.</p>
+        </div>
+    </div>
+
+    <!-- Add new rate -->
+    <div class="bg-white rounded-xl border border-slate-200 p-8">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6">Add Courier Rate</h2>
+        <form th:action="@{/admin/shipping/new}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Courier Name *</label>
+                <input type="text" name="courierName" required placeholder="e.g. DHL Express"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Emoji</label>
+                <input type="text" name="courierEmoji" value="📦" maxlength="4"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Coverage *</label>
+                <select name="coverage" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                    <option th:each="c : ${coverageTypes}" th:value="${c}" th:text="${c.name()}">TYPE</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Min Weight (KG)</label>
+                <input type="number" name="minWeightKg" value="0" min="0" step="0.1"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Max Weight (KG)</label>
+                <input type="number" name="maxWeightKg" value="30" min="0" step="0.1"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Base Rate (GMD)</label>
+                <input type="number" name="baseRateGmd" value="50" min="0" step="0.01"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Rate Per KG (GMD)</label>
+                <input type="number" name="perKgRateGmd" value="10" min="0" step="0.01"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Min Days</label>
+                <input type="number" name="estimatedDaysMin" value="1" min="1"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Max Days</label>
+                <input type="number" name="estimatedDaysMax" value="3" min="1"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tracking URL Template</label>
+                <input type="text" name="trackingUrlTemplate" placeholder="https://www.dhl.com/track?AWB={}"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                <p class="text-[9px] text-slate-400 mt-1">Use <code class="bg-slate-100 px-1 rounded">{}</code> as placeholder for the tracking number. Leave blank for manual tracking.</p>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Display Order</label>
+                <input type="number" name="displayOrder" value="0"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-3">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Description (optional)</label>
+                <input type="text" name="description" placeholder="e.g. Best for heavy construction materials"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-3">
+                <button type="submit"
+                        class="bg-[#1a2336] text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition rounded-lg">
+                    Add Courier Rate →
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<!-- Edit modal -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-sm font-bold uppercase tracking-wider">Edit Courier Rate</h3>
+            <button onclick="closeEdit()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">✕</button>
+        </div>
+        <form id="edit-form" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" name="courierName"        id="e-name">
+            <input type="hidden" name="courierEmoji"       id="e-emoji">
+            <input type="hidden" name="coverage"           id="e-coverage">
+            <input type="hidden" name="minWeightKg"        id="e-min">
+            <input type="hidden" name="maxWeightKg"        id="e-max">
+            <input type="hidden" name="baseRateGmd"        id="e-base">
+            <input type="hidden" name="perKgRateGmd"       id="e-perkg">
+            <input type="hidden" name="estimatedDaysMin"   id="e-dmin">
+            <input type="hidden" name="estimatedDaysMax"   id="e-dmax">
+            <input type="hidden" name="trackingUrlTemplate" id="e-tracking">
+            <input type="hidden" name="description"        id="e-desc">
+            <input type="hidden" name="displayOrder"       id="e-order">
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Courier Name</label>
+                <input type="text" id="e-name-vis" oninput="document.getElementById('e-name').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Base Rate (GMD)</label>
+                <input type="number" id="e-base-vis" step="0.01" oninput="document.getElementById('e-base').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Per KG Rate (GMD)</label>
+                <input type="number" id="e-perkg-vis" step="0.01" oninput="document.getElementById('e-perkg').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Min Days</label>
+                <input type="number" id="e-dmin-vis" min="1" oninput="document.getElementById('e-dmin').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Max Days</label>
+                <input type="number" id="e-dmax-vis" min="1" oninput="document.getElementById('e-dmax').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tracking URL Template</label>
+                <input type="text" id="e-tracking-vis" placeholder="https://www.dhl.com/track?AWB={}"
+                       oninput="document.getElementById('e-tracking').value=this.value"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-2 flex justify-end gap-3">
+                <button type="button" onclick="closeEdit()"
+                        class="px-6 py-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition">Cancel</button>
+                <button type="submit"
+                        class="px-6 py-2.5 text-[10px] font-black uppercase tracking-wider bg-[#1a2336] text-white rounded-lg hover:bg-[#4d78c0] transition">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEdit(btn) {
+    var d = btn.dataset;
+    document.getElementById('edit-form').action = '/admin/shipping/edit/' + d.id;
+    document.getElementById('e-name').value     = d.name;
+    document.getElementById('e-name-vis').value = d.name;
+    document.getElementById('e-emoji').value    = d.emoji;
+    document.getElementById('e-coverage').value = d.coverage;
+    document.getElementById('e-min').value      = d.min;
+    document.getElementById('e-max').value      = d.max;
+    document.getElementById('e-base').value     = d.base;
+    document.getElementById('e-base-vis').value = d.base;
+    document.getElementById('e-perkg').value    = d.perkg;
+    document.getElementById('e-perkg-vis').value= d.perkg;
+    document.getElementById('e-dmin').value     = d.dmin;
+    document.getElementById('e-dmin-vis').value = d.dmin;
+    document.getElementById('e-dmax').value     = d.dmax;
+    document.getElementById('e-dmax-vis').value = d.dmax;
+    document.getElementById('e-tracking').value = d.tracking || '';
+    document.getElementById('e-tracking-vis').value = d.tracking || '';
+    document.getElementById('e-desc').value     = d.desc || '';
+    document.getElementById('e-order').value    = d.order;
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
+function closeEdit() {
+    document.getElementById('edit-modal').classList.add('hidden');
+}
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEdit();
+});
+</script>
+</body>
+</html>

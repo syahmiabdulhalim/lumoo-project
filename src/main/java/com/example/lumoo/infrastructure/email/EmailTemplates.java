@@ -47,15 +47,26 @@ public final class EmailTemplates {
     }
 
     public static String orderShipped(String name, String orderId, String trackingNumber) {
-        String tracking = (trackingNumber != null && !trackingNumber.isBlank())
-                ? "<p style='color:#444;font-size:13px'>Tracking number: <strong>" + trackingNumber + "</strong></p>"
-                : "";
+        return orderShipped(name, orderId, trackingNumber, null);
+    }
+
+    public static String orderShipped(String name, String orderId, String trackingNumber, String trackingUrl) {
+        String trackingBlock = "";
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
+            trackingBlock = "<div style='background:#f0f4ff;border:1px solid #d0deff;border-radius:6px;padding:14px 18px;margin:16px 0'>" +
+                    "<p style='color:#888;font-size:11px;margin:0 0 4px;text-transform:uppercase;letter-spacing:1px'>Tracking Number</p>" +
+                    "<p style='color:#1a2336;font-size:18px;font-weight:900;margin:0;letter-spacing:1px'>" + trackingNumber + "</p>";
+            if (trackingUrl != null && !trackingUrl.isBlank()) {
+                trackingBlock += "<a href='" + trackingUrl + "' style='display:inline-block;margin-top:10px;background:#4d78c0;color:white;padding:8px 18px;font-size:11px;font-weight:bold;text-decoration:none;border-radius:4px'>Track with Courier →</a>";
+            }
+            trackingBlock += "</div>";
+        }
         return wrap("Your Order is On Its Way!", """
             <p style="color:#444;font-size:14px">Hi <strong>%s</strong>,</p>
-            <p style="color:#444;font-size:14px">Order <strong>#LMO-%s</strong> has been shipped!</p>
+            <p style="color:#444;font-size:14px">Order <strong>#LMO-%s</strong> has been dispatched!</p>
             %s
-            <p style="color:#444;font-size:13px">You can check your order status anytime in your dashboard.</p>
-            """.formatted(name, orderId, tracking));
+            <a href="https://lumoo.my/track" style="display:inline-block;margin-top:12px;background:#1a2336;color:white;padding:10px 20px;font-size:11px;font-weight:bold;text-decoration:none;border-radius:4px">Track on LUMOO →</a>
+            """.formatted(name, orderId, trackingBlock));
     }
 
     public static String orderDelivered(String name, String orderId) {

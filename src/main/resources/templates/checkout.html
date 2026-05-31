@@ -39,8 +39,42 @@
                                    placeholder="e.g. 14 Kairaba Avenue, Banjul, Gambia"
                                    class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none transition placeholder-gray-300">
                         </div>
+                        <div class="mb-6">
+                            <label class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3">
+                                Delivery Area
+                            </label>
+                            <select name="deliveryArea" id="deliveryAreaSelect"
+                                    onchange="syncShippingCoverage()"
+                                    class="w-full bg-transparent border-b border-gray-200 py-3 text-sm focus:border-[#1a2336] outline-none transition">
+                                <option value="BANJUL_METRO">🏙️ Greater Banjul Area (Banjul, Serrekunda, Bakau, Kanifing, Kololi)</option>
+                                <option value="GAMBIA_WEST">🌍 Western Region (Brikama, Gunjur, Kartong)</option>
+                                <option value="GAMBIA_NORTH">🌍 North Bank (Farafenni, Kerewan)</option>
+                                <option value="GAMBIA_CENTRAL">🌍 Central River (Janjanbureh, Bansang)</option>
+                                <option value="GAMBIA_UPPER">🌍 Upper River (Basse, Fatoto)</option>
+                                <option value="INTERNATIONAL">✈️ International (Outside Gambia)</option>
+                            </select>
+                        </div>
+                        <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6 mt-10">
+                            2. Shipping Method
+                        </h2>
+                        <div class="mb-8">
+                            <div class="flex items-center gap-3 mb-4">
+                                <select id="shippingCoverage" onchange="fetchShippingRates()"
+                                        class="border-b border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none bg-transparent font-bold">
+                                    <option value="NATIONAL">Within Gambia</option>
+                                    <option value="INTERNATIONAL">International</option>
+                                </select>
+                                <span class="text-[9px] text-gray-400">Total weight: <strong id="totalWeightDisplay">calculating...</strong></span>
+                            </div>
+                            <div id="shipping-loading" class="text-xs text-gray-400 py-3 hidden">Fetching rates...</div>
+                            <div id="shipping-options" class="space-y-2"></div>
+                            <input type="hidden" name="courierName"  id="selectedCourierName">
+                            <input type="hidden" name="shippingCost" id="selectedShippingCost" value="0">
+                            <p class="text-[9px] text-gray-400 mt-3">Don't need delivery? Select "Self Collect / No Shipping" below.</p>
+                        </div>
+
                         <h2 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-8 mt-10">
-                            2. Payment Method
+                            3. Payment Method
                         </h2>
                         <div class="space-y-3 mb-8" id="paymentOptions">
                             <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
@@ -71,13 +105,22 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Send via QMoney wallet. Share your transaction ID after placing the order.</p>
                                 </div>
                             </label>
-                            <label class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
+                            <label th:if="${total >= 10}"
+                                   class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="MODEMPAY" class="mt-1 accent-black">
                                 <div>
                                     <p class="text-xs font-bold uppercase tracking-wider">💳 Pay Online (ModemPay)</p>
                                     <p class="text-[9px] text-gray-400 mt-1">Secure instant payment. You'll be redirected to complete payment — no upload needed.</p>
                                 </div>
                             </label>
+                            <div th:unless="${total >= 10}"
+                                 class="flex items-start gap-4 p-4 border border-dashed border-gray-200 bg-gray-50 opacity-60">
+                                <div class="w-4 h-4 mt-1 rounded-full border-2 border-gray-300 shrink-0"></div>
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">💳 Pay Online (ModemPay)</p>
+                                    <p class="text-[9px] text-orange-500 font-bold mt-1">⚠ Minimum GMD 10 required. Current total is GMD <span th:text="${total}"></span>.</p>
+                                </div>
+                            </div>
                         </div>
                         <div id="bankDetails" class="hidden bg-blue-50 border border-blue-200 p-6 mb-8">
                             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-blue-700 mb-4">Bank Transfer Details</p>
@@ -184,13 +227,13 @@
                             <span>Subtotal</span>
                             <span th:text="${'GMD ' + total}"></span>
                         </div>
-                        <div class="flex justify-between text-[9px] text-gray-400 uppercase tracking-wider mb-4">
-                            <span>Delivery</span>
-                            <span class="text-green-600 font-bold">Discussed on order</span>
+                        <div id="shipping-summary-row" class="hidden flex justify-between text-[9px] text-gray-400 uppercase tracking-wider mb-2">
+                            <span>Shipping (<span id="summary-courier">—</span>)</span>
+                            <span id="summary-shipping-cost" class="font-bold text-gray-700">GMD 0</span>
                         </div>
                         <div class="flex justify-between items-baseline border-t border-gray-100 pt-4">
                             <span class="text-[9px] font-black uppercase tracking-widest">Total</span>
-                            <span class="text-xl font-black text-[#4d78c0]" th:text="${'GMD ' + total}"></span>
+                            <span id="grand-total-display" class="text-xl font-black text-[#4d78c0]" th:text="${'GMD ' + total}"></span>
                         </div>
                         <div th:if="${total < 10}"
                              class="mt-3 bg-orange-50 border border-orange-200 rounded px-3 py-2 text-[9px] text-orange-700 font-bold uppercase tracking-wider">
@@ -230,6 +273,99 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
     <script>
         const radios = document.querySelectorAll('input[name="paymentMethod"]');
+        // Shipping calculator
+        var cartItems = /*[[${cart}]]*/ [];
+        var subtotal  = /*[[${total}]]*/ 0;
+
+        function totalWeightKg() {
+            if (!cartItems || cartItems.length === 0) return 1;
+            var w = 0;
+            cartItems.forEach(function(item) {
+                var kg = item.weightKg || 1;
+                w += kg * (item.quantity || 1);
+            });
+            return Math.round(w * 10) / 10;
+        }
+
+        function fetchShippingRates() {
+            var weight   = totalWeightKg();
+            var coverage = document.getElementById('shippingCoverage').value;
+            document.getElementById('totalWeightDisplay').textContent = weight + ' KG';
+            document.getElementById('shipping-loading').classList.remove('hidden');
+            document.getElementById('shipping-options').innerHTML = '';
+
+            fetch('/api/shipping/rates?weight=' + weight + '&coverage=' + coverage)
+                .then(function(r) { return r.json(); })
+                .then(function(resp) {
+                    document.getElementById('shipping-loading').classList.add('hidden');
+                    var container = document.getElementById('shipping-options');
+                    container.innerHTML = '';
+
+                    // Always add "Self Collect / No Shipping" option
+                    var selfCollect = buildOption('none', '🏪', 'Self Collect / No Shipping', 0, '-', '-', false, true);
+                    container.appendChild(selfCollect);
+
+                    if (resp.data && resp.data.length > 0) {
+                        resp.data.forEach(function(q) {
+                            var days = q.daysMin === q.daysMax ? q.daysMin + ' day(s)' : q.daysMin + '–' + q.daysMax + ' days';
+                            var opt  = buildOption(q.courierName, q.emoji, q.courierName, q.rateGmd, 'GMD ' + q.rateGmd.toFixed(2), days, q.hasTracking, false);
+                            container.appendChild(opt);
+                        });
+                    }
+
+                    // Select first radio
+                    var first = container.querySelector('input[type=radio]');
+                    if (first) { first.checked = true; updateShippingSelection(first); }
+                })
+                .catch(function() {
+                    document.getElementById('shipping-loading').classList.add('hidden');
+                });
+        }
+
+        function buildOption(value, emoji, label, cost, costLabel, days, hasTracking, isFirst) {
+            var div = document.createElement('label');
+            div.className = 'flex items-center justify-between gap-3 p-3 border border-gray-200 cursor-pointer hover:border-[#4d78c0] transition has-[:checked]:border-[#4d78c0] has-[:checked]:bg-blue-50 rounded-lg';
+            var trackBadge = hasTracking ? '<span class="text-[8px] bg-green-100 text-green-700 font-bold px-1.5 py-0.5 rounded">Live Track</span>' : '';
+            div.innerHTML =
+                '<div class="flex items-center gap-2">' +
+                '  <input type="radio" name="_shipping_option" value="' + value + '" data-cost="' + cost + '" onchange="updateShippingSelection(this)" class="accent-[#4d78c0]">' +
+                '  <span class="text-base">' + emoji + '</span>' +
+                '  <div>' +
+                '    <p class="text-xs font-bold text-gray-800">' + label + '</p>' +
+                '    <p class="text-[9px] text-gray-400">' + (days !== '-' ? '🕐 ' + days : 'No delivery') + ' ' + trackBadge + '</p>' +
+                '  </div>' +
+                '</div>' +
+                '<p class="text-sm font-black text-[#1a2336] shrink-0">' + (cost > 0 ? 'GMD ' + parseFloat(cost).toFixed(2) : 'Free') + '</p>';
+            return div;
+        }
+
+        function updateShippingSelection(radio) {
+            var cost    = parseFloat(radio.dataset.cost) || 0;
+            var name    = radio.value === 'none' ? '' : radio.value;
+            var grandTotal = subtotal + cost;
+            document.getElementById('selectedCourierName').value  = name;
+            document.getElementById('selectedShippingCost').value = cost;
+            document.getElementById('grand-total-display').textContent = 'GMD ' + grandTotal.toFixed(2);
+            var row = document.getElementById('shipping-summary-row');
+            if (cost > 0) {
+                row.classList.remove('hidden');
+                document.getElementById('summary-courier').textContent       = name;
+                document.getElementById('summary-shipping-cost').textContent = 'GMD ' + cost.toFixed(2);
+            } else {
+                row.classList.add('hidden');
+            }
+        }
+
+        function syncShippingCoverage() {
+            var area = document.getElementById('deliveryAreaSelect').value;
+            var covEl = document.getElementById('shippingCoverage');
+            if (covEl) covEl.value = (area === 'INTERNATIONAL') ? 'INTERNATIONAL' : 'NATIONAL';
+            fetchShippingRates();
+        }
+
+        // Load rates on page load
+        fetchShippingRates();
+
         const bankDiv = document.getElementById('bankDetails');
         const mobileDiv = document.getElementById('mobileDetails');
         radios.forEach(r => r.addEventListener('change', () => {

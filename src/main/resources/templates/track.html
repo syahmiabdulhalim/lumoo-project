@@ -109,8 +109,15 @@
         <div th:if="${order.trackingNumber != null or order.estimatedDeliveryDate != null}"
              class="mx-6 mb-4 bg-slate-50 rounded-xl px-5 py-3 flex flex-wrap gap-6">
             <div th:if="${order.trackingNumber != null and !order.trackingNumber.isEmpty()}">
-                <p class="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">Tracking Number</p>
+                <p class="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">
+                    <span th:if="${order.courierName != null}" th:text="${order.courierName + ' — '}"></span>Tracking Number
+                </p>
                 <p class="text-sm font-black text-[#1a2336] mt-0.5" th:text="${order.trackingNumber}"></p>
+                <a th:if="${order.shippingTrackingUrl != null and !order.shippingTrackingUrl.isEmpty()}"
+                   th:href="${order.shippingTrackingUrl}" target="_blank" rel="noopener"
+                   class="inline-block mt-2 text-[9px] font-black uppercase tracking-wider bg-[#4d78c0] text-white px-3 py-1.5 rounded hover:bg-[#3a65ad] transition">
+                    Track with Courier →
+                </a>
             </div>
             <div th:if="${order.estimatedDeliveryDate != null}">
                 <p class="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">Estimated Delivery</p>

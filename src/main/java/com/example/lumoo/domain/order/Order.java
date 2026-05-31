@@ -18,6 +18,13 @@ public class Order {
     private String trackingNumber;
     private LocalDateTime shippedAt;
     private java.time.LocalDate estimatedDeliveryDate;
+    private String courierName;
+    private Double shippingCost;
+    private String shippingTrackingUrl;
+    private Long riderId;
+    private String riderName;
+    private String riderPhone;
+    private String deliveryArea;
     private String returnReason;
     private String paymentProofUrl;
     private String modempayPaymentId;
@@ -56,6 +63,20 @@ private LocalDateTime createdAt;
     public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
     public LocalDateTime getShippedAt() { return shippedAt; }
     public void setShippedAt(LocalDateTime shippedAt) { this.shippedAt = shippedAt; }
+    public String getCourierName() { return courierName; }
+    public void setCourierName(String courierName) { this.courierName = courierName; }
+    public Double getShippingCost() { return shippingCost; }
+    public void setShippingCost(Double shippingCost) { this.shippingCost = shippingCost; }
+    public String getShippingTrackingUrl() { return shippingTrackingUrl; }
+    public void setShippingTrackingUrl(String shippingTrackingUrl) { this.shippingTrackingUrl = shippingTrackingUrl; }
+    public Long getRiderId() { return riderId; }
+    public void setRiderId(Long riderId) { this.riderId = riderId; }
+    public String getRiderName() { return riderName; }
+    public void setRiderName(String riderName) { this.riderName = riderName; }
+    public String getRiderPhone() { return riderPhone; }
+    public void setRiderPhone(String riderPhone) { this.riderPhone = riderPhone; }
+    public String getDeliveryArea() { return deliveryArea; }
+    public void setDeliveryArea(String deliveryArea) { this.deliveryArea = deliveryArea; }
     public java.time.LocalDate getEstimatedDeliveryDate() { return estimatedDeliveryDate; }
     public void setEstimatedDeliveryDate(java.time.LocalDate estimatedDeliveryDate) { this.estimatedDeliveryDate = estimatedDeliveryDate; }
     public String getReturnReason() { return returnReason; }

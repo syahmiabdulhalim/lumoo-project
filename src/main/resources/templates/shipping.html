@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Shipping Calculator — LUMOO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f4f6fb] font-['Nunito_Sans'] min-h-screen">
+
+<nav class="bg-white border-b border-gray-100 px-6 md:px-12 py-4 flex justify-between items-center sticky top-0 z-50">
+    <a href="/" class="text-xl font-black tracking-tighter text-[#1a2336]">LUMOO</a>
+    <div class="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em]">
+        <a href="/track"     class="text-gray-400 hover:text-[#4d78c0] transition">Track Order</a>
+        <a href="/"          class="text-gray-400 hover:text-[#4d78c0] transition">Store</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="bg-[#1a2336] py-14 px-6 text-center">
+    <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-400 mb-3">Delivery Rates</p>
+    <h1 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-2">Shipping Calculator</h1>
+    <p class="text-sm text-slate-400">Get the best courier rates instantly. Compare DHL, GAMPOST, Red Code &amp; more.</p>
+</div>
+
+<main class="max-w-3xl mx-auto px-4 py-10 space-y-6">
+
+    <!-- Calculator card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-6">Enter Shipment Details</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div>
+                <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Delivery Type</label>
+                <select id="coverage"
+                        class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">
+                    <option value="NATIONAL">National (Within Gambia)</option>
+                    <option value="INTERNATIONAL">International</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Weight (KG)</label>
+                <input type="number" id="weight" min="0.1" max="999" step="0.1" value="1"
+                       class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold"
+                       placeholder="e.g. 2.5">
+            </div>
+            <div class="flex items-end">
+                <button onclick="calculate()"
+                        class="w-full bg-[#1a2336] hover:bg-[#4d78c0] text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-lg transition">
+                    Get Rates →
+                </button>
+            </div>
+        </div>
+
+        <div id="error-msg" class="hidden bg-red-50 text-red-600 text-xs font-semibold px-4 py-3 rounded-lg mb-4"></div>
+
+        <!-- Results -->
+        <div id="results" class="hidden">
+            <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4" id="results-label">Available Couriers</p>
+
+            <div id="quotes-list" class="space-y-3"></div>
+
+            <div id="no-rates" class="hidden text-center py-10">
+                <p class="text-sm text-gray-400">No courier rates available for this shipment. Please contact us.</p>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden text-center py-8">
+            <div class="inline-block w-6 h-6 border-2 border-[#4d78c0] border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-gray-400 mt-2">Fetching rates...</p>
+        </div>
+    </div>
+
+    <!-- Info cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center">
+            <div class="text-2xl mb-2">✈️</div>
+            <p class="text-xs font-black uppercase tracking-wider text-[#1a2336] mb-1">DHL Express</p>
+            <p class="text-[10px] text-gray-400">International & national. Fast, reliable, tracked worldwide.</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center">
+            <div class="text-2xl mb-2">🏣</div>
+            <p class="text-xs font-black uppercase tracking-wider text-[#1a2336] mb-1">GAMPOST</p>
+            <p class="text-[10px] text-gray-400">Gambia Post Office. Affordable national &amp; international delivery.</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 p-5 text-center">
+            <div class="text-2xl mb-2">🚗</div>
+            <p class="text-xs font-black uppercase tracking-wider text-[#1a2336] mb-1">Local Couriers</p>
+            <p class="text-[10px] text-gray-400">Red Code, WayBill &amp; trusted Gambian handlers. Fast local delivery.</p>
+        </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+        <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-6">How Shipping Works</p>
+        <ol class="space-y-4">
+            <li class="flex gap-4">
+                <span class="w-7 h-7 rounded-full bg-[#1a2336] text-white text-[10px] font-black flex items-center justify-center shrink-0">1</span>
+                <div>
+                    <p class="text-sm font-bold text-gray-800">Add items to cart &amp; checkout</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Enter your delivery address and select a courier during checkout.</p>
+                </div>
+            </li>
+            <li class="flex gap-4">
+                <span class="w-7 h-7 rounded-full bg-[#1a2336] text-white text-[10px] font-black flex items-center justify-center shrink-0">2</span>
+                <div>
+                    <p class="text-sm font-bold text-gray-800">Make payment</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Pay via QMoney, Afrimoney, Wave, bank transfer, or cash.</p>
+                </div>
+            </li>
+            <li class="flex gap-4">
+                <span class="w-7 h-7 rounded-full bg-[#4d78c0] text-white text-[10px] font-black flex items-center justify-center shrink-0">3</span>
+                <div>
+                    <p class="text-sm font-bold text-[#4d78c0]">Get your tracking number</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Once dispatched, you receive a tracking number by email. Use it at <a href="/track" class="text-[#4d78c0] font-bold hover:underline">lumoo.my/track</a> or the courier&apos;s website.</p>
+                </div>
+            </li>
+            <li class="flex gap-4">
+                <span class="w-7 h-7 rounded-full bg-green-500 text-white text-[10px] font-black flex items-center justify-center shrink-0">4</span>
+                <div>
+                    <p class="text-sm font-bold text-green-700">Delivered to your door</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Track your shipment in real-time until it arrives.</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+function calculate() {
+    var weight   = parseFloat(document.getElementById('weight').value);
+    var coverage = document.getElementById('coverage').value;
+    var errEl    = document.getElementById('error-msg');
+    var loading  = document.getElementById('loading');
+    var results  = document.getElementById('results');
+
+    errEl.classList.add('hidden');
+    if (isNaN(weight) || weight <= 0) {
+        errEl.textContent = 'Please enter a valid weight greater than 0 KG.';
+        errEl.classList.remove('hidden');
+        return;
+    }
+
+    loading.classList.remove('hidden');
+    results.classList.add('hidden');
+
+    fetch('/api/shipping/rates?weight=' + weight + '&coverage=' + coverage)
+        .then(function(r) { return r.json(); })
+        .then(function(resp) {
+            loading.classList.add('hidden');
+            results.classList.remove('hidden');
+
+            var label = document.getElementById('results-label');
+            var list  = document.getElementById('quotes-list');
+            var noRates = document.getElementById('no-rates');
+
+            label.textContent = 'Rates for ' + weight + ' KG — ' + (coverage === 'NATIONAL' ? 'Within Gambia' : 'International');
+            list.innerHTML = '';
+
+            if (!resp.data || resp.data.length === 0) {
+                noRates.classList.remove('hidden');
+                return;
+            }
+            noRates.classList.add('hidden');
+
+            resp.data.forEach(function(q, i) {
+                var days = q.daysMin === q.daysMax ? q.daysMin + ' day(s)' : q.daysMin + '–' + q.daysMax + ' days';
+                var trackBadge = q.hasTracking
+                    ? '<span class="text-[8px] bg-green-100 text-green-700 font-black uppercase tracking-wider px-2 py-0.5 rounded">✓ Live Tracking</span>'
+                    : '<span class="text-[8px] bg-gray-100 text-gray-500 font-black uppercase tracking-wider px-2 py-0.5 rounded">Manual Tracking</span>';
+                var best = i === 0 ? '<span class="text-[8px] bg-[#4d78c0] text-white font-black uppercase tracking-wider px-2 py-0.5 rounded ml-2">Best Price</span>' : '';
+                var desc = q.description ? '<p class="text-[10px] text-gray-400 mt-1">' + q.description + '</p>' : '';
+
+                list.insertAdjacentHTML('beforeend',
+                    '<div class="flex items-center justify-between p-4 rounded-xl border ' + (i === 0 ? 'border-[#4d78c0] bg-blue-50' : 'border-gray-100 bg-white') + ' hover:shadow-sm transition">' +
+                    '  <div class="flex items-center gap-3">' +
+                    '    <span class="text-2xl">' + q.emoji + '</span>' +
+                    '    <div>' +
+                    '      <div class="flex items-center gap-1 flex-wrap">' +
+                    '        <p class="text-sm font-black text-[#1a2336]">' + q.courierName + '</p>' + best +
+                    '      </div>' +
+                    '      <div class="flex items-center gap-2 mt-1 flex-wrap">' +
+                    '        <p class="text-[10px] text-gray-500">🕐 ' + days + '</p>' +
+                    '        ' + trackBadge +
+                    '      </div>' + desc +
+                    '    </div>' +
+                    '  </div>' +
+                    '  <div class="text-right shrink-0 ml-4">' +
+                    '    <p class="text-[9px] text-gray-400 uppercase font-bold">Rate</p>' +
+                    '    <p class="text-lg font-black text-[#1a2336]">GMD ' + q.rateGmd.toFixed(2) + '</p>' +
+                    '  </div>' +
+                    '</div>'
+                );
+            });
+        })
+        .catch(function() {
+            loading.classList.add('hidden');
+            errEl.textContent = 'Could not fetch rates. Please try again.';
+            errEl.classList.remove('hidden');
+        });
+}
+
+document.getElementById('weight').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>

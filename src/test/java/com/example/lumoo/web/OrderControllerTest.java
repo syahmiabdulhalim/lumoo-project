@@ -113,7 +113,7 @@ class OrderControllerTest {
         order.setPaymentMethod("COD");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), any(), any()))
                 .thenReturn(List.of(order));
         mvc.perform(post("/order/place")
                         .principal(principal("buyer@test.com"))
@@ -133,7 +133,7 @@ class OrderControllerTest {
         order.setPaymentMethod("TRANSFER");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), any(), any()))
                 .thenReturn(List.of(order));
         mvc.perform(post("/order/place")
                         .principal(principal("buyer@test.com"))

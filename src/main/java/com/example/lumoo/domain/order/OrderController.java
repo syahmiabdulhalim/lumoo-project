@@ -51,6 +51,9 @@ public class OrderController {
                              @RequestParam(defaultValue = "false") boolean privacyAccepted,
                              @RequestParam(defaultValue = "false") boolean termsAccepted,
                              @RequestParam(defaultValue = "false") boolean marketingConsent,
+                             @RequestParam(required = false) String courierName,
+                             @RequestParam(required = false) Double shippingCost,
+                             @RequestParam(required = false) String deliveryArea,
                              Principal principal) {
         if (principal == null) return "redirect:/login";
         if (address == null || address.trim().isEmpty()) return "redirect:/checkout?error=address_required";
@@ -62,7 +65,7 @@ public class OrderController {
         if (items.isEmpty()) return "redirect:/cart?error=empty";
         List<Order> orders;
         try {
-            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent);
+            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, deliveryArea);
         } catch (IllegalStateException e) {
             return "redirect:/cart?error=out_of_stock";
         }

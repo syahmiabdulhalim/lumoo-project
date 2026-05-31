@@ -24,6 +24,7 @@ public class Product {
     private String imageUrl;
     @Column(columnDefinition = "TEXT")
     private String description;
+    private Double weightKg;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private User vendor;
@@ -47,4 +48,6 @@ public class Product {
     public void setVendor(User vendor) { this.vendor = vendor; }
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
+    public Double getWeightKg() { return weightKg; }
+    public void setWeightKg(Double weightKg) { this.weightKg = weightKg; }
 }

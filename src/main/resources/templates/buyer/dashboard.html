@@ -55,16 +55,40 @@
         </script>
         <div th:if="${param.containsKey('payment_cancelled')}"
              id="cancel-toast"
-             class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-orange-400 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
-            <span class="text-orange-400 text-lg">✕</span>
-            <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Payment cancelled. Your order is still saved — you can retry anytime.</p>
+             class="fixed top-6 right-6 z-50 max-w-xs bg-white border border-orange-200 shadow-xl rounded-xl p-5 transition-all duration-500">
+            <div class="flex items-start gap-3">
+                <span class="text-orange-400 text-xl shrink-0 mt-0.5">⚠</span>
+                <div class="flex-1">
+                    <p class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Payment Cancelled</p>
+                    <p class="text-[10px] text-slate-500 leading-relaxed mb-3">Your order is still saved. You can retry payment or cancel the order.</p>
+                    <div class="flex gap-2">
+                        <a th:if="${param.order != null}"
+                           th:href="@{/buyer/order/{id}/pay(id=${param.order[0]})}"
+                           class="text-[9px] font-black uppercase tracking-wider bg-[#4d78c0] text-white px-3 py-1.5 rounded-lg hover:bg-[#3a65ad] transition">
+                            Retry Payment
+                        </a>
+                        <form th:if="${param.order != null}"
+                              th:action="@{/buyer/order/delete/{id}(id=${param.order[0]})}" method="post" class="inline">
+                            <button type="submit"
+                                    onclick="return confirm('Cancel this order?')"
+                                    class="text-[9px] font-black uppercase tracking-wider border border-red-200 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
+                                Cancel Order
+                            </button>
+                        </form>
+                        <button onclick="document.getElementById('cancel-toast').remove()"
+                                class="text-[9px] font-black uppercase tracking-wider text-slate-400 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition ml-auto">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <script th:if="${param.containsKey('payment_cancelled')}">
             history.replaceState(null, '', '/buyer/dashboard');
             setTimeout(function() {
                 var t = document.getElementById('cancel-toast');
                 if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
-            }, 6000);
+            }, 12000);
         </script>
         <div th:unless="${alreadyApplied}"
              class="mb-8 bg-white border border-dashed border-blue-200 p-6 flex items-center justify-between">

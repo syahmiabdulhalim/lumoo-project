@@ -54,6 +54,7 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired private OrderRepository orderRepository;
+    @Autowired private com.example.lumoo.domain.shipping.ShippingRateRepository shippingRateRepository;
     @Autowired private OrderItemRepository orderItemRepository;
     @Autowired private CartRepository cartRepository;
     @Autowired private PayoutService payoutService;
@@ -97,6 +98,24 @@ public class OrderService {
     public List<Order> placeOrders(User user, String address, String paymentMethod,
                                    List<CartItem> cartItems,
                                    boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
+        return placeOrders(user, address, paymentMethod, cartItems,
+                privacyAccepted, termsAccepted, marketingConsent, null, null);
+    }
+
+    @Transactional
+    public List<Order> placeOrders(User user, String address, String paymentMethod,
+                                   List<CartItem> cartItems,
+                                   boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
+                                   String courierName, Double shippingCost) {
+        return placeOrders(user, address, paymentMethod, cartItems,
+                privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, null);
+    }
+
+    @Transactional
+    public List<Order> placeOrders(User user, String address, String paymentMethod,
+                                   List<CartItem> cartItems,
+                                   boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
+                                   String courierName, Double shippingCost, String deliveryArea) {
         Map<Long, List<CartItem>> byVendor = cartItems.stream()
                 .collect(Collectors.groupingBy(ci ->
                         ci.getProduct() != null && ci.getProduct().getVendor() != null
@@ -111,7 +130,7 @@ public class OrderService {
         List<Order> orders = new ArrayList<>();
         for (List<CartItem> vendorItems : byVendor.values()) {
             orders.add(createOrder(user, address, paymentMethod, vendorItems,
-                    privacyAccepted, termsAccepted, marketingConsent));
+                    privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, deliveryArea));
         }
         cartRepository.deleteAll(cartItems);
         for (Order o : orders) {
@@ -125,9 +144,12 @@ public class OrderService {
     }
     private Order createOrder(User user, String address, String paymentMethod,
                               List<CartItem> items,
-                              boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
-        double total      = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
-        double commission = total * 0.10;
+                              boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
+                              String courierName, Double shippingCost, String deliveryArea) {
+        double itemsTotal = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
+        double shipping   = shippingCost != null ? shippingCost : 0.0;
+        double total      = itemsTotal + shipping;
+        double commission = itemsTotal * 0.10;
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address.trim());
@@ -144,6 +166,9 @@ public class OrderService {
         order.setPrivacyAccepted(privacyAccepted);
         order.setTermsAccepted(termsAccepted);
         order.setMarketingConsent(marketingConsent);
+        if (courierName != null && !courierName.isBlank()) order.setCourierName(courierName);
+        if (shippingCost != null && shippingCost > 0) order.setShippingCost(shippingCost);
+        if (deliveryArea != null && !deliveryArea.isBlank()) order.setDeliveryArea(deliveryArea);
         Order saved = orderRepository.save(order);
         for (CartItem ci : items) {
             OrderItem oi = new OrderItem();
@@ -186,13 +211,15 @@ public class OrderService {
         if (!s.equals("PAID")) return ShipResult.INVALID_STATUS;
         order.setStatus("SHIPPED");
         order.setShippedAt(LocalDateTime.now());
-        if (trackingNumber != null && !trackingNumber.isBlank())
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
             order.setTrackingNumber(trackingNumber.trim());
+            setTrackingUrl(order, trackingNumber.trim());
+        }
         orderRepository.save(order);
         emailService.sendEmail(order.getUser().getEmail(),
                 "Your order #LMO-" + orderId + " has shipped",
                 EmailTemplates.orderShipped(order.getUser().getUsername(),
-                        String.valueOf(orderId), order.getTrackingNumber()));
+                        String.valueOf(orderId), order.getTrackingNumber(), order.getShippingTrackingUrl()));
         return ShipResult.SHIPPED;
     }
     public enum DeliverResult { DELIVERED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
@@ -257,8 +284,10 @@ public class OrderService {
             o.setStatus(status);
             if ("SHIPPED".equals(status)) {
                 o.setShippedAt(LocalDateTime.now());
-                if (trackingNumber != null && !trackingNumber.isBlank())
+                if (trackingNumber != null && !trackingNumber.isBlank()) {
                     o.setTrackingNumber(trackingNumber.trim());
+                    setTrackingUrl(o, trackingNumber.trim());
+                }
                 if (estimatedDelivery != null)
                     o.setEstimatedDeliveryDate(estimatedDelivery);
             }
@@ -304,5 +333,14 @@ public class OrderService {
         emailService.sendEmail(order.getUser().getEmail(),
                 "How was your order? Leave a review",
                 EmailTemplates.reviewRequest(name, orderId, productName, reviewUrl));
+    }
+
+    private void setTrackingUrl(Order order, String trackingNumber) {
+        if (order.getCourierName() == null) return;
+        shippingRateRepository.findAll().stream()
+                .filter(r -> r.getCourierName().equalsIgnoreCase(order.getCourierName()))
+                .findFirst()
+                .map(r -> r.buildTrackingUrl(trackingNumber))
+                .ifPresent(order::setShippingTrackingUrl);
     }
 }
