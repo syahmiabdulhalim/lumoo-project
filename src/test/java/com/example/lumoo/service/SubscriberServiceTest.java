@@ -13,6 +13,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SubscriberServiceTest {
     @Mock private SubscriberRepository repo;
+    @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
     @InjectMocks private SubscriberService service;
     @Test
     void subscribe_null_returnsInvalid() {

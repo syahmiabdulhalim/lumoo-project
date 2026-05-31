@@ -81,13 +81,63 @@
             <div class="lg:w-1/4">
                 <div class="bg-[#1a2336] text-white p-8 sticky top-32">
                     <h3 class="text-[10px] font-black uppercase tracking-[0.3em] mb-8 border-b border-gray-800 pb-4 text-[#4d78c0]">Summary</h3>
-                    <div class="flex justify-between items-end mb-10">
-                        <p class="text-[9px] text-gray-500 uppercase font-bold">Total Amount</p>
-                        <h2 class="text-2xl font-black tracking-tighter" th:text="${'GMD ' + total}">GMD 0</h2>
+                    <div class="flex justify-between items-end mb-6">
+                        <p class="text-[9px] text-gray-500 uppercase font-bold">Subtotal</p>
+                        <span id="subtotal-display" class="text-lg font-black tracking-tighter" th:text="${'GMD ' + #numbers.formatDecimal(total, 1, 2)}">GMD 0</span>
                     </div>
-                    <a href="/checkout" class="block w-full bg-[#4d78c0] py-5 text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-white hover:text-black transition duration-700">
+                    <div class="mb-4">
+                        <div class="flex gap-2">
+                            <input id="promo-input" type="text" placeholder="Promo code"
+                                   class="flex-1 bg-white/10 border border-white/20 text-white text-xs px-3 py-2 outline-none placeholder-gray-500 uppercase focus:border-[#4d78c0]">
+                            <button onclick="applyPromo()" type="button"
+                                    class="bg-[#4d78c0] text-white text-[9px] font-black uppercase tracking-wider px-3 py-2 hover:bg-white hover:text-[#1a2336] transition">
+                                Apply
+                            </button>
+                        </div>
+                        <p id="promo-msg" class="text-[9px] mt-1 hidden"></p>
+                    </div>
+                    <div id="discount-row" class="hidden flex justify-between items-center mb-4">
+                        <p class="text-[9px] text-green-400 uppercase font-bold">Discount</p>
+                        <span id="discount-display" class="text-sm font-black text-green-400">-GMD 0</span>
+                    </div>
+                    <div class="flex justify-between items-end mb-8 border-t border-white/10 pt-4">
+                        <p class="text-[9px] text-gray-400 uppercase font-bold">Total</p>
+                        <span id="total-display" class="text-2xl font-black tracking-tighter" th:text="${'GMD ' + #numbers.formatDecimal(total, 1, 2)}">GMD 0</span>
+                    </div>
+                    <input type="hidden" id="promo-code-value" name="promoCode" value="">
+                    <a href="/checkout" id="checkout-btn" class="block w-full bg-[#4d78c0] py-5 text-[10px] font-black uppercase tracking-[0.2em] text-center hover:bg-white hover:text-black transition duration-700">
                         Checkout Now →
                     </a>
+                    <script th:inline="javascript">
+                    var subtotal = [[${total}]];
+                    function applyPromo() {
+                        var code = document.getElementById('promo-input').value.trim();
+                        var msg  = document.getElementById('promo-msg');
+                        if (!code) return;
+                        fetch('/api/promo/validate?code=' + encodeURIComponent(code) + '&orderTotal=' + subtotal)
+                            .then(function(r) { return r.json(); })
+                            .then(function(d) {
+                                msg.classList.remove('hidden');
+                                if (d.success) {
+                                    msg.className = 'text-[9px] mt-1 text-green-400 font-bold';
+                                    msg.textContent = 'Code applied: -GMD ' + d.data.discountAmount.toFixed(2);
+                                    document.getElementById('discount-row').classList.remove('hidden');
+                                    document.getElementById('discount-display').textContent = '-GMD ' + d.data.discountAmount.toFixed(2);
+                                    document.getElementById('total-display').textContent = 'GMD ' + d.data.finalTotal.toFixed(2);
+                                    document.getElementById('promo-code-value').value = code;
+                                    var btn = document.getElementById('checkout-btn');
+                                    btn.href = '/checkout?promo=' + encodeURIComponent(code);
+                                } else {
+                                    msg.className = 'text-[9px] mt-1 text-red-400';
+                                    msg.textContent = d.message || 'Invalid promo code.';
+                                    document.getElementById('promo-code-value').value = '';
+                                }
+                            });
+                    }
+                    document.getElementById('promo-input').addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') applyPromo();
+                    });
+                    </script>
                 </div>
             </div>
         </div>

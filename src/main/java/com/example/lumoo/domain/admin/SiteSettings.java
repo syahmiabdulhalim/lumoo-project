@@ -21,6 +21,7 @@ public class SiteSettings {
     private String businessHours;
     private String businessWhatsapp;
     private String copyrightText;
+    private String googleAnalyticsId;
     private String socialFacebook;
     private String socialInstagram;
     private String socialTwitter;
@@ -67,6 +68,8 @@ public class SiteSettings {
     public void setBusinessWhatsapp(String businessWhatsapp) { this.businessWhatsapp = businessWhatsapp; }
     public String getCopyrightText() { return copyrightText; }
     public void setCopyrightText(String copyrightText) { this.copyrightText = copyrightText; }
+    public String getGoogleAnalyticsId() { return googleAnalyticsId; }
+    public void setGoogleAnalyticsId(String googleAnalyticsId) { this.googleAnalyticsId = googleAnalyticsId; }
     public String getSocialFacebook() { return socialFacebook; }
     public void setSocialFacebook(String socialFacebook) { this.socialFacebook = socialFacebook; }
     public String getSocialInstagram() { return socialInstagram; }

@@ -32,7 +32,7 @@ public class PaymentController {
         if (order == null) return ResponseEntity.status(404).body(ApiResponse.error("Order not found."));
         if (!order.getUser().getId().equals(user.getId()))
             return ResponseEntity.status(403).body(ApiResponse.error("Access denied."));
-        if (!"AWAITING_PROOF".equals(order.getStatus()))
+        if (!"AWAITING_PAYMENT".equals(order.getStatus()) && !"AWAITING_PROOF".equals(order.getStatus()))
             return ResponseEntity.badRequest().body(ApiResponse.error("Order is not awaiting payment."));
         try {
             String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));

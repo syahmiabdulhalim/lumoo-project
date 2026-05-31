@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Audit Log</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">Audit Log</span>
+    </div>
+    <span class="text-xs text-slate-400" th:text="${totalLogs} + ' total entries'">0 total entries</span>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-12">
+
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100">
+            <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">System Audit Log</h1>
+            <p class="text-xs text-slate-400 mt-1">All admin actions, order changes, and login events</p>
+        </div>
+
+        <div th:if="${logs != null and !#lists.isEmpty(logs)}" class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="text-left px-4 py-3">Time</th>
+                        <th class="text-left px-4 py-3">Action</th>
+                        <th class="text-left px-4 py-3">Entity</th>
+                        <th class="text-left px-4 py-3">Actor</th>
+                        <th class="text-left px-4 py-3">IP</th>
+                        <th class="text-left px-4 py-3">Details</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="entry : ${logs}" class="hover:bg-slate-50 transition">
+                        <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap font-mono"
+                            th:text="${#temporals.format(entry.createdAt, 'dd MMM yyyy HH:mm:ss')}">—</td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs font-bold px-2 py-1 rounded uppercase tracking-wider"
+                                  th:classappend="${#strings.contains(entry.action, 'DELETE') or #strings.contains(entry.action, 'REJECTED')} ? 'bg-red-100 text-red-700' :
+                                                  (${#strings.contains(entry.action, 'APPROVED') or #strings.contains(entry.action, 'VERIFIED') or #strings.contains(entry.action, 'PAID')} ? 'bg-emerald-100 text-emerald-700' :
+                                                  (${#strings.contains(entry.action, 'LOGIN')} ? 'bg-blue-100 text-blue-700' :
+                                                   'bg-slate-100 text-slate-600'))"
+                                  th:text="${entry.action}">ACTION</span>
+                        </td>
+                        <td class="px-4 py-3 text-xs text-slate-600">
+                            <span th:if="${entry.entityType != null}" th:text="${entry.entityType}"></span>
+                            <span th:if="${entry.entityId != null}" class="text-slate-400 ml-1" th:text="'#' + ${entry.entityId}"></span>
+                        </td>
+                        <td class="px-4 py-3 text-xs text-slate-600 font-mono" th:text="${entry.actorId ?: '—'}">actor</td>
+                        <td class="px-4 py-3 text-xs text-slate-400 font-mono" th:text="${entry.ipAddress ?: '—'}">ip</td>
+                        <td class="px-4 py-3 text-xs text-slate-400 max-w-xs truncate"
+                            th:text="${entry.afterState != null ? entry.afterState : (entry.beforeState != null ? entry.beforeState : '—')}">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${logs == null or #lists.isEmpty(logs)}" class="py-20 text-center">
+            <p class="text-sm text-slate-400">No audit entries yet.</p>
+        </div>
+
+        <div th:if="${totalPages > 1}" class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/admin/audit-logs(page=${currentPage - 1})}"
+               class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">← Previous</a>
+            <span class="text-xs text-slate-400 mx-auto"
+                  th:text="'Page ' + (${currentPage} + 1) + ' of ' + ${totalPages}"></span>
+            <a th:if="${currentPage + 1 < totalPages}"
+               th:href="@{/admin/audit-logs(page=${currentPage + 1})}"
+               class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">Next →</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

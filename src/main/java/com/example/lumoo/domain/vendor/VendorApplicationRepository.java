@@ -11,4 +11,5 @@ public interface VendorApplicationRepository extends JpaRepository<VendorApplica
     List<VendorApplication> findByUserOrderByAppliedAtDesc(User user);
     Optional<VendorApplication> findByUserAndStatus(User user, String status);
     boolean existsByUserAndStatus(User user, String status);
+    long countByStatus(String status);
 }

@@ -12,8 +12,9 @@
     </div>
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
         <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
-        <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <div class="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+            <div th:replace="~{fragments/bell :: bell}"></div>
             <form th:action="@{/logout}" method="post" class="inline">
                 <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase transition">Logout</button>
             </form>

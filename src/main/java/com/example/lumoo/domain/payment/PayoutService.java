@@ -27,7 +27,9 @@ public class PayoutService {
     private String apiUrl;
     @Autowired private OrderRepository orderRepository;
     @Autowired private ObjectMapper objectMapper;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(10))
+            .build();
     public boolean isConfigured() {
         return apiKey != null && !apiKey.isBlank();
     }
@@ -82,7 +84,8 @@ public class PayoutService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200 || response.statusCode() == 201) {
                 JsonNode json = objectMapper.readTree(response.body());
-                String transferId = json.path("id").asText();
+                JsonNode data = json.has("data") ? json.path("data") : json;
+                String transferId = data.path("id").asText();
                 order.setPayoutStatus("PENDING");
                 order.setPayoutTransferId(transferId);
                 log.info("[Payout] Transfer initiated — orderId={} transferId={} vendor={} amount={}GMD",

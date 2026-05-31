@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO | About Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-sans">
+
+<div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+    <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
+    <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+</div>
+
+<nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+    <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
+    <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
+        <a href="/careers" class="hover:text-[#4d78c0] transition">Careers</a>
+        <a href="/partnerships" class="hover:text-[#4d78c0] transition">Partnerships</a>
+    </div>
+</nav>
+
+<main>
+
+    <section class="bg-[#1a2336] text-white px-12 py-28">
+        <div class="max-w-4xl mx-auto">
+            <p class="text-[9px] text-blue-400 uppercase tracking-[0.4em] font-black mb-4">About Us</p>
+            <h1 class="text-5xl md:text-6xl font-light tracking-tighter leading-tight mb-6"
+                th:text="${content.heroTitle ?: 'Building Gambia\'s Future, Together.'}">
+                Building Gambia's Future, Together.
+            </h1>
+            <p class="text-sm text-slate-300 max-w-2xl leading-relaxed"
+               th:text="${content.heroSubtitle ?: 'LUMOO is Gambia\'s leading marketplace for construction materials — connecting builders, contractors, and homeowners with trusted vendors.'}">
+            </p>
+        </div>
+    </section>
+
+    <div th:if="${content.foundedYear != null or content.teamSize != null or content.productsCount != null}"
+         class="bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto px-12 py-10 grid grid-cols-3 gap-8 text-center">
+            <div th:if="${content.foundedYear != null}">
+                <p class="text-3xl font-black tracking-tighter text-[#4d78c0]" th:text="${content.foundedYear}">2022</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black mt-1">Founded</p>
+            </div>
+            <div th:if="${content.teamSize != null}">
+                <p class="text-3xl font-black tracking-tighter text-[#4d78c0]" th:text="${content.teamSize}">20+</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black mt-1">Team Members</p>
+            </div>
+            <div th:if="${content.productsCount != null}">
+                <p class="text-3xl font-black tracking-tighter text-[#4d78c0]" th:text="${content.productsCount}">500+</p>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black mt-1">Products Listed</p>
+            </div>
+        </div>
+    </div>
+
+    <section th:if="${content.storyContent != null}" class="max-w-4xl mx-auto px-12 py-20">
+        <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-4">Our Story</p>
+        <div class="text-sm text-gray-600 leading-relaxed max-w-2xl whitespace-pre-wrap" th:text="${content.storyContent}"></div>
+    </section>
+
+    <section th:if="${content.missionContent != null or content.visionContent != null}"
+             class="bg-white border-t border-b border-gray-100 py-20">
+        <div class="max-w-4xl mx-auto px-12 grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div th:if="${content.missionContent != null}">
+                <p class="text-[9px] text-[#4d78c0] uppercase tracking-[0.4em] font-black mb-4">Our Mission</p>
+                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap" th:text="${content.missionContent}"></p>
+            </div>
+            <div th:if="${content.visionContent != null}">
+                <p class="text-[9px] text-[#4d78c0] uppercase tracking-[0.4em] font-black mb-4">Our Vision</p>
+                <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap" th:text="${content.visionContent}"></p>
+            </div>
+        </div>
+    </section>
+
+    <section th:if="${values != null and !#lists.isEmpty(values)}" class="max-w-4xl mx-auto px-12 py-20">
+        <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-12">Our Values</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div th:each="v : ${values}" class="bg-white border border-gray-100 p-6">
+                <span class="text-3xl block mb-4" th:text="${v.icon}">🏆</span>
+                <h3 class="text-xs font-black uppercase tracking-widest mb-2" th:text="${v.title}">Title</h3>
+                <p class="text-xs text-gray-500 leading-relaxed" th:text="${v.description}">Description</p>
+            </div>
+        </div>
+    </section>
+
+    <section th:if="${members != null and !#lists.isEmpty(members)}"
+             class="bg-white border-t border-gray-100 py-20">
+        <div class="max-w-4xl mx-auto px-12">
+            <p class="text-[9px] text-gray-400 uppercase tracking-[0.4em] font-black mb-12">Meet the Team</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <div th:each="m : ${members}" class="text-center">
+                    <div class="w-20 h-20 rounded-full bg-gray-100 mx-auto mb-4 overflow-hidden">
+                        <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                             th:src="${m.imageUrl}" th:alt="${m.name}"
+                             class="w-full h-full object-cover">
+                        <div th:unless="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                             class="w-full h-full flex items-center justify-center text-2xl font-black text-[#4d78c0]"
+                             th:text="${m.name?.substring(0,1)?.toUpperCase()}">A</div>
+                    </div>
+                    <p class="text-xs font-black uppercase tracking-widest" th:text="${m.name}">Name</p>
+                    <p class="text-[9px] text-gray-400 uppercase tracking-wider mt-1" th:text="${m.role}">Role</p>
+                    <p th:if="${m.bio != null}" class="text-xs text-gray-500 leading-relaxed mt-3" th:text="${m.bio}">Bio</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-[#1a2336] text-white px-12 py-20 text-center">
+        <p class="text-[9px] text-blue-400 uppercase tracking-[0.4em] font-black mb-4">Join Us</p>
+        <h2 class="text-3xl font-light tracking-tighter mb-6">
+            Want to be part of the <span class="font-black italic text-[#4d78c0]">LUMOO story?</span>
+        </h2>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+            <a href="/careers"
+               class="bg-[#4d78c0] text-white px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-[#1a2336] transition duration-300">
+                View Open Positions →
+            </a>
+            <a href="/partnerships"
+               class="border border-slate-600 text-slate-300 px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:border-white hover:text-white transition duration-300">
+                Partner With Us
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

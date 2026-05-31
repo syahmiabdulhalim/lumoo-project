@@ -6,15 +6,22 @@ import com.example.lumoo.domain.vendor.VendorApplication;
 import com.example.lumoo.domain.user.NotificationRepository;
 import com.example.lumoo.domain.user.UserRepository;
 import com.example.lumoo.domain.vendor.VendorApplicationRepository;
+import com.example.lumoo.infrastructure.email.EmailService;
+import com.example.lumoo.infrastructure.email.EmailTemplates;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class VendorApplicationService {
+    private static final Logger log = LoggerFactory.getLogger(VendorApplicationService.class);
+
     @Autowired private VendorApplicationRepository applicationRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private NotificationRepository notificationRepository;
+    @Autowired private EmailService emailService;
     public java.util.Optional<VendorApplication> findById(Long id) {
         return applicationRepository.findById(id);
     }
@@ -54,6 +61,9 @@ public class VendorApplicationService {
                 "🎉 Congratulations! Your vendor application has been approved. Please log out and log back in to access your Vendor Hub.",
                 user
             ));
+            emailService.sendEmail(user.getEmail(),
+                    "Your LUMOO vendor application is approved!",
+                    EmailTemplates.vendorApproved(user.getUsername()));
         });
     }
     public void reject(Long id, String note) {
@@ -66,6 +76,9 @@ public class VendorApplicationService {
             if (note != null && !note.isBlank()) msg += " Reason: " + note.trim();
             msg += " You may re-apply after 12 hours. Contact info@lumoo.my for help.";
             notificationRepository.save(new Notification(msg, app.getUser()));
+            emailService.sendEmail(app.getUser().getEmail(),
+                    "Update on your LUMOO vendor application",
+                    EmailTemplates.vendorRejected(app.getUser().getUsername(), note));
         });
     }
 }

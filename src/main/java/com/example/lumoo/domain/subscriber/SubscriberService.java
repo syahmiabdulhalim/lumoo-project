@@ -1,12 +1,18 @@
 package com.example.lumoo.domain.subscriber;
 import com.example.lumoo.domain.subscriber.Subscriber;
 import com.example.lumoo.domain.subscriber.SubscriberRepository;
+import com.example.lumoo.infrastructure.email.EmailService;
+import com.example.lumoo.infrastructure.email.EmailTemplates;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 @Service
 public class SubscriberService {
     @Autowired private SubscriberRepository repo;
+    @Autowired private EmailService emailService;
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
     public enum Result { SUBSCRIBED, ALREADY_SUBSCRIBED, INVALID }
     public Result subscribe(String email) {
         if (email == null || !email.contains("@") || email.length() > 254) return Result.INVALID;
@@ -23,6 +29,7 @@ public class SubscriberService {
         Subscriber s = new Subscriber();
         s.setEmail(email);
         repo.save(s);
+        emailService.sendEmail(email, "Welcome to LUMOO!", EmailTemplates.subscriberWelcome(baseUrl));
         return Result.SUBSCRIBED;
     }
     public List<Subscriber> getAll() { return repo.findAll(); }

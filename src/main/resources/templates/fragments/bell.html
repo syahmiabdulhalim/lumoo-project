@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="bell">
+    <div class="relative" id="bell-wrapper">
+        <button id="bell-btn"
+                onclick="toggleBell()"
+                class="relative flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition focus:outline-none"
+                aria-label="Notifications">
+            <svg id="bell-icon" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+            <span id="bell-badge"
+                  class="hidden absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center px-0.5">
+                0
+            </span>
+        </button>
+
+        <div id="bell-dropdown"
+             class="hidden absolute right-0 top-11 w-80 bg-white border border-gray-100 shadow-2xl rounded-xl z-50 overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-700">Notifications</span>
+                <button onclick="markAllRead()"
+                        class="text-[9px] font-bold text-[#4d78c0] hover:underline uppercase tracking-wider">
+                    Mark all read
+                </button>
+            </div>
+            <div id="bell-list" class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                <div id="bell-empty" class="px-4 py-8 text-center hidden">
+                    <p class="text-[10px] text-gray-300 uppercase tracking-widest font-black">No notifications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var open = false;
+
+        function fetchNotifications() {
+            fetch('/api/notifications', { credentials: 'same-origin' })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(data) {
+                    if (!data) return;
+                    var badge = document.getElementById('bell-badge');
+                    var list  = document.getElementById('bell-list');
+                    var empty = document.getElementById('bell-empty');
+                    if (!badge || !list) return;
+
+                    if (data.unread > 0) {
+                        badge.textContent = data.unread > 9 ? '9+' : data.unread;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+
+                    var existing = list.querySelectorAll('.bell-item');
+                    existing.forEach(function(el) { el.remove(); });
+
+                    if (!data.items || data.items.length === 0) {
+                        empty.classList.remove('hidden');
+                    } else {
+                        empty.classList.add('hidden');
+                        data.items.forEach(function(n) {
+                            var div = document.createElement('div');
+                            div.className = 'bell-item px-4 py-3 flex items-start gap-3 ' + (n.read ? 'bg-white' : 'bg-blue-50');
+                            div.innerHTML =
+                                '<div class="shrink-0 mt-0.5 w-2 h-2 rounded-full ' + (n.read ? 'bg-gray-200' : 'bg-[#4d78c0]') + '"></div>' +
+                                '<div class="flex-1 min-w-0">' +
+                                  '<p class="text-xs text-gray-700 leading-snug">' + escapeHtml(n.message) + '</p>' +
+                                  '<p class="text-[9px] text-gray-400 mt-1 uppercase tracking-wider">' + n.createdAt + '</p>' +
+                                '</div>';
+                            list.appendChild(div);
+                        });
+                    }
+                })
+                .catch(function() {});
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        window.toggleBell = function() {
+            var dropdown = document.getElementById('bell-dropdown');
+            if (!dropdown) return;
+            open = !open;
+            dropdown.classList.toggle('hidden', !open);
+            if (open) fetchNotifications();
+        };
+
+        window.markAllRead = function() {
+            fetch('/api/notifications/read-all', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function() {
+                var badge = document.getElementById('bell-badge');
+                if (badge) badge.classList.add('hidden');
+                fetchNotifications();
+            });
+        };
+
+        document.addEventListener('click', function(e) {
+            var wrapper = document.getElementById('bell-wrapper');
+            if (open && wrapper && !wrapper.contains(e.target)) {
+                open = false;
+                var dd = document.getElementById('bell-dropdown');
+                if (dd) dd.classList.add('hidden');
+            }
+        });
+
+        fetchNotifications();
+        setInterval(fetchNotifications, 60000);
+    })();
+    </script>
+</div>
+</body>
+</html>

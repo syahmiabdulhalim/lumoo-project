@@ -7,6 +7,8 @@ import com.example.lumoo.domain.order.OrderItem;
 import com.example.lumoo.domain.order.CartItem;
 import com.example.lumoo.domain.payment.PayoutService;
 import com.example.lumoo.domain.payment.WebhookEvent;
+import com.example.lumoo.infrastructure.email.EmailService;
+import com.example.lumoo.infrastructure.email.EmailTemplates;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.Role;
 import com.example.lumoo.domain.user.Notification;
@@ -37,6 +39,8 @@ import com.example.lumoo.domain.pdpp.ErasureRequestRepository;
 import com.example.lumoo.domain.pdpp.DataAccessRequestRepository;
 import com.example.lumoo.domain.pdpp.BreachIncidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -47,11 +51,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 public class OrderService {
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
     @Autowired private OrderRepository orderRepository;
     @Autowired private OrderItemRepository orderItemRepository;
     @Autowired private CartRepository cartRepository;
     @Autowired private PayoutService payoutService;
     @Autowired private ProductService productService;
+    @Autowired private EmailService emailService;
+    @Autowired private com.example.lumoo.domain.user.UserService userService;
+    @org.springframework.beans.factory.annotation.Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
     public List<Order> getUserOrders(User user) {
         return orderRepository.findByUserWithItems(user);
     }
@@ -104,6 +114,13 @@ public class OrderService {
                     privacyAccepted, termsAccepted, marketingConsent));
         }
         cartRepository.deleteAll(cartItems);
+        for (Order o : orders) {
+            String buyerEmail = o.getUser().getEmail();
+            String buyerName  = o.getUser().getUsername();
+            emailService.sendEmail(buyerEmail, "Order #LMO-" + o.getId() + " received",
+                    EmailTemplates.orderPlaced(buyerName, String.valueOf(o.getId()), o.getTotalAmount(), o.getAddress()));
+            userService.notifyAdmins("🛒 New order #LMO-" + o.getId() + " placed by " + buyerName + " — GMD " + String.format("%.2f", o.getTotalAmount()));
+        }
         return orders;
     }
     private Order createOrder(User user, String address, String paymentMethod,
@@ -148,7 +165,11 @@ public class OrderService {
         String st = order.getStatus();
         if (!st.equals("PENDING") && !st.equals("AWAITING_PROOF") && !st.equals("AWAITING_PAYMENT")) return CancelResult.CANNOT_CANCEL;
         returnStockForOrder(order);
+        String buyerEmail = order.getUser().getEmail();
+        String orderId    = String.valueOf(order.getId());
         orderRepository.delete(order);
+        emailService.sendEmail(buyerEmail, "Order #LMO-" + orderId + " cancelled",
+                EmailTemplates.orderCancelled(order.getUser().getUsername(), orderId, null));
         return CancelResult.CANCELLED;
     }
     public enum ShipResult { SHIPPED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
@@ -167,6 +188,10 @@ public class OrderService {
         if (trackingNumber != null && !trackingNumber.isBlank())
             order.setTrackingNumber(trackingNumber.trim());
         orderRepository.save(order);
+        emailService.sendEmail(order.getUser().getEmail(),
+                "Your order #LMO-" + orderId + " has shipped",
+                EmailTemplates.orderShipped(order.getUser().getUsername(),
+                        String.valueOf(orderId), order.getTrackingNumber()));
         return ShipResult.SHIPPED;
     }
     public enum DeliverResult { DELIVERED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
@@ -177,6 +202,12 @@ public class OrderService {
         if (!order.getStatus().equals("SHIPPED")) return DeliverResult.INVALID_STATUS;
         order.setStatus("DELIVERED");
         orderRepository.save(order);
+        String name = order.getUser().getUsername();
+        String id   = String.valueOf(orderId);
+        emailService.sendEmail(order.getUser().getEmail(),
+                "Order #LMO-" + id + " delivered",
+                EmailTemplates.orderDelivered(name, id));
+        sendReviewRequest(order, name, id);
         return DeliverResult.DELIVERED;
     }
     public enum ReturnResult { REQUESTED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
@@ -188,6 +219,7 @@ public class OrderService {
         order.setStatus("RETURN_REQUESTED");
         if (reason != null && !reason.isBlank()) order.setReturnReason(reason.trim());
         orderRepository.save(order);
+        userService.notifyAdmins("↩ Return requested for order #LMO-" + orderId + " by " + order.getUser().getUsername() + ".");
         return ReturnResult.REQUESTED;
     }
     public void resolveReturn(Long orderId) {
@@ -201,12 +233,17 @@ public class OrderService {
             o.setPaymentProofUrl(proofUrl);
             o.setStatus("PROOF_UPLOADED");
             orderRepository.save(o);
+            userService.notifyAdmins("📎 Payment proof uploaded for order #LMO-" + orderId + " — awaiting verification.");
         });
     }
     public void verifyPayment(Long orderId) {
         orderRepository.findById(orderId).ifPresent(o -> {
             o.setStatus("PAID");
             orderRepository.save(o);
+            emailService.sendEmail(o.getUser().getEmail(),
+                    "Payment confirmed for order #LMO-" + o.getId(),
+                    EmailTemplates.orderPaid(o.getUser().getUsername(),
+                            String.valueOf(o.getId()), o.getTotalAmount()));
         });
     }
     @Transactional
@@ -214,8 +251,22 @@ public class OrderService {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
             o.setStatus(status);
             orderRepository.save(o);
-            if ("DELIVERED".equals(status)) {
-                payoutService.tryPayoutVendor(o);
+            String email = o.getUser().getEmail();
+            String name  = o.getUser().getUsername();
+            String id    = String.valueOf(o.getId());
+            switch (status) {
+                case "PAID"      -> emailService.sendEmail(email, "Payment confirmed — #LMO-" + id,
+                                        EmailTemplates.orderPaid(name, id, o.getTotalAmount()));
+                case "SHIPPED"   -> emailService.sendEmail(email, "Order #LMO-" + id + " shipped",
+                                        EmailTemplates.orderShipped(name, id, o.getTrackingNumber()));
+                case "DELIVERED" -> {
+                    emailService.sendEmail(email, "Order #LMO-" + id + " delivered",
+                            EmailTemplates.orderDelivered(name, id));
+                    sendReviewRequest(o, name, id);
+                    payoutService.tryPayoutVendor(o);
+                }
+                case "CANCELLED" -> emailService.sendEmail(email, "Order #LMO-" + id + " cancelled",
+                                        EmailTemplates.orderCancelled(name, id, null));
             }
         });
     }
@@ -230,5 +281,16 @@ public class OrderService {
                 productService.returnStock(item.getProduct().getId(), item.getQuantity());
             }
         }
+    }
+
+    private void sendReviewRequest(Order order, String name, String orderId) {
+        if (order.getItems() == null || order.getItems().isEmpty()) return;
+        OrderItem first = order.getItems().get(0);
+        if (first.getProduct() == null) return;
+        String productName = first.getProductName();
+        String reviewUrl   = baseUrl + "/product/" + first.getProduct().getId();
+        emailService.sendEmail(order.getUser().getEmail(),
+                "How was your order? Leave a review",
+                EmailTemplates.reviewRequest(name, orderId, productName, reviewUrl));
     }
 }

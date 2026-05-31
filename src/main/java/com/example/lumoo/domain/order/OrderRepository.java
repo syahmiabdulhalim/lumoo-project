@@ -34,4 +34,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByPayoutTransferId(String payoutTransferId);
     List<Order> findByModempayPaymentId(String modempayPaymentId);
     List<Order> findByUserAndStatus(User user, String status);
+    @Query("SELECT o FROM Order o WHERE o.status = 'AWAITING_PAYMENT' AND o.modempayPaymentId IS NOT NULL AND o.orderDate < :cutoff")
+    List<Order> findStaleAwaitingPayment(@Param("cutoff") LocalDateTime cutoff);
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'AWAITING_PROOF' AND o.orderDate < :cutoff")
+    List<Order> findStaleAwaitingProof(@Param("cutoff") LocalDateTime cutoff);
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'DELIVERED' AND o.payoutStatus = 'FAILED'")
+    List<Order> findDeliveredWithFailedPayout();
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'SHIPPED' AND o.orderDate < :cutoff")
+    List<Order> findStaleShipped(@Param("cutoff") LocalDateTime cutoff);
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status = :status")
+    long countByStatus(@Param("status") String status);
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.orderDate >= :since")
+    double sumRevenueSince(@Param("since") LocalDateTime since);
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :since")
+    long countOrdersSince(@Param("since") LocalDateTime since);
 }

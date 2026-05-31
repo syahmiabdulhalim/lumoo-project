@@ -11,8 +11,9 @@
         <a href="/">
             <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-12 w-auto object-contain">
         </a>
-        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <div class="flex items-center space-x-6 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/vendor/add-product" class="bg-[#4d78c0] text-white px-4 py-2 hover:bg-[#3d68b0] transition">+ Add Material</a>
+            <div th:replace="~{fragments/bell :: bell}"></div>
             <form th:action="@{/logout}" method="post">
                 <button type="submit" class="text-red-600 hover:text-red-800 transition">Logout</button>
             </form>

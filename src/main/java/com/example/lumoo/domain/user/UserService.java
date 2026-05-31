@@ -7,6 +7,8 @@ import com.example.lumoo.domain.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 @Service
 public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
     @Autowired private UserRepository userRepository;
@@ -120,9 +124,21 @@ public class UserService {
     public List<Notification> getAndMarkNotificationsRead(User user) {
         List<Notification> notes = notificationRepository.findByUserAndIsReadFalse(user);
         if (notes != null && !notes.isEmpty()) {
-            notificationRepository.deleteAll(notes);
+            notes.forEach(n -> n.setRead(true));
+            notificationRepository.saveAll(notes);
         }
         return notes;
+    }
+    public List<Notification> getRecentNotifications(User user) {
+        return notificationRepository.findByUserOrderByCreatedAtDesc(user).stream()
+                .limit(10).toList();
+    }
+    public long countUnreadNotifications(User user) {
+        return notificationRepository.countByUserAndIsReadFalse(user);
+    }
+    public void notifyAdmins(String message) {
+        userRepository.findByRole(Role.ADMIN).forEach(admin ->
+                notificationRepository.save(new Notification(message, admin)));
     }
     public boolean verifyUser(Long id) {
         return userRepository.findById(id).map(user -> {

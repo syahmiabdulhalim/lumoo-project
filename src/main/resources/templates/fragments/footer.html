@@ -101,6 +101,7 @@
                         <li><a href="/blog"                class="text-gray-400 hover:text-white transition">Blog</a></li>
                         <li><a href="/stores"              class="text-gray-400 hover:text-white transition">Our Vendors</a></li>
                         <li><a href="/buyer/vendorapply"   class="text-gray-400 hover:text-white transition">Sell on LUMOO</a></li>
+                        <li><a href="/about"        class="text-gray-400 hover:text-white transition">About Us</a></li>
                         <li><a href="/partnerships" class="text-gray-400 hover:text-white transition">Partnerships</a></li>
                         <li><a href="/careers"     class="text-gray-400 hover:text-white transition">Careers</a></li>
                     </ul>
@@ -157,5 +158,14 @@
         </div>
     </div>
 </footer>
+<th:block th:if="${siteSettings?.googleAnalyticsId != null and !siteSettings.googleAnalyticsId.isEmpty()}">
+    <script th:src="'https://www.googletagmanager.com/gtag/js?id=' + ${siteSettings.googleAnalyticsId}" async></script>
+    <script th:inline="javascript">
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', [[${siteSettings.googleAnalyticsId}]]);
+    </script>
+</th:block>
 </body>
 </html>

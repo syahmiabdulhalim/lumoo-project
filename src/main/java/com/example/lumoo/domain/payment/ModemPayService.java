@@ -1,6 +1,8 @@
 package com.example.lumoo.domain.payment;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderService;
+import com.example.lumoo.infrastructure.email.EmailService;
+import com.example.lumoo.infrastructure.email.EmailTemplates;
 import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.domain.order.OrderRepository;
 import com.example.lumoo.domain.payment.WebhookEventRepository;
@@ -39,7 +41,10 @@ public class ModemPayService {
     @Autowired private PayoutService payoutService;
     @Autowired private OrderService orderService;
     @Autowired private ObjectMapper objectMapper;
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    @Autowired private EmailService emailService;
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(10))
+            .build();
     public boolean isConfigured() {
         return !apiKey.isBlank() && !webhookSecret.isBlank();
     }
@@ -156,8 +161,9 @@ public class ModemPayService {
         event.setEventType(eventType);
         event.setOrderId(firstOrderId);
         webhookEventRepository.save(event);
+        long paidAmount = payload.path("amount").asLong(-1);
         switch (eventType) {
-            case "charge.succeeded"     -> orderIds.forEach(this::handlePaymentSuccess);
+            case "charge.succeeded"     -> orderIds.forEach(id -> handlePaymentSuccess(id, paidAmount));
             case "charge.failed",
                  "charge.cancelled"    -> orderIds.forEach(this::handlePaymentFailed);
             case "charge.expired"      -> orderIds.forEach(this::handlePaymentExpired);
@@ -168,15 +174,27 @@ public class ModemPayService {
         }
         log.info("[ModemPay] Webhook processed — eventId={} eventType={} orderIds={}", eventId, eventType, orderIds);
     }
-    private void handlePaymentSuccess(Long orderId) {
+    private void handlePaymentSuccess(Long orderId, long paidAmount) {
         orderRepository.findById(orderId).ifPresent(order -> {
-            if ("AWAITING_PAYMENT".equals(order.getStatus())) {
-                order.setStatus("PAID");
-                orderRepository.save(order);
-                log.info("[ModemPay] Order #{} marked PAID", orderId);
-            } else {
+            if (!"AWAITING_PAYMENT".equals(order.getStatus())) {
                 log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", orderId, order.getStatus());
+                return;
             }
+            long expected = Math.round(order.getTotalAmount());
+            if (paidAmount >= 0 && paidAmount < expected) {
+                log.warn("[ModemPay] Order #{} amount mismatch — expected={}GMD paid={}GMD — NOT marking PAID", orderId, expected, paidAmount);
+                order.setStatus("PAYMENT_FAILED");
+                orderRepository.save(order);
+                orderService.returnStockForOrder(order);
+                return;
+            }
+            order.setStatus("PAID");
+            orderRepository.save(order);
+            emailService.sendEmail(order.getUser().getEmail(),
+                    "Payment confirmed — #LMO-" + orderId,
+                    EmailTemplates.orderPaid(order.getUser().getUsername(),
+                            String.valueOf(orderId), order.getTotalAmount()));
+            log.info("[ModemPay] Order #{} marked PAID (paid={}GMD)", orderId, paidAmount);
         });
     }
     private void handlePaymentFailed(Long orderId) {
@@ -185,6 +203,9 @@ public class ModemPayService {
                 order.setStatus("PAYMENT_FAILED");
                 orderRepository.save(order);
                 orderService.returnStockForOrder(order);
+                emailService.sendEmail(order.getUser().getEmail(),
+                        "Payment unsuccessful — #LMO-" + orderId,
+                        EmailTemplates.paymentFailed(order.getUser().getUsername(), String.valueOf(orderId)));
                 log.info("[ModemPay] Order #{} marked PAYMENT_FAILED — stock returned", orderId);
             }
         });

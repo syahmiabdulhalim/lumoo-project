@@ -1,5 +1,7 @@
 package com.example.lumoo.infrastructure.security;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
@@ -11,6 +13,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 @Component
 public class DataEncryptor {
+    private static final Logger log = LoggerFactory.getLogger(DataEncryptor.class);
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int IV_LENGTH = 12;
     private static final int TAG_LENGTH = 128;
@@ -24,7 +27,7 @@ public class DataEncryptor {
             KeyGenerator kg = KeyGenerator.getInstance("AES");
             kg.init(256);
             secretKey = kg.generateKey();
-            System.err.println("[DataEncryptor] WARNING: ENCRYPTION_KEY not set — using ephemeral key. Set ENCRYPTION_KEY env var (openssl rand -base64 32).");
+            log.warn("[DataEncryptor] ENCRYPTION_KEY not set — using ephemeral key. Encrypted data will be lost on restart. Set ENCRYPTION_KEY env var.");
         } else {
             byte[] keyBytes = Base64.getDecoder().decode(base64Key);
             secretKey = new SecretKeySpec(keyBytes, "AES");

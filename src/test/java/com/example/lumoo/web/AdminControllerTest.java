@@ -32,6 +32,9 @@ class AdminControllerTest {
     @MockitoBean VendorApplicationService vendorApplicationService;
     @MockitoBean SiteSettingsService siteSettingsService;
     @MockitoBean SubscriberService subscriberService;
+    @MockitoBean com.example.lumoo.domain.pdpp.AuditService auditService;
+    @MockitoBean com.example.lumoo.domain.pdpp.AuditLogRepository auditLogRepository;
+    @MockitoBean com.example.lumoo.infrastructure.email.EmailService emailService;
     @Test
     void dashboard_returns200() throws Exception {
         when(orderService.getAll()).thenReturn(List.of());

@@ -1,0 +1,36 @@
+name: Daily DB Backup
+
+on:
+  schedule:
+    - cron: '0 20 * * *'   # 4am MYT (UTC+8) = 8pm UTC
+  workflow_dispatch:        # allow manual trigger from GitHub Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: MySQL Backup → DigitalOcean Spaces
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger backup on server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.DO_SERVER_IP }}
+          username: ${{ secrets.DO_SERVER_USER }}
+          key:      ${{ secrets.DO_SSH_KEY }}
+          script: |
+            cd /opt/lumoo
+            bash scripts/backup.sh --db-only
+            bash scripts/backup.sh --verify
+
+      - name: Notify on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.DO_SERVER_IP }}
+          username: ${{ secrets.DO_SERVER_USER }}
+          key:      ${{ secrets.DO_SSH_KEY }}
+          script: |
+            echo "[Backup FAILED] $(date)" >> /var/log/lumoo-backup.log

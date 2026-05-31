@@ -136,14 +136,16 @@ class UserServiceTest {
         when(notificationRepository.findByUserAndIsReadFalse(user)).thenReturn(List.of(n1, n2));
         List<Notification> result = userService.getAndMarkNotificationsRead(user);
         assertEquals(2, result.size());
-        verify(notificationRepository).deleteAll(List.of(n1, n2));
+        assertTrue(n1.isRead());
+        assertTrue(n2.isRead());
+        verify(notificationRepository).saveAll(List.of(n1, n2));
     }
     @Test
     void getAndMarkNotificationsRead_returnsEmptyList_whenNoNotifications() {
         when(notificationRepository.findByUserAndIsReadFalse(user)).thenReturn(List.of());
         List<Notification> result = userService.getAndMarkNotificationsRead(user);
         assertTrue(result.isEmpty());
-        verify(notificationRepository, never()).deleteAll(any());
+        verify(notificationRepository, never()).saveAll(any());
     }
     @Test
     void updateProfile_updatesFieldsAndSaves() {

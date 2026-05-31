@@ -34,6 +34,13 @@ public class AuditService {
         log.setActorId(actorId);
         auditLogRepository.save(log);
     }
+    public void log(String action, String entityType, String entityId, HttpServletRequest request) {
+        log(action, entityType, entityId, null, null, request);
+    }
+    public void log(String action, String entityType, String entityId,
+                    Map<?, ?> after, HttpServletRequest request) {
+        log(action, entityType, entityId, null, after, request);
+    }
     private String toJson(Map<?, ?> map) {
         if (map == null) return null;
         try { return objectMapper.writeValueAsString(map); }

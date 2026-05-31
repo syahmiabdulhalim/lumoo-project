@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>LUMOO | Construction Materials</title>
+    <title>LUMOO | Construction Materials Gambia</title>
+    <meta name="description" content="LUMOO — Gambia's leading marketplace for construction materials. Find cement, roofing, timber, electrical, plumbing and more from trusted vendors.">
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="LUMOO Gambia">
+    <meta property="og:title"       content="LUMOO — Construction Materials Gambia">
+    <meta property="og:description" content="Gambia's leading marketplace for construction materials. Find cement, roofing, timber, electrical and more.">
+    <meta property="og:url"         content="https://lumoo.my">
+    <meta name="twitter:card"       content="summary_large_image">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/lumoo.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -199,7 +206,8 @@
                class="group block">
                 <div class="relative overflow-hidden bg-gray-100" style="aspect-ratio:3/4;">
                     <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
-                         th:src="${product.imageUrl}" alt=""
+                         th:src="${product.imageUrl}" th:alt="${product.name}"
+                         loading="lazy"
                          class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     <div th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}"
                          class="w-full h-full bg-gray-200 flex items-center justify-center">

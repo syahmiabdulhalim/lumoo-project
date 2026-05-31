@@ -8,4 +8,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByActionOrderByCreatedAtDesc(String action);
     List<AuditLog> findByEntityTypeAndEntityIdOrderByCreatedAtDesc(String entityType, String entityId);
     void deleteByCreatedAtBefore(LocalDateTime cutoff);
+    org.springframework.data.domain.Page<AuditLog> findAllByOrderByCreatedAtDesc(
+            org.springframework.data.domain.Pageable pageable);
 }

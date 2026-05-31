@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Promo Codes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">Promo Codes</span>
+    </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-6 py-12 space-y-8">
+
+    <div th:if="${flashMsg != null}" id="flash-toast"
+         class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+         th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+        <span th:text="${flashMsg}"></span>
+        <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+    </div>
+    <script th:if="${flashMsg != null}">
+        setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+    </script>
+
+    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h1 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Active Promo Codes</h1>
+            <span class="text-xs text-slate-400" th:text="${#lists.size(promos)} + ' codes'">0</span>
+        </div>
+        <table class="w-full text-sm" th:if="${!#lists.isEmpty(promos)}">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="text-left px-6 py-3">Code</th>
+                    <th class="text-left px-6 py-3">Discount</th>
+                    <th class="text-left px-6 py-3">Min. Order</th>
+                    <th class="text-left px-6 py-3">Usage</th>
+                    <th class="text-left px-6 py-3">Expires</th>
+                    <th class="text-left px-6 py-3">Status</th>
+                    <th class="text-left px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr th:each="p : ${promos}" class="hover:bg-slate-50">
+                    <td class="px-6 py-4 font-mono font-bold text-slate-800" th:text="${p.code}">CODE</td>
+                    <td class="px-6 py-4 text-sm font-bold text-[#4d78c0]"
+                        th:text="${p.discountType.name() == 'PERCENTAGE' ? p.discountValue + '%' : 'GMD ' + p.discountValue}">-</td>
+                    <td class="px-6 py-4 text-xs text-slate-500"
+                        th:text="${p.minimumOrder > 0 ? 'GMD ' + p.minimumOrder : 'None'}">-</td>
+                    <td class="px-6 py-4 text-xs text-slate-500"
+                        th:text="${p.usedCount + (p.usageLimit != null ? '/' + p.usageLimit : ' uses')}">0</td>
+                    <td class="px-6 py-4 text-xs text-slate-400"
+                        th:text="${p.expiresAt != null ? #temporals.format(p.expiresAt, 'dd MMM yyyy') : '—'}">—</td>
+                    <td class="px-6 py-4">
+                        <span th:if="${p.active}" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded font-bold">Active</span>
+                        <span th:unless="${p.active}" class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold">Disabled</span>
+                    </td>
+                    <td class="px-6 py-4 flex items-center gap-2">
+                        <form th:action="@{/admin/promos/toggle/{id}(id=${p.id})}" method="post" class="inline">
+                            <button type="submit" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold transition"
+                                    th:text="${p.active ? 'Disable' : 'Enable'}">Toggle</button>
+                        </form>
+                        <form th:action="@{/admin/promos/delete/{id}(id=${p.id})}" method="post" class="inline">
+                            <button type="submit" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition"
+                                    onclick="return confirm('Delete this promo code?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div th:if="${#lists.isEmpty(promos)}" class="py-16 text-center">
+            <p class="text-sm text-slate-400">No promo codes yet.</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-8">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-6">Create Promo Code</h2>
+        <form th:action="@{/admin/promos/new}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Code *</label>
+                <input type="text" name="code" required placeholder="e.g. LUMOO10"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm uppercase focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Type</label>
+                <select name="discountType" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                    <option th:each="t : ${discountTypes}" th:value="${t}" th:text="${t.name()}">Type</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Value * (% or GMD)</label>
+                <input type="number" name="discountValue" required min="0" step="0.01" placeholder="10"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Min. Order (GMD)</label>
+                <input type="number" name="minimumOrder" value="0" min="0"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Usage Limit (blank = unlimited)</label>
+                <input type="number" name="usageLimit" min="1" placeholder="Unlimited"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Expires (optional)</label>
+                <input type="datetime-local" name="expiresAt"
+                       class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="md:col-span-3">
+                <button type="submit"
+                        class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-8 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition">
+                    Create Promo Code
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+</body>
+</html>

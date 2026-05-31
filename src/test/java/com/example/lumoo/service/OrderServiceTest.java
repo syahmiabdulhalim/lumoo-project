@@ -52,6 +52,8 @@ class OrderServiceTest {
     @Mock private CartRepository cartRepository;
     @Mock private com.example.lumoo.domain.payment.PayoutService payoutService;
     @Mock private com.example.lumoo.domain.product.ProductService productService;
+    @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
+    @Mock private com.example.lumoo.domain.user.UserService userService;
     @InjectMocks private OrderService orderService;
     private User buyer;
     private User vendor;

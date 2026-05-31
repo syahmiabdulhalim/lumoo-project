@@ -52,7 +52,8 @@
                 Apply <span class="font-black italic text-[#4d78c0]">Now.</span>
             </h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] font-black mb-10">Fill in your details below</p>
-            <form th:action="@{/careers/{id}/apply(id=${posting.id})}" method="post" class="space-y-6">
+            <form th:action="@{/careers/{id}/apply(id=${posting.id})}" method="post" class="space-y-6"
+                  onsubmit="this.querySelector('button[type=submit]').disabled=true;this.querySelector('button[type=submit]').textContent='Sending…';">
                 <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>

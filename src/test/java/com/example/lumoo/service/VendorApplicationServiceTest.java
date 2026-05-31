@@ -19,6 +19,7 @@ class VendorApplicationServiceTest {
     @Mock private VendorApplicationRepository applicationRepository;
     @Mock private UserRepository userRepository;
     @Mock private NotificationRepository notificationRepository;
+    @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
     @InjectMocks private VendorApplicationService service;
     private User user;
     @BeforeEach

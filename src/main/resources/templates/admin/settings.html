@@ -33,6 +33,10 @@
                 class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition">
             Subscribers <span th:text="'(' + ${#lists.size(subscribers)} + ')'" class="text-gray-300"></span>
         </button>
+        <button onclick="showTab('newsletter')" id="tab-newsletter"
+                class="tab-btn px-5 py-3 text-[9px] font-black uppercase tracking-widest border-b-2 border-transparent text-gray-400 hover:text-gray-700 transition">
+            Newsletter
+        </button>
     </div>
     <form th:action="@{/admin/settings}" method="post">
         <div id="panel-payment">
@@ -194,6 +198,11 @@
                         <label class="label">Copyright Text</label>
                         <input type="text" name="copyrightText" th:value="${settings.copyrightText}" class="input" placeholder="© 2026 LUMOO Gambia. All rights reserved.">
                     </div>
+                    <div class="sm:col-span-2">
+                        <label class="label">Google Analytics ID</label>
+                        <input type="text" name="googleAnalyticsId" th:value="${settings.googleAnalyticsId}" class="input" placeholder="G-XXXXXXXXXX">
+                        <p class="text-[9px] text-gray-400 mt-1">Paste your GA4 Measurement ID from Google Analytics → Admin → Data Streams</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -237,7 +246,30 @@
                 </div>
             </div>
         </div>
-        <div class="flex justify-end" th:unless="${#strings.equals(param.tab != null ? param.tab[0] : '', 'subscribers')}">
+        <div id="panel-newsletter" class="hidden">
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h3 class="text-xs font-black uppercase tracking-widest mb-6">Send Newsletter</h3>
+                <p class="text-xs text-gray-400 mb-6" th:text="'Will be sent to ' + ${activeSubscriberCount} + ' active subscribers.'"></p>
+                <form th:action="@{/admin/newsletter/send}" method="post" class="space-y-4">
+                    <div>
+                        <label class="label">Subject *</label>
+                        <input type="text" name="subject" required class="input" placeholder="e.g. New arrivals this week!">
+                    </div>
+                    <div>
+                        <label class="label">Message (HTML supported)</label>
+                        <textarea name="htmlBody" required rows="10"
+                                  class="w-full border-b border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none resize-none font-mono"
+                                  placeholder="&lt;h2&gt;Big News!&lt;/h2&gt;&lt;p&gt;We just added new products...&lt;/p&gt;"></textarea>
+                    </div>
+                    <button type="submit"
+                            class="bg-[#1a2336] text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition"
+                            onclick="return confirm('Send to all active subscribers?')">
+                        Send Newsletter →
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="flex justify-end" th:unless="${#strings.equals(param.tab != null ? param.tab[0] : '', 'subscribers') or #strings.equals(param.tab != null ? param.tab[0] : '', 'newsletter')}">
             <button type="submit"
                     class="bg-[#1a2336] text-white px-10 py-3.5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition">
                 Save Settings →
@@ -252,7 +284,7 @@
 </style>
 <script>
     function showTab(name) {
-        ['payment','pdpa','business','subscribers'].forEach(t => {
+        ['payment','pdpa','business','subscribers','newsletter'].forEach(t => {
             document.getElementById('panel-' + t).classList.add('hidden');
             var btn = document.getElementById('tab-' + t);
             btn.classList.remove('border-[#4d78c0]','text-[#4d78c0]');

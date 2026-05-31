@@ -1,6 +1,8 @@
 package com.example.lumoo.domain.product;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.User;
+import com.example.lumoo.domain.user.NotificationRepository;
+import com.example.lumoo.domain.user.Notification;
 import com.example.lumoo.domain.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +24,9 @@ import java.util.Set;
 import java.util.UUID;
 @Service
 public class ProductService {
+    private static final int LOW_STOCK_THRESHOLD = 5;
     @Autowired private ProductRepository productRepository;
+    @Autowired private NotificationRepository notificationRepository;
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
     public List<Product> getAll() {
@@ -181,7 +185,21 @@ public class ProductService {
         productRepository.deleteById(id);
     }
     public boolean decrementStock(Long productId, int qty) {
-        return productRepository.decrementStock(productId, qty) > 0;
+        boolean ok = productRepository.decrementStock(productId, qty) > 0;
+        if (ok) {
+            productRepository.findById(productId).ifPresent(p -> {
+                if (p.getStock() <= LOW_STOCK_THRESHOLD && p.getVendor() != null) {
+                    String msg = "⚠ Low stock: \"" + p.getName() + "\" has only " + p.getStock() + " unit(s) left.";
+                    boolean alreadyNotified = notificationRepository
+                            .findByUser(p.getVendor()).stream()
+                            .anyMatch(n -> !n.isRead() && n.getMessage().contains("Low stock") && n.getMessage().contains(p.getName()));
+                    if (!alreadyNotified) {
+                        notificationRepository.save(new Notification(msg, p.getVendor()));
+                    }
+                }
+            });
+        }
+        return ok;
     }
     public void returnStock(Long productId, int qty) {
         productRepository.returnStock(productId, qty);

@@ -86,6 +86,22 @@
                 <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Partnerships
             </a>
+
+            <a href="/admin/promos" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                Promo Codes
+            </a>
+
+            <a href="/admin/about" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                About Us
+            </a>
+
+            <a href="/admin/audit-logs" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Audit Log
+            </a>
+
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <p class="text-slate-600 text-[10px] font-semibold uppercase tracking-widest px-3 mb-3">Account</p>
                 <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white">
@@ -127,10 +143,11 @@
                 <h1 class="text-base font-semibold text-slate-800">Dashboard</h1>
                 <p class="text-xs text-slate-400">Welcome back, Admin</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
                 <span class="text-xs text-slate-400 mono" th:text="${#temporals.format(#temporals.createNow(), 'dd MMM yyyy')}">Today</span>
                 <div class="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span class="text-xs text-slate-500">System Online</span>
+                <div th:replace="~{fragments/bell :: bell}"></div>
             </div>
         </header>
         <div class="p-8 space-y-8">

@@ -10,10 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.security.Principal;
 @Controller
 public class InvoiceController {
+    private static final Logger log = LoggerFactory.getLogger(InvoiceController.class);
     @Autowired private OrderRepository orderRepository;
     @GetMapping("/buyer/invoice/{id}")
     public void generateInvoice(@PathVariable Long id, HttpServletResponse response, Principal principal) throws IOException {
@@ -41,7 +44,7 @@ public class InvoiceController {
             order.getItems().forEach(item -> {
                 try {
                     document.add(new Paragraph("- " + item.getProductName() + " x " + item.getQuantity() + " : GMD " + (item.getPrice() * item.getQuantity())));
-                } catch (DocumentException e) { e.printStackTrace(); }
+                } catch (DocumentException e) { log.error("[Invoice] Failed to write item for order #{}: {}", id, e.getMessage()); }
             });
         }
         document.add(new Paragraph("------------------------------------------------------------------"));

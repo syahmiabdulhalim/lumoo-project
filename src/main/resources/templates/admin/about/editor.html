@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | About Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">About Us Editor</span>
+    </div>
+    <a href="/about" target="_blank" class="text-xs text-slate-400 hover:text-white font-semibold transition">Preview Page →</a>
+</nav>
+
+<div th:if="${flashMsg != null}" id="flash-toast"
+     class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+     th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+    <span th:text="${flashMsg}"></span>
+    <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+</div>
+<script th:if="${flashMsg != null}">
+    setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+</script>
+
+<main class="max-w-5xl mx-auto px-6 py-12 space-y-10">
+
+    <div class="flex gap-3 text-xs font-bold uppercase tracking-widest">
+        <a href="#content"  class="text-slate-500 hover:text-[#4d78c0] transition">Content</a>
+        <span class="text-slate-300">·</span>
+        <a href="#team"     class="text-slate-500 hover:text-[#4d78c0] transition">Team</a>
+        <span class="text-slate-300">·</span>
+        <a href="#values"   class="text-slate-500 hover:text-[#4d78c0] transition">Values</a>
+    </div>
+
+    <section id="content" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Page Content</h2>
+            <span class="text-xs text-slate-400">Hero · Story · Mission · Vision · Stats</span>
+        </div>
+        <form th:action="@{/admin/about/content}" method="post" class="p-6 space-y-6">
+            <div class="grid grid-cols-1 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Hero Title</label>
+                    <input type="text" name="heroTitle" th:value="${content.heroTitle}"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. Building Gambia's Future, Together.">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Hero Subtitle</label>
+                    <textarea name="heroSubtitle" rows="2" th:text="${content.heroSubtitle}"
+                              class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                              placeholder="Short tagline under the title"></textarea>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 pt-6">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Our Story</label>
+                <textarea name="storyContent" rows="6" th:text="${content.storyContent}"
+                          class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                          placeholder="Tell the story of how LUMOO started..."></textarea>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Mission</label>
+                    <textarea name="missionContent" rows="4" th:text="${content.missionContent}"
+                              class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                              placeholder="What LUMOO does and why..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Vision</label>
+                    <textarea name="visionContent" rows="4" th:text="${content.visionContent}"
+                              class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                              placeholder="Where LUMOO is heading..."></textarea>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-4 border-t border-slate-100 pt-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Founded Year</label>
+                    <input type="text" name="foundedYear" th:value="${content.foundedYear}"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. 2022">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Team Size</label>
+                    <input type="text" name="teamSize" th:value="${content.teamSize}"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. 20+">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Products Listed</label>
+                    <input type="text" name="productsCount" th:value="${content.productsCount}"
+                           class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. 500+">
+                </div>
+            </div>
+            <button type="submit"
+                    class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-8 py-3 text-xs font-bold uppercase tracking-widest rounded-lg transition">
+                Save Content
+            </button>
+        </form>
+    </section>
+
+    <section id="team" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Team Members</h2>
+            <span class="text-xs text-slate-400" th:text="${#lists.size(members)} + ' members'">0 members</span>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(members)}" class="divide-y divide-slate-100">
+            <div th:each="m : ${members}" class="px-6 py-4">
+                <details class="group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+                                <img th:if="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                                     th:src="${m.imageUrl}" th:alt="${m.name}"
+                                     class="w-full h-full object-cover">
+                                <span th:unless="${m.imageUrl != null and !m.imageUrl.isEmpty()}"
+                                      class="text-slate-400 text-xs font-bold" th:text="${m.name?.substring(0,1)?.toUpperCase()}">A</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-slate-800" th:text="${m.name}">Name</p>
+                                <p class="text-xs text-slate-400" th:text="${m.role}">Role</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span th:unless="${m.active}" class="text-xs bg-slate-100 text-slate-400 px-2 py-0.5 rounded font-bold">Hidden</span>
+                            <svg class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </summary>
+                    <form th:action="@{/admin/about/team/edit/{id}(id=${m.id})}" method="post"
+                          class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Name</label>
+                            <input type="text" name="name" th:value="${m.name}" required
+                                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Role / Title</label>
+                            <input type="text" name="role" th:value="${m.role}"
+                                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Bio</label>
+                            <textarea name="bio" rows="3" th:text="${m.bio}"
+                                      class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Image URL</label>
+                            <input type="text" name="imageUrl" th:value="${m.imageUrl}"
+                                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                                   placeholder="/uploads/avatars/photo.jpg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Display Order</label>
+                            <input type="number" name="displayOrder" th:value="${m.displayOrder}"
+                                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" name="active" value="true" th:checked="${m.active}"
+                                   class="w-4 h-4 accent-[#4d78c0]">
+                            <label class="text-xs font-semibold text-slate-600">Visible on public page</label>
+                        </div>
+                        <div class="md:col-span-2 flex items-center gap-3">
+                            <button type="submit"
+                                    class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest rounded transition">
+                                Save
+                            </button>
+                            <form th:action="@{/admin/about/team/delete/{id}(id=${m.id})}" method="post" class="inline">
+                                <button type="submit"
+                                        class="text-xs text-red-500 hover:text-red-700 font-semibold transition"
+                                        onclick="return confirm('Remove this team member?')">
+                                    Remove
+                                </button>
+                            </form>
+                        </div>
+                    </form>
+                </details>
+            </div>
+        </div>
+
+        <div class="px-6 py-6 border-t border-slate-100">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Add New Member</p>
+            <form th:action="@{/admin/about/team/new}" method="post"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Name *</label>
+                    <input type="text" name="name" required
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="Full name">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Role / Title</label>
+                    <input type="text" name="role"
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. Co-Founder & CEO">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Bio</label>
+                    <textarea name="bio" rows="2"
+                              class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                              placeholder="Short biography..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Image URL</label>
+                    <input type="text" name="imageUrl"
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="/uploads/avatars/photo.jpg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Display Order</label>
+                    <input type="number" name="displayOrder" value="0"
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit"
+                            class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition">
+                        + Add Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section id="values" class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Company Values</h2>
+            <span class="text-xs text-slate-400" th:text="${#lists.size(values)} + ' values'">0 values</span>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(values)}">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="text-left px-6 py-3">Icon</th>
+                        <th class="text-left px-6 py-3">Title</th>
+                        <th class="text-left px-6 py-3">Description</th>
+                        <th class="text-left px-6 py-3">Order</th>
+                        <th class="text-left px-6 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="v : ${values}" class="hover:bg-slate-50">
+                        <td class="px-6 py-3 text-xl" th:text="${v.icon}">🏆</td>
+                        <td class="px-6 py-3 font-semibold text-slate-800" th:text="${v.title}">Title</td>
+                        <td class="px-6 py-3 text-xs text-slate-500 max-w-xs truncate" th:text="${v.description}">Desc</td>
+                        <td class="px-6 py-3 text-xs text-slate-400" th:text="${v.displayOrder}">0</td>
+                        <td class="px-6 py-3">
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                        th:onclick="|openValueEdit(${v.id},'${v.icon}','${v.title}',\`${v.description}\`,${v.displayOrder})|"
+                                        class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded font-semibold transition">Edit</button>
+                                <form th:action="@{/admin/about/values/delete/{id}(id=${v.id})}" method="post" class="inline">
+                                    <button type="submit"
+                                            class="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded font-semibold transition"
+                                            onclick="return confirm('Delete this value?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${#lists.isEmpty(values)}" class="px-6 py-8 text-center">
+            <p class="text-sm text-slate-400">No values yet. Add your first one below.</p>
+        </div>
+
+        <div class="px-6 py-6 border-t border-slate-100">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Add New Value</p>
+            <form th:action="@{/admin/about/values/new}" method="post"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Icon (emoji)</label>
+                    <input type="text" name="icon"
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="🏆">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Title *</label>
+                    <input type="text" name="title" required
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]"
+                           placeholder="e.g. Quality First">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Description</label>
+                    <textarea name="description" rows="2"
+                              class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"
+                              placeholder="Explain this value..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Display Order</label>
+                    <input type="number" name="displayOrder" value="0"
+                           class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit"
+                            class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition">
+                        + Add Value
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</main>
+
+<div id="value-edit-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
+        <h3 class="text-sm font-bold uppercase tracking-widest mb-6">Edit Value</h3>
+        <form id="value-edit-form" method="post" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Icon</label>
+                    <input type="text" id="edit-icon" name="icon" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Title *</label>
+                    <input type="text" id="edit-title" name="title" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Description</label>
+                <textarea id="edit-desc" name="description" rows="3" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0] resize-none"></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Display Order</label>
+                <input type="number" id="edit-order" name="displayOrder" class="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:border-[#4d78c0]">
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" class="bg-[#1a2336] hover:bg-[#4d78c0] text-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition">Save</button>
+                <button type="button" onclick="document.getElementById('value-edit-modal').classList.add('hidden')"
+                        class="text-xs text-slate-500 hover:text-slate-700 font-semibold">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openValueEdit(id, icon, title, desc, order) {
+    document.getElementById('edit-icon').value  = icon;
+    document.getElementById('edit-title').value = title;
+    document.getElementById('edit-desc').value  = desc;
+    document.getElementById('edit-order').value = order;
+    document.getElementById('value-edit-form').action = '/admin/about/values/edit/' + id;
+    document.getElementById('value-edit-modal').classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>
