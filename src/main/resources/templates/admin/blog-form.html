@@ -22,6 +22,7 @@
             <span class="text-slate-600">|</span>
             <span class="text-sm font-bold" th:text="${editing ? 'Edit Post' : 'New Post'}">Post</span>
         </div>
+        <div th:replace="~{fragments/bell :: bell}"></div>
     </nav>
     <main class="max-w-4xl mx-auto px-6 py-12">
         <form th:action="${editing ? '/admin/blog/edit/' + post.id : '/admin/blog/new'}"

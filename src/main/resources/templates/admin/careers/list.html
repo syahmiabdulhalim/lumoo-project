@@ -13,10 +13,13 @@
             <span class="text-slate-600">|</span>
             <span class="text-sm font-bold">Career Postings</span>
         </div>
-        <a href="/admin/careers/new"
-           class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
-            + New Posting
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="/admin/careers/new"
+               class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
+                + New Posting
+            </a>
+            <div th:replace="~{fragments/bell :: bell}"></div>
+        </div>
     </nav>
     <main class="max-w-6xl mx-auto px-6 py-12">
         <div th:if="${flashMsg != null}" id="flash-toast"

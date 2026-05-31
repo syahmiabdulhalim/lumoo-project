@@ -14,7 +14,10 @@
         <span class="text-slate-600">|</span>
         <span class="text-sm font-bold">About Us Editor</span>
     </div>
-    <a href="/about" target="_blank" class="text-xs text-slate-400 hover:text-white font-semibold transition">Preview Page →</a>
+    <div class="flex items-center gap-3">
+        <a href="/about" target="_blank" class="text-xs text-slate-400 hover:text-white font-semibold transition">Preview Page →</a>
+        <div th:replace="~{fragments/bell :: bell}"></div>
+    </div>
 </nav>
 
 <div th:if="${flashMsg != null}" id="flash-toast"
