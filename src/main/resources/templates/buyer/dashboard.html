@@ -40,6 +40,19 @@
                 if (t) { t.style.opacity = '0'; t.style.transform = 'translateY(-8px)'; setTimeout(function(){ t.remove(); }, 500); }
             }, 5000);
         </script>
+        <div th:if="${param.payment_error != null}"
+             id="payment-error-toast"
+             class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-red-500 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3">
+            <span class="text-red-500 text-lg shrink-0">⚠</span>
+            <p class="text-xs font-bold text-slate-700" th:text="${param.payment_error[0]}"></p>
+        </div>
+        <script th:if="${param.payment_error != null}">
+            history.replaceState(null, '', '/buyer/dashboard');
+            setTimeout(function() {
+                var t = document.getElementById('payment-error-toast');
+                if (t) { t.style.opacity='0'; setTimeout(function(){ t.remove(); },500); }
+            }, 8000);
+        </script>
         <div th:if="${param.containsKey('payment_cancelled')}"
              id="cancel-toast"
              class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-orange-400 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">

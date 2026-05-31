@@ -210,8 +210,10 @@ public class WebController {
         try {
             String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));
             return "redirect:" + paymentUrl;
+        } catch (IllegalArgumentException e) {
+            return "redirect:/buyer/dashboard?payment_error=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return "redirect:/buyer/dashboard?error=payment_failed";
+            return "redirect:/buyer/dashboard?payment_error=" + java.net.URLEncoder.encode("Payment initiation failed. Please try again.", java.nio.charset.StandardCharsets.UTF_8);
         }
     }
     @GetMapping("/buyer/order/{id}")

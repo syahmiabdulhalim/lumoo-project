@@ -55,6 +55,9 @@ public class ModemPayService {
         if (orders == null || orders.isEmpty()) throw new IllegalArgumentException("No orders");
         Order first   = orders.get(0);
         long  total   = orders.stream().mapToLong(o -> Math.round(o.getTotalAmount())).sum();
+        if (total < 10) {
+            throw new IllegalArgumentException("Minimum order amount for online payment is GMD 10. Current total: GMD " + total + ".");
+        }
         String orderIds = orders.stream()
                 .map(o -> o.getId().toString())
                 .collect(Collectors.joining(","));
