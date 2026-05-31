@@ -55,9 +55,11 @@ services:
     container_name: lumoo-redis
     mem_limit: 64m
     command: >
-      sh -c "[ -n \"$$REDIS_PASSWORD\" ] && redis-server --requirepass $$REDIS_PASSWORD || redis-server"
+      redis-server --requirepass ${REDIS_PASSWORD}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
