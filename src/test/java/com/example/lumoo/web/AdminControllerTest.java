@@ -103,7 +103,7 @@ class AdminControllerTest {
                         .param("orderId", "1")
                         .param("status", "SHIPPED"))
                 .andExpect(status().is3xxRedirection());
-        verify(orderService).updateStatus(1L, "SHIPPED");
+        verify(orderService).updateStatus(1L, "SHIPPED", null, null);
     }
     @Test
     void deleteOrder_redirects() throws Exception {

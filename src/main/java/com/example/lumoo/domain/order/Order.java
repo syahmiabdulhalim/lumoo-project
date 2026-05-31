@@ -16,6 +16,8 @@ public class Order {
     private String address;
     private String paymentMethod;
     private String trackingNumber;
+    private LocalDateTime shippedAt;
+    private java.time.LocalDate estimatedDeliveryDate;
     private String returnReason;
     private String paymentProofUrl;
     private String modempayPaymentId;
@@ -52,6 +54,10 @@ private LocalDateTime createdAt;
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     public String getTrackingNumber() { return trackingNumber; }
     public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
+    public LocalDateTime getShippedAt() { return shippedAt; }
+    public void setShippedAt(LocalDateTime shippedAt) { this.shippedAt = shippedAt; }
+    public java.time.LocalDate getEstimatedDeliveryDate() { return estimatedDeliveryDate; }
+    public void setEstimatedDeliveryDate(java.time.LocalDate estimatedDeliveryDate) { this.estimatedDeliveryDate = estimatedDeliveryDate; }
     public String getReturnReason() { return returnReason; }
     public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
     public String getPaymentProofUrl() { return paymentProofUrl; }

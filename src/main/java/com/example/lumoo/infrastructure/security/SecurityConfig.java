@@ -40,6 +40,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/uploads/kyc/**").hasRole("ADMIN")
     .requestMatchers("/stores", "/store/**", "/product/**", "/category/**", "/blog", "/blog/**", "/sitemap.xml", "/privacy-policy", "/terms", "/cookie-policy", "/returns", "/subscribe").permitAll()
     .requestMatchers("/careers", "/careers/**", "/partnerships", "/partnerships/**", "/about").permitAll()
+    .requestMatchers("/track", "/track/**").permitAll()
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
     .requestMatchers("/api/customer-rights/**").permitAll()

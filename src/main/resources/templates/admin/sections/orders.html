@@ -47,20 +47,37 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <form th:action="@{/admin/update-order-status}" method="post" class="flex items-center gap-2">
+                                <form th:action="@{/admin/update-order-status}" method="post" class="flex flex-col gap-2">
                                     <input type="hidden" name="orderId" th:value="${o.id}">
-                                    <select name="status" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="PENDING"          th:selected="${o.status == 'PENDING'}">Pending</option>
-                                        <option value="PAID"             th:selected="${o.status == 'PAID'}">Paid</option>
-                                        <option value="SHIPPED"          th:selected="${o.status == 'SHIPPED'}">Shipped</option>
-                                        <option value="DELIVERED"        th:selected="${o.status == 'DELIVERED'}">Delivered</option>
-                                        <option value="CANCELLED"        th:selected="${o.status == 'CANCELLED'}">Cancelled</option>
-                                        <option value="RETURN_REQUESTED" th:selected="${o.status == 'RETURN_REQUESTED'}">Return Requested</option>
-                                        <option value="RETURNED"         th:selected="${o.status == 'RETURNED'}">Returned</option>
-                                    </select>
-                                    <button type="submit" class="text-xs bg-slate-800 hover:bg-[#4d78c0] text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
-                                        Save
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <select name="status"
+                                                th:id="'status-' + ${o.id}"
+                                                onchange="toggleShipFields(this)"
+                                                class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="PENDING"          th:selected="${o.status == 'PENDING'}">Pending</option>
+                                            <option value="PAID"             th:selected="${o.status == 'PAID'}">Paid</option>
+                                            <option value="SHIPPED"          th:selected="${o.status == 'SHIPPED'}">Shipped</option>
+                                            <option value="DELIVERED"        th:selected="${o.status == 'DELIVERED'}">Delivered</option>
+                                            <option value="CANCELLED"        th:selected="${o.status == 'CANCELLED'}">Cancelled</option>
+                                            <option value="RETURN_REQUESTED" th:selected="${o.status == 'RETURN_REQUESTED'}">Return Requested</option>
+                                            <option value="RETURNED"         th:selected="${o.status == 'RETURNED'}">Returned</option>
+                                        </select>
+                                        <button type="submit" class="text-xs bg-slate-800 hover:bg-[#4d78c0] text-white px-3 py-1.5 rounded-lg font-medium transition-colors">
+                                            Save
+                                        </button>
+                                    </div>
+                                    <div th:id="'ship-fields-' + ${o.id}"
+                                         th:classappend="${o.status == 'SHIPPED'} ? '' : 'hidden'"
+                                         class="ship-extra flex flex-col gap-1.5">
+                                        <input type="text" name="trackingNumber"
+                                               th:value="${o.trackingNumber}"
+                                               placeholder="Tracking number (optional)"
+                                               class="text-xs border border-slate-200 rounded px-2 py-1.5 w-48 focus:outline-none focus:border-blue-400">
+                                        <input type="date" name="estimatedDeliveryDate"
+                                               th:value="${o.estimatedDeliveryDate}"
+                                               class="text-xs border border-slate-200 rounded px-2 py-1.5 w-48 focus:outline-none focus:border-blue-400"
+                                               title="Estimated delivery date">
+                                    </div>
                                 </form>
                             </td>
                             <td class="px-6 py-4">
@@ -119,6 +136,15 @@
             </div>
         </div>
     </section>
+    <script>
+    function toggleShipFields(select) {
+        var row = select.closest('form');
+        var extra = row.querySelector('.ship-extra');
+        if (!extra) return;
+        if (select.value === 'SHIPPED') extra.classList.remove('hidden');
+        else extra.classList.add('hidden');
+    }
+    </script>
     <section id="proof-review">
         <div class="bg-white rounded-xl border border-yellow-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-yellow-100 flex items-center justify-between bg-yellow-50">

@@ -31,6 +31,7 @@ public final class EmailTemplates {
               <tr><td style="padding:8px;color:#888;font-size:12px">Delivery to</td><td style="padding:8px;font-size:14px">%s</td></tr>
             </table>
             <p style="color:#444;font-size:13px">We'll notify you when your order is confirmed and shipped.</p>
+            <a href="https://lumoo.my/track" style="display:inline-block;margin-top:16px;background:#4d78c0;color:white;padding:12px 24px;font-size:12px;font-weight:bold;text-decoration:none;border-radius:4px">Track Your Order →</a>
             """.formatted(name, orderId, orderId, total, address));
     }
 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Track Your Order — LUMOO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans'] min-h-screen">
+
+<nav class="flex justify-between items-center px-8 md:px-12 py-5 bg-white shadow-sm sticky top-0 z-50">
+    <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
+    <a href="/" class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-gray-800 transition">← Back to Store</a>
+</nav>
+
+<main class="max-w-2xl mx-auto px-6 py-16">
+
+    <!-- Search form -->
+    <div class="text-center mb-12">
+        <p class="text-[9px] text-[#4d78c0] uppercase tracking-[0.4em] font-black mb-3">Order Tracking</p>
+        <h1 class="text-3xl font-black tracking-tighter mb-2">Where is my order?</h1>
+        <p class="text-sm text-gray-400">Enter your order ID and email to track your delivery.</p>
+    </div>
+
+    <div class="bg-white border border-gray-100 shadow-sm p-8 mb-8">
+        <form method="post" th:action="@{/track}" class="flex flex-col gap-4">
+            <div>
+                <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Order ID</label>
+                <input type="text" name="orderId" required placeholder="e.g. LMO-123 or just 123"
+                       th:value="${order != null ? 'LMO-' + order.id : ''}"
+                       class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent">
+            </div>
+            <div>
+                <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Email Address</label>
+                <input type="email" name="email" required placeholder="Email used when ordering"
+                       class="w-full border-b border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent">
+            </div>
+            <div th:if="${error}" class="bg-red-50 text-red-600 text-xs px-4 py-3 rounded font-semibold" th:text="${error}"></div>
+            <button type="submit"
+                    class="bg-[#1a2336] text-white py-4 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#4d78c0] transition duration-300 mt-2">
+                Track Order →
+            </button>
+        </form>
+    </div>
+
+    <!-- Result -->
+    <div th:if="${order != null}">
+
+        <!-- Order header -->
+        <div class="bg-[#1a2336] text-white p-6 mb-1 flex items-center justify-between">
+            <div>
+                <p class="text-[9px] text-blue-300 uppercase tracking-[0.3em] font-black mb-1">Order</p>
+                <p class="text-xl font-black tracking-tighter" th:text="'#LMO-' + ${order.id}">LMO-0</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[9px] text-blue-300 uppercase tracking-[0.3em] font-black mb-1">Total</p>
+                <p class="text-xl font-black" th:text="'GMD ' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">GMD 0</p>
+            </div>
+        </div>
+        <div class="bg-[#4d78c0] text-white px-6 py-3 mb-8 flex items-center justify-between text-xs">
+            <span th:text="${order.orderDate != null ? #temporals.format(order.orderDate, 'dd MMM yyyy, hh:mm a') : ''}"></span>
+            <span class="font-black uppercase tracking-wider" th:text="${order.paymentMethod}"></span>
+        </div>
+
+        <!-- Status timeline -->
+        <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-8">Delivery Status</p>
+
+            <ol class="relative border-l-2 border-gray-100 ml-3 space-y-0">
+
+                <!-- Step 1: Order Placed -->
+                <li class="mb-8 ml-6">
+                    <span class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white bg-green-500">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-green-600">Order Placed</h3>
+                    <p class="text-[10px] text-gray-400 mt-0.5"
+                       th:text="${order.orderDate != null ? #temporals.format(order.orderDate, 'dd MMM yyyy') : 'Confirmed'}"></p>
+                </li>
+
+                <!-- Step 2: Payment -->
+                <li class="mb-8 ml-6"
+                    th:with="paid=${order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'DELIVERED'}">
+                    <span th:classappend="${paid} ? 'bg-green-500' : 'bg-gray-200'"
+                          class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white">
+                        <svg th:if="${paid}" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        <span th:unless="${paid}" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                    </span>
+                    <h3 th:classappend="${paid} ? 'text-green-600' : 'text-gray-400'"
+                        class="text-xs font-black uppercase tracking-wider">Payment Confirmed</h3>
+                    <p class="text-[10px] text-gray-400 mt-0.5" th:text="${paid} ? 'Your payment has been verified.' : 'Waiting for payment verification.'"></p>
+                </li>
+
+                <!-- Step 3: Being Prepared -->
+                <li class="mb-8 ml-6"
+                    th:with="preparing=${order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'DELIVERED'}">
+                    <span th:classappend="${preparing} ? 'bg-green-500' : 'bg-gray-200'"
+                          class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white">
+                        <svg th:if="${preparing}" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        <span th:unless="${preparing}" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                    </span>
+                    <h3 th:classappend="${preparing} ? 'text-green-600' : 'text-gray-400'"
+                        class="text-xs font-black uppercase tracking-wider">Being Prepared</h3>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Your order is being packed by the vendor.</p>
+                </li>
+
+                <!-- Step 4: Shipped -->
+                <li class="mb-8 ml-6"
+                    th:with="shipped=${order.status == 'SHIPPED' or order.status == 'DELIVERED'}">
+                    <span th:classappend="${shipped} ? 'bg-[#4d78c0]' : (order.status == 'PAID' ? 'bg-blue-200 animate-pulse' : 'bg-gray-200')"
+                          class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white">
+                        <svg th:if="${shipped}" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        <span th:unless="${shipped}" class="w-2 h-2 rounded-full" th:classappend="${order.status == 'PAID'} ? 'bg-blue-400' : 'bg-gray-400'"></span>
+                    </span>
+                    <h3 th:classappend="${shipped} ? 'text-[#4d78c0]' : 'text-gray-400'"
+                        class="text-xs font-black uppercase tracking-wider">Out for Delivery</h3>
+                    <div th:if="${shipped}">
+                        <p class="text-[10px] text-gray-500 mt-0.5"
+                           th:text="${order.shippedAt != null ? 'Shipped on ' + #temporals.format(order.shippedAt, 'dd MMM yyyy') : 'Your order is on its way!'}"></p>
+                        <div th:if="${order.trackingNumber != null and !order.trackingNumber.isEmpty()}"
+                             class="mt-2 bg-blue-50 border border-blue-100 rounded px-3 py-2 inline-block">
+                            <p class="text-[9px] text-blue-400 uppercase font-black tracking-wider">Tracking Number</p>
+                            <p class="text-sm font-black text-[#1a2336]" th:text="${order.trackingNumber}"></p>
+                        </div>
+                        <div th:if="${order.estimatedDeliveryDate != null}"
+                             class="mt-2 bg-green-50 border border-green-100 rounded px-3 py-2 inline-block ml-2">
+                            <p class="text-[9px] text-green-500 uppercase font-black tracking-wider">Expected By</p>
+                            <p class="text-sm font-black text-green-700"
+                               th:text="${#temporals.format(order.estimatedDeliveryDate, 'dd MMM yyyy')}"></p>
+                        </div>
+                    </div>
+                    <p th:unless="${shipped}" class="text-[10px] text-gray-400 mt-0.5">Waiting to be dispatched.</p>
+                </li>
+
+                <!-- Step 5: Delivered -->
+                <li class="ml-6"
+                    th:with="delivered=${order.status == 'DELIVERED'}">
+                    <span th:classappend="${delivered} ? 'bg-green-500' : 'bg-gray-200'"
+                          class="absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full ring-4 ring-white">
+                        <svg th:if="${delivered}" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        <span th:unless="${delivered}" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                    </span>
+                    <h3 th:classappend="${delivered} ? 'text-green-600' : 'text-gray-400'"
+                        class="text-xs font-black uppercase tracking-wider">Delivered</h3>
+                    <p class="text-[10px] text-gray-400 mt-0.5" th:text="${delivered} ? 'Your order has been delivered. Thank you!' : 'Pending delivery.'"></p>
+                </li>
+
+            </ol>
+
+            <!-- Cancelled / Return -->
+            <div th:if="${order.status == 'CANCELLED'}"
+                 class="mt-8 bg-red-50 border border-red-100 rounded-lg px-5 py-4 flex items-center gap-3">
+                <svg class="w-5 h-5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <div>
+                    <p class="text-xs font-black text-red-700 uppercase tracking-wider">Order Cancelled</p>
+                    <p class="text-[10px] text-red-500 mt-0.5">This order has been cancelled. Contact us if you have questions.</p>
+                </div>
+            </div>
+            <div th:if="${order.status == 'RETURN_REQUESTED' or order.status == 'RETURNED'}"
+                 class="mt-8 bg-orange-50 border border-orange-100 rounded-lg px-5 py-4 flex items-center gap-3">
+                <svg class="w-5 h-5 text-orange-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                <div>
+                    <p class="text-xs font-black text-orange-700 uppercase tracking-wider"
+                       th:text="${order.status == 'RETURNED'} ? 'Return Processed' : 'Return Requested'"></p>
+                    <p class="text-[10px] text-orange-500 mt-0.5">Our team will contact you shortly to arrange the return.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escrow trust notice -->
+        <div class="bg-blue-50 border border-blue-100 rounded-lg px-6 py-4 mb-6 flex items-start gap-3">
+            <svg class="w-5 h-5 text-[#4d78c0] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <div>
+                <p class="text-xs font-black text-[#1a2336] uppercase tracking-wider mb-1">Your Payment is Protected</p>
+                <p class="text-[11px] text-gray-500 leading-relaxed">Your payment is held securely and only released to the vendor after your order is confirmed delivered. If there is a problem, contact us immediately.</p>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="bg-white border border-gray-100 shadow-sm p-6">
+            <p class="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-5">Items in This Order</p>
+            <div class="divide-y divide-gray-50">
+                <div th:each="item : ${items}" class="flex items-center justify-between py-3">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800" th:text="${item.productName}">Product</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5" th:text="'Qty: ' + ${item.quantity}"></p>
+                    </div>
+                    <p class="text-sm font-black text-[#1a2336]"
+                       th:text="'GMD ' + ${#numbers.formatDecimal(item.subtotal, 1, 2)}"></p>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-4 mt-2 flex justify-between items-center">
+                <p class="text-[9px] font-black uppercase tracking-widest text-gray-400">Total</p>
+                <p class="text-lg font-black text-[#1a2336]"
+                   th:text="'GMD ' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></p>
+            </div>
+        </div>
+
+        <!-- Help -->
+        <div class="text-center mt-8">
+            <p class="text-xs text-gray-400">Need help? <a href="/contact" class="text-[#4d78c0] font-bold hover:underline">Contact us</a> or
+                <a th:href="'https://wa.me/?text=Hi, I need help with order LMO-' + ${order.id}"
+                   target="_blank" rel="noopener" class="text-green-600 font-bold hover:underline">WhatsApp us →</a></p>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

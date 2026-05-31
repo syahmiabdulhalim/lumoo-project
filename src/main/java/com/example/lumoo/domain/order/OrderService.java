@@ -185,6 +185,7 @@ public class OrderService {
         String s = order.getStatus();
         if (!s.equals("PAID")) return ShipResult.INVALID_STATUS;
         order.setStatus("SHIPPED");
+        order.setShippedAt(LocalDateTime.now());
         if (trackingNumber != null && !trackingNumber.isBlank())
             order.setTrackingNumber(trackingNumber.trim());
         orderRepository.save(order);
@@ -248,8 +249,19 @@ public class OrderService {
     }
     @Transactional
     public void updateStatus(Long orderId, String status) {
+        updateStatus(orderId, status, null, null);
+    }
+
+    public void updateStatus(Long orderId, String status, String trackingNumber, java.time.LocalDate estimatedDelivery) {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
             o.setStatus(status);
+            if ("SHIPPED".equals(status)) {
+                o.setShippedAt(LocalDateTime.now());
+                if (trackingNumber != null && !trackingNumber.isBlank())
+                    o.setTrackingNumber(trackingNumber.trim());
+                if (estimatedDelivery != null)
+                    o.setEstimatedDeliveryDate(estimatedDelivery);
+            }
             orderRepository.save(o);
             String email = o.getUser().getEmail();
             String name  = o.getUser().getUsername();

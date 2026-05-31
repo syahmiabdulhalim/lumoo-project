@@ -146,8 +146,15 @@ public class AdminController {
         return "redirect:/admin/dashboard#users";
     }
     @PostMapping("/update-order-status")
-    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam String status, HttpServletRequest req) {
-        orderService.updateStatus(orderId, status);
+    public String updateOrderStatus(@RequestParam Long orderId, @RequestParam String status,
+                                    @RequestParam(required = false) String trackingNumber,
+                                    @RequestParam(required = false) String estimatedDeliveryDate,
+                                    HttpServletRequest req) {
+        java.time.LocalDate eta = null;
+        if (estimatedDeliveryDate != null && !estimatedDeliveryDate.isBlank()) {
+            try { eta = java.time.LocalDate.parse(estimatedDeliveryDate); } catch (Exception ignored) {}
+        }
+        orderService.updateStatus(orderId, status, trackingNumber, eta);
         auditService.log("ORDER_STATUS_UPDATED", "Order", String.valueOf(orderId), null, java.util.Map.of("status", status), req);
         log.info("[Admin] Order #{} status set to {} by {}", orderId, status, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
         return "redirect:/admin/dashboard#orders";
