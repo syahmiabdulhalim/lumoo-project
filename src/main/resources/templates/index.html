@@ -76,7 +76,7 @@
     </div>
     <div class="bg-black text-white py-3 marquee-track">
         <div class="marquee-inner text-[8px] font-black uppercase tracking-widest">
-            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over RM500</span>
+            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over GMD500</span>
             <span class="px-3 text-[#4d78c0]">★</span>
             <span class="px-8 whitespace-nowrap">Quality Assured Construction Materials</span>
             <span class="px-3 text-[#4d78c0]">★</span>
@@ -84,7 +84,7 @@
             <span class="px-3 text-[#4d78c0]">★</span>
             <span class="px-8 whitespace-nowrap">New Stock Arriving Weekly</span>
             <span class="px-3 text-[#4d78c0]">★</span>
-            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over RM500</span>
+            <span class="px-8 whitespace-nowrap">Free Delivery on Orders Over GMD500</span>
             <span class="px-3 text-[#4d78c0]">★</span>
             <span class="px-8 whitespace-nowrap">Quality Assured Construction Materials</span>
             <span class="px-3 text-[#4d78c0]">★</span>
@@ -217,7 +217,7 @@
                 <div class="py-4 px-1 bg-white border-t border-gray-100 group-hover:border-black transition">
                     <p class="text-[7px] font-black uppercase tracking-widest text-gray-400 mb-1" th:text="${product.category}">Category</p>
                     <p class="text-xs font-bold tracking-tight leading-snug line-clamp-2 mb-2" th:text="${product.name}">Name</p>
-                    <p class="text-sm font-black" th:text="${'RM ' + product.price}">RM 0.00</p>
+                    <p class="text-sm font-black" th:text="${'GMD ' + #numbers.formatDecimal(product.price, 1, 2)}">GMD 0.00</p>
                 </div>
             </a>
         </div>
