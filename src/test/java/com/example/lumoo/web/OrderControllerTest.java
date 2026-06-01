@@ -38,6 +38,7 @@ class OrderControllerTest {
         User u = new User();
         u.setId(id);
         u.setEmail(email);
+        u.setEmailVerified(true);
         return u;
     }
     @Test

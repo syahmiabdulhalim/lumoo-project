@@ -17,6 +17,7 @@ class UserServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private NotificationRepository notificationRepository;
+    @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
     @InjectMocks private UserService userService;
     private User user;
     @BeforeEach

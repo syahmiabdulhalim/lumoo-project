@@ -35,15 +35,13 @@ class AdminControllerTest {
     @MockitoBean com.example.lumoo.domain.pdpp.AuditService auditService;
     @MockitoBean com.example.lumoo.domain.pdpp.AuditLogRepository auditLogRepository;
     @MockitoBean com.example.lumoo.infrastructure.email.EmailService emailService;
+    @MockitoBean com.example.lumoo.domain.order.OrderReportRepository orderReportRepository;
     @Test
     void dashboard_returns200() throws Exception {
-        when(orderService.getAll()).thenReturn(List.of());
-        when(productService.getAll()).thenReturn(List.of());
-        when(userService.getAll()).thenReturn(List.of());
-        when(inquiryService.getAll()).thenReturn(List.of());
-        when(productService.getPendingApproval()).thenReturn(List.of());
-        when(vendorApplicationService.getPending()).thenReturn(List.of());
-        when(productService.getPendingImageApproval()).thenReturn(List.of());
+        when(productService.countPendingApproval()).thenReturn(0L);
+        when(vendorApplicationService.countPending()).thenReturn(0L);
+        when(productService.countPendingImageApproval()).thenReturn(0L);
+        when(orderReportRepository.countByResolvedFalse()).thenReturn(0L);
         mvc.perform(get("/admin/dashboard"))
                 .andExpect(status().isOk());
     }

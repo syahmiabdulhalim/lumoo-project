@@ -155,9 +155,10 @@ class WebControllerTest {
         User user = new User();
         user.setId(1L);
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(user));
-        when(orderService.getUserOrders(user)).thenReturn(new java.util.ArrayList<>());
+        when(orderService.getUserOrdersPage(eq(user), anyInt(), anyInt()))
+                .thenReturn(new PageImpl<>(List.of()));
         when(vendorApplicationService.hasAlreadyApplied(user)).thenReturn(false);
-        when(userService.getAndMarkNotificationsRead(user)).thenReturn(List.of());
+        when(userService.getUnreadNotifications(user)).thenReturn(List.of());
         mvc.perform(get("/buyer/dashboard")
                         .principal(new UsernamePasswordAuthenticationToken("buyer@test.com", null, List.of())))
                 .andExpect(status().isOk());
