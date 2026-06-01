@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="content">
+
+    <!-- Status filter bar -->
+    <div class="flex items-center gap-1 px-4 pt-4 pb-0 flex-wrap">
+        <a th:href="@{/vendor/sections/orders}"
+           th:classappend="${statusFilter == null or statusFilter == ''} ? 'bg-[#4d78c0] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+           class="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors">
+            All
+        </a>
+        <a th:href="@{/vendor/sections/orders(status='PAID')}"
+           th:classappend="${statusFilter == 'PAID'} ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+           class="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors">
+            Needs Shipping
+            <span th:if="${paidCount > 0}"
+                  th:text="${paidCount}"
+                  class="bg-white/30 text-inherit text-[8px] font-black px-1 py-0.5 rounded-full">0</span>
+        </a>
+        <a th:href="@{/vendor/sections/orders(status='SHIPPED')}"
+           th:classappend="${statusFilter == 'SHIPPED'} ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+           class="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors">
+            Shipped
+        </a>
+        <a th:href="@{/vendor/sections/orders(status='DELIVERED')}"
+           th:classappend="${statusFilter == 'DELIVERED'} ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+           class="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors">
+            Delivered
+        </a>
+        <a th:href="@{/vendor/sections/orders(status='RETURN_REQUESTED')}"
+           th:classappend="${statusFilter == 'RETURN_REQUESTED'} ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+           class="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full transition-colors">
+            Returns
+            <span th:if="${returnCount > 0}"
+                  th:text="${returnCount}"
+                  class="bg-white/30 text-inherit text-[8px] font-black px-1 py-0.5 rounded-full">0</span>
+        </a>
+    </div>
+
+    <!-- Orders table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm" th:if="${vendorOrders != null and !#lists.isEmpty(vendorOrders)}">
+            <thead>
+                <tr class="bg-slate-50 border-y border-slate-100 mt-4">
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Order</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Items</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Customer</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Date</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Amount</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Status</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Tracking</th>
+                    <th class="text-left px-6 py-3 text-[10px] font-black uppercase tracking-wider text-slate-400">Deliver to</th>
+                    <th class="px-6 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <tr th:each="o : ${vendorOrders}" class="hover:bg-slate-50/60 transition-colors align-top">
+                    <td class="px-6 py-4">
+                        <span class="text-[11px] text-slate-400 font-mono" th:text="${'#LMO-' + o.id}"></span>
+                    </td>
+                    <td class="px-6 py-4 max-w-[200px]">
+                        <div th:each="item : ${o.items}" class="flex items-center gap-1.5 mb-1 last:mb-0">
+                            <span class="text-[10px] font-semibold text-slate-700" th:text="${item.productName}">Product</span>
+                            <span class="text-[9px] text-slate-400">× <span th:text="${item.quantity}">1</span></span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-[11px] text-slate-700 font-medium"
+                           th:text="${o.user != null ? o.user.getDisplayName() : '—'}"></p>
+                        <p class="text-[10px] text-slate-400"
+                           th:text="${o.user != null ? o.user.email : ''}"></p>
+                    </td>
+                    <td class="px-6 py-4 text-[10px] text-slate-400 whitespace-nowrap"
+                        th:text="${o.orderDate != null ? #temporals.format(o.orderDate, 'dd MMM yyyy') : '—'}"></td>
+                    <td class="px-6 py-4 text-xs font-black text-[#4d78c0] whitespace-nowrap"
+                        th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}"></td>
+                    <td class="px-6 py-4">
+                        <span class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full"
+                              th:text="${o.status}"
+                              th:classappend="${o.status == 'DELIVERED'}        ? 'bg-emerald-100 text-emerald-700' :
+                                             (${o.status == 'SHIPPED'}         ? 'bg-purple-100 text-purple-700'  :
+                                             (${o.status == 'PAID'}            ? 'bg-amber-100 text-amber-700'    :
+                                             (${o.status == 'RETURN_REQUESTED'}? 'bg-orange-100 text-orange-700'  :
+                                             (${o.status == 'RETURNED'}        ? 'bg-gray-100 text-gray-500'      :
+                                              'bg-blue-100 text-blue-700'))))">
+                        </span>
+                        <p th:if="${o.returnReason != null and !o.returnReason.isBlank()}"
+                           class="text-[10px] text-orange-500 mt-1 max-w-[120px] line-clamp-2"
+                           th:text="${o.returnReason}"></p>
+                    </td>
+                    <td class="px-6 py-4 text-[10px] text-slate-400 font-mono"
+                        th:text="${o.trackingNumber != null ? o.trackingNumber : '—'}"></td>
+                    <td class="px-6 py-4 text-[10px] text-slate-500 max-w-[160px]"
+                        th:text="${o.address != null ? o.address : '—'}"></td>
+                    <td class="px-6 py-4">
+                        <form th:if="${o.status == 'PAID'}"
+                              th:action="@{/vendor/order/{id}/ship(id=${o.id})}" method="post"
+                              class="flex flex-col gap-1.5 min-w-[140px]">
+                            <input type="text" name="trackingNumber"
+                                   class="border border-slate-200 rounded px-2 py-1 text-[10px] focus:border-[#4d78c0] outline-none"
+                                   placeholder="Tracking # (optional)">
+                            <button type="submit"
+                                    class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded transition">
+                                Mark Shipped
+                            </button>
+                        </form>
+                        <span th:if="${o.status != 'PAID'}" class="text-[9px] text-slate-300">—</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${vendorOrders == null or #lists.isEmpty(vendorOrders)}" class="py-16 text-center">
+            <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <p class="text-xs text-slate-400">No orders found</p>
+        </div>
+
+        <div th:if="${ordersTotalPages > 1}"
+             class="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+            <a th:if="${ordersCurrentPage > 0}"
+               th:href="@{/vendor/sections/orders(page=${ordersCurrentPage - 1}, status=${statusFilter})}"
+               class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">← Previous</a>
+            <span class="text-xs text-slate-400 mx-auto"
+                  th:text="'Page ' + (${ordersCurrentPage} + 1) + ' of ' + ${ordersTotalPages}"></span>
+            <a th:if="${ordersCurrentPage + 1 < ordersTotalPages}"
+               th:href="@{/vendor/sections/orders(page=${ordersCurrentPage + 1}, status=${statusFilter})}"
+               class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">Next →</a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

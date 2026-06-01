@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUserOrderByCreatedAtDesc(User user);
+    List<Notification> findByUserAndIdLessThanOrderByCreatedAtDesc(User user, Long beforeId, org.springframework.data.domain.Pageable pageable);
+    List<Notification> findByUserOrderByCreatedAtDesc(User user, org.springframework.data.domain.Pageable pageable);
     long countByUserAndIsReadFalse(User user);
     List<Notification> findByUser(User user);
     List<Notification> findByUserAndIsReadFalse(User user);

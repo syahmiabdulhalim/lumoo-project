@@ -49,6 +49,9 @@ public class VendorApplicationService {
     public List<VendorApplication> getPending() {
         return applicationRepository.findByStatusOrderByAppliedAtDesc("PENDING");
     }
+    public long countPending() {
+        return applicationRepository.countByStatus("PENDING");
+    }
     public void approve(Long id) {
         applicationRepository.findById(id).ifPresent(app -> {
             app.setStatus("APPROVED");
@@ -58,7 +61,7 @@ public class VendorApplicationService {
             user.setRole(Role.VENDOR);
             userRepository.save(user);
             notificationRepository.save(new Notification(
-                "🎉 Congratulations! Your vendor application has been approved. Please log out and log back in to access your Vendor Hub.",
+                "🎉 Vendor application approved — Log out and back in to access your Vendor Hub.",
                 user
             ));
             emailService.sendEmail(user.getEmail(),
@@ -72,9 +75,9 @@ public class VendorApplicationService {
             app.setReviewedAt(LocalDateTime.now());
             if (note != null && !note.isBlank()) app.setRejectionNote(note.trim());
             applicationRepository.save(app);
-            String msg = "Your vendor application was not approved.";
-            if (note != null && !note.isBlank()) msg += " Reason: " + note.trim();
-            msg += " You may re-apply after 12 hours. Contact info@lumoo.my for help.";
+            String msg = "❌ Vendor application not approved."
+                    + (note != null && !note.isBlank() ? " Reason: " + note.trim() : "")
+                    + " You may re-apply after 12 hours.";
             notificationRepository.save(new Notification(msg, app.getUser()));
             emailService.sendEmail(app.getUser().getEmail(),
                     "Update on your LUMOO vendor application",

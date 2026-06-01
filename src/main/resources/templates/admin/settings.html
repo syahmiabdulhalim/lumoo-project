@@ -78,6 +78,18 @@
                 </div>
             </div>
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Vendor Payout Protection</h2>
+                <p class="text-[9px] text-gray-400 mb-4">Vendor earnings are held for this many days after delivery before being released. This gives buyers time to raise disputes before money leaves the platform.</p>
+                <div class="flex items-center gap-3 max-w-xs">
+                    <div class="flex-1">
+                        <label class="label">Hold Period (Days)</label>
+                        <input type="number" name="payoutHoldDays" min="0" max="30"
+                               th:value="${settings.payoutHoldDays}" class="input" placeholder="3">
+                    </div>
+                    <p class="text-[9px] text-gray-400 mt-5">0 = immediate payout</p>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">QMoney</h2>
                 <div class="grid grid-cols-2 gap-5">
                     <div>
@@ -151,6 +163,22 @@
                           class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
                           placeholder="Enter your terms of service here..."
                           th:text="${settings.termsText}"></textarea>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Returns &amp; Refunds</h2>
+                <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/returns</code>. Basic HTML is supported.</p>
+                <textarea name="returnsText" rows="12"
+                          class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
+                          placeholder="Enter your returns &amp; refunds policy here..."
+                          th:text="${settings.returnsText}"></textarea>
+            </div>
+            <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
+                <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Cookie Policy</h2>
+                <p class="text-[9px] text-gray-400 mb-3">This text appears at <code class="bg-gray-100 px-1">/cookie-policy</code>. Basic HTML is supported.</p>
+                <textarea name="cookiePolicyText" rows="12"
+                          class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
+                          placeholder="Enter your cookie policy here..."
+                          th:text="${settings.cookiePolicyText}"></textarea>
             </div>
         </div>
         <div id="panel-business" class="hidden">

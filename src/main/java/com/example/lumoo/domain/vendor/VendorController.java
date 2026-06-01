@@ -15,35 +15,52 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.security.Principal;
-import org.springframework.data.domain.Page;
 @Controller
 @RequestMapping("/vendor")
 public class VendorController {
     @Autowired private ProductService productService;
     @Autowired private OrderService orderService;
     @Autowired private UserService userService;
-    private static final int VENDOR_ORDERS_PAGE_SIZE = 20;
+    private static final int VENDOR_PAGE_SIZE = 20;
     @GetMapping("/dashboard")
-    public String vendorDashboard(Model model,
-                                  @AuthenticationPrincipal UserDetails currentUser,
-                                  @RequestParam(defaultValue = "0") int page) {
+    public String vendorDashboard(Model model, @AuthenticationPrincipal UserDetails currentUser) {
         User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
         Long vendorId = vendor.getId();
-        double totalRevenue  = orderService.sumVendorRevenue(vendorId);
-        double monthlySales  = orderService.sumVendorMonthlySales(vendorId);
-        long   orderCount    = orderService.countVendorOrders(vendorId);
-        double averageOrder  = orderCount == 0 ? 0.0 : totalRevenue / orderCount;
-        Page<Order> ordersPage = orderService.getVendorOrdersPage(vendorId, page, VENDOR_ORDERS_PAGE_SIZE);
-        model.addAttribute("products", productService.getByVendor(vendor));
-        model.addAttribute("vendorOrders", ordersPage.getContent());
-        model.addAttribute("ordersCurrentPage", ordersPage.getNumber());
-        model.addAttribute("ordersTotalPages", ordersPage.getTotalPages());
-        model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("averageOrder", averageOrder);
-        model.addAttribute("monthlySales", monthlySales);
+        double totalRevenue = orderService.sumVendorRevenue(vendorId);
+        double monthlySales = orderService.sumVendorMonthlySales(vendorId);
+        long   orderCount   = orderService.countVendorOrders(vendorId);
+        long   paidCount    = orderService.countVendorOrdersByStatus(vendorId, "PAID");
+        long   returnCount  = orderService.countVendorOrdersByStatus(vendorId, "RETURN_REQUESTED");
+        model.addAttribute("totalRevenue",    totalRevenue);
+        model.addAttribute("monthlySales",    monthlySales);
         model.addAttribute("totalSalesCount", orderCount);
-        model.addAttribute("vendorName", vendor.getUsername());
+        model.addAttribute("averageOrder",    orderCount == 0 ? 0.0 : totalRevenue / orderCount);
+        model.addAttribute("paidCount",       paidCount);
+        model.addAttribute("returnCount",     returnCount);
+        model.addAttribute("totalProducts",   productService.getByVendor(vendor).size());
+        model.addAttribute("vendorName",      vendor.getDisplayName());
         return "vendor/dashboard";
+    }
+    @GetMapping("/sections/orders")
+    public String sectionOrders(@AuthenticationPrincipal UserDetails currentUser, Model model,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "") String status) {
+        User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
+        Long vendorId = vendor.getId();
+        var ordersPage = orderService.getVendorOrdersPageFiltered(vendorId, status, page, VENDOR_PAGE_SIZE);
+        model.addAttribute("vendorOrders",      ordersPage.getContent());
+        model.addAttribute("ordersCurrentPage", ordersPage.getNumber());
+        model.addAttribute("ordersTotalPages",  ordersPage.getTotalPages());
+        model.addAttribute("statusFilter",      status);
+        model.addAttribute("paidCount",         orderService.countVendorOrdersByStatus(vendorId, "PAID"));
+        model.addAttribute("returnCount",       orderService.countVendorOrdersByStatus(vendorId, "RETURN_REQUESTED"));
+        return "vendor/sections/orders :: content";
+    }
+    @GetMapping("/sections/products")
+    public String sectionProducts(@AuthenticationPrincipal UserDetails currentUser, Model model) {
+        User vendor = userService.findByEmail(currentUser.getUsername()).orElseThrow();
+        model.addAttribute("products", productService.getByVendor(vendor));
+        return "vendor/sections/products :: content";
     }
     @GetMapping("/add-product")
     public String addProductPage(Model model) {

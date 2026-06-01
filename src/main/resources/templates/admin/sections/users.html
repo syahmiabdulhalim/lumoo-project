@@ -41,11 +41,17 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <span th:if="${u.verified}" class="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                    Verified
-                                </span>
-                                <span th:unless="${u.verified}" class="text-xs text-slate-400">Not verified</span>
+                                <div class="flex flex-col gap-1">
+                                    <span th:if="${u.verified}" class="inline-flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                        Verified
+                                    </span>
+                                    <span th:unless="${u.verified}" class="text-xs text-slate-400">Not verified</span>
+                                    <span th:if="${u.suspended}"
+                                          class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-full w-fit">
+                                        ⛔ Suspended
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
@@ -67,6 +73,20 @@
                                             th:data-form-id="'upgrade-form-' + ${u.id}">
                                         → Vendor
                                     </button>
+                                    <form th:if="${!u.suspended and u.role.name() != 'ADMIN'}"
+                                          th:action="@{/admin/suspend-user/{id}(id=${u.id})}" method="post">
+                                        <button type="submit"
+                                                class="text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100 transition whitespace-nowrap">
+                                            Suspend
+                                        </button>
+                                    </form>
+                                    <form th:if="${u.suspended}"
+                                          th:action="@{/admin/unsuspend-user/{id}(id=${u.id})}" method="post">
+                                        <button type="submit"
+                                                class="text-[10px] font-bold uppercase tracking-wide px-3 py-1.5 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition whitespace-nowrap">
+                                            Reinstate
+                                        </button>
+                                    </form>
                                     <button type="button" class="btn-lm-delete text-slate-300 hover:text-red-500 transition-colors ml-1"
                                        data-title="Delete User Account"
                                        th:data-msg="|Delete account for ${u.email}? All their orders and data will be removed.|"
@@ -133,6 +153,17 @@
                 <div th:if="${inquiries == null || inquiries.empty}" class="text-center py-16">
                     <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                     <p class="text-sm text-slate-400">No pending inquiries</p>
+                </div>
+                <div th:if="${inquiriesTotalPages > 1}"
+                     class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+                    <a th:if="${inquiriesCurrentPage > 0}"
+                       th:href="@{/admin/sections/users(inquiriesPage=${inquiriesCurrentPage - 1})}"
+                       class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">← Previous</a>
+                    <span class="text-xs text-slate-400 mx-auto"
+                          th:text="'Page ' + (${inquiriesCurrentPage} + 1) + ' of ' + ${inquiriesTotalPages}"></span>
+                    <a th:if="${inquiriesCurrentPage + 1 < inquiriesTotalPages}"
+                       th:href="@{/admin/sections/users(inquiriesPage=${inquiriesCurrentPage + 1})}"
+                       class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors">Next →</a>
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     http
         .csrf(csrf -> csrf
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-            .ignoringRequestMatchers("/api/payment/webhook", "/subscribe")
+            .ignoringRequestMatchers("/api/payment/webhook", "/subscribe", "/api/notifications/read-all")
         )
         .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
@@ -44,6 +44,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/shipping", "/api/shipping/**").permitAll()
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
+    .requestMatchers("/verify-email", "/resend-verification").permitAll()
     .requestMatchers("/api/customer-rights/**").permitAll()
     .requestMatchers("/api/payment/webhook").permitAll()
     .requestMatchers("/api/payment/initiate").authenticated()

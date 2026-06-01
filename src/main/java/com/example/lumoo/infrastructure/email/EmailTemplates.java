@@ -195,6 +195,16 @@ public final class EmailTemplates {
             """.formatted(name, reasonLine));
     }
 
+    public static String emailVerification(String name, String verifyLink) {
+        return wrap("Verify your LUMOO account", """
+            <p style="color:#444;font-size:14px">Hi <strong>%s</strong>,</p>
+            <p style="color:#444;font-size:14px">Thanks for registering. Click the button below to verify your email address and start shopping.</p>
+            <p style="text-align:center;margin:28px 0">
+              <a href="%s" style="background:#1a2336;color:#fff;padding:14px 32px;font-size:11px;font-weight:900;text-decoration:none;letter-spacing:0.15em;text-transform:uppercase">Verify My Email</a>
+            </p>
+            <p style="color:#999;font-size:12px">If you didn't create a LUMOO account, you can safely ignore this email.</p>
+            """.formatted(name, verifyLink));
+    }
     public static String adminDailyDigest(String date, long newOrders, double revenue,
                                            long pendingProof, long returnRequests,
                                            long pendingVendorApps, long newSubscribers,

@@ -66,6 +66,11 @@ public class OrderService {
     public List<Order> getUserOrders(User user) {
         return orderRepository.findByUserWithItems(user);
     }
+    public org.springframework.data.domain.Page<Order> getUserOrdersPage(User user, int page, int size) {
+        return orderRepository.findByUserPaged(user,
+            org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("orderDate").descending()));
+    }
     public List<Order> getVendorOrders(Long vendorId) {
         return orderRepository.findVendorOrdersWithItems(vendorId);
     }
@@ -87,6 +92,16 @@ public class OrderService {
         return orderRepository.findVendorOrdersPaged(vendorId,
             org.springframework.data.domain.PageRequest.of(page, size,
                 org.springframework.data.domain.Sort.by("createdAt").descending()));
+    }
+    public org.springframework.data.domain.Page<Order> getVendorOrdersPageFiltered(Long vendorId, String status, int page, int size) {
+        var pageable = org.springframework.data.domain.PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by("createdAt").descending());
+        if (status == null || status.isBlank() || "ALL".equals(status))
+            return orderRepository.findVendorOrdersPaged(vendorId, pageable);
+        return orderRepository.findVendorOrdersPagedByStatus(vendorId, status, pageable);
+    }
+    public long countVendorOrdersByStatus(Long vendorId, String status) {
+        return orderRepository.countVendorOrdersByStatus(vendorId, status);
     }
     public Optional<Order> findById(Long id) {
         return orderRepository.findById(id);
@@ -138,7 +153,7 @@ public class OrderService {
             String buyerName  = o.getUser().getUsername();
             emailService.sendEmail(buyerEmail, "Order #LMO-" + o.getId() + " received",
                     EmailTemplates.orderPlaced(buyerName, String.valueOf(o.getId()), o.getTotalAmount(), o.getAddress()));
-            userService.notifyAdmins("🛒 New order #LMO-" + o.getId() + " placed by " + buyerName + " — GMD " + String.format("%.2f", o.getTotalAmount()));
+            userService.notifyAdmins("🛒 New order #LMO-" + o.getId() + " — " + o.getUser().getDisplayName() + " — GMD " + String.format("%.2f", o.getTotalAmount()));
         }
         return orders;
     }
@@ -247,7 +262,7 @@ public class OrderService {
         order.setStatus("RETURN_REQUESTED");
         if (reason != null && !reason.isBlank()) order.setReturnReason(reason.trim());
         orderRepository.save(order);
-        userService.notifyAdmins("↩ Return requested for order #LMO-" + orderId + " by " + order.getUser().getUsername() + ".");
+        userService.notifyAdmins("↩ Return requested — #LMO-" + orderId + " by " + order.getUser().getDisplayName());
         return ReturnResult.REQUESTED;
     }
     public void resolveReturn(Long orderId) {
@@ -301,10 +316,11 @@ public class OrderService {
                 case "SHIPPED"   -> emailService.sendEmail(email, "Order #LMO-" + id + " shipped",
                                         EmailTemplates.orderShipped(name, id, o.getTrackingNumber()));
                 case "DELIVERED" -> {
+                    o.setDeliveredAt(LocalDateTime.now());
+                    o.setPayoutStatus("HELD");
                     emailService.sendEmail(email, "Order #LMO-" + id + " delivered",
                             EmailTemplates.orderDelivered(name, id));
                     sendReviewRequest(o, name, id);
-                    payoutService.tryPayoutVendor(o);
                 }
                 case "CANCELLED" -> emailService.sendEmail(email, "Order #LMO-" + id + " cancelled",
                                         EmailTemplates.orderCancelled(name, id, null));

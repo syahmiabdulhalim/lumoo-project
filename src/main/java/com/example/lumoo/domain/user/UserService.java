@@ -26,9 +26,12 @@ public class UserService {
 
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
+    @Value("${app.base-url:https://lumoo.my}")
+    private String baseUrl;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private NotificationRepository notificationRepository;
+    @Autowired private com.example.lumoo.infrastructure.email.EmailService emailService;
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -60,8 +63,33 @@ public class UserService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
+        String token = UUID.randomUUID().toString();
+        user.setEmailVerificationToken(token);
+        user.setEmailVerified(false);
         userRepository.save(user);
+        String link = baseUrl + "/verify-email?token=" + token;
+        emailService.sendEmail(email, "Verify your LUMOO account",
+            com.example.lumoo.infrastructure.email.EmailTemplates.emailVerification(email.split("@")[0], link));
         return true;
+    }
+    public boolean verifyEmail(String token) {
+        return userRepository.findByEmailVerificationToken(token).map(user -> {
+            user.setEmailVerified(true);
+            user.setEmailVerificationToken(null);
+            userRepository.save(user);
+            return true;
+        }).orElse(false);
+    }
+    public void resendVerification(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (user.isEmailVerified()) return;
+            String token = UUID.randomUUID().toString();
+            user.setEmailVerificationToken(token);
+            userRepository.save(user);
+            String link = baseUrl + "/verify-email?token=" + token;
+            emailService.sendEmail(email, "Verify your LUMOO account",
+                com.example.lumoo.infrastructure.email.EmailTemplates.emailVerification(email.split("@")[0], link));
+        });
     }
     public void updateProfile(User user, String fullName, String phone, String address) {
         user.setFullName(fullName);
@@ -121,6 +149,9 @@ public class UserService {
         userRepository.save(user);
         return PasswordChangeResult.SUCCESS;
     }
+    public List<Notification> getUnreadNotifications(User user) {
+        return notificationRepository.findByUserAndIsReadFalse(user);
+    }
     public List<Notification> getAndMarkNotificationsRead(User user) {
         List<Notification> notes = notificationRepository.findByUserAndIsReadFalse(user);
         if (notes != null && !notes.isEmpty()) {
@@ -139,6 +170,22 @@ public class UserService {
     public void notifyAdmins(String message) {
         userRepository.findByRole(Role.ADMIN).forEach(admin ->
                 notificationRepository.save(new Notification(message, admin)));
+    }
+    public void suspendUser(Long id) {
+        userRepository.findById(id).ifPresent(u -> {
+            u.setSuspended(true);
+            userRepository.save(u);
+            notificationRepository.save(new Notification(
+                "⛔ Your account has been suspended. Contact support@lumoo.my if you believe this is an error.", u));
+        });
+    }
+    public void unsuspendUser(Long id) {
+        userRepository.findById(id).ifPresent(u -> {
+            u.setSuspended(false);
+            userRepository.save(u);
+            notificationRepository.save(new Notification(
+                "✅ Your account suspension has been lifted. You can now log in normally.", u));
+        });
     }
     public boolean verifyUser(Long id) {
         return userRepository.findById(id).map(user -> {

@@ -15,8 +15,10 @@ public UserDetails loadUserByUsername(String username) throws UsernameNotFoundEx
     User user = userRepository.findByEmail(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     return new org.springframework.security.core.userdetails.User(
-            user.getEmail(), 
+            user.getEmail(),
             user.getPassword(),
+            !user.isSuspended(),  // enabled
+            true, true, true,
             Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
     );
 }

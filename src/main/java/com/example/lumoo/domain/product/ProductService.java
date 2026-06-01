@@ -74,8 +74,14 @@ public class ProductService {
     public List<Product> getPendingApproval() {
         return productRepository.findByApproved(false);
     }
+    public long countPendingApproval() {
+        return productRepository.countByApproved(false);
+    }
     public List<Product> getPendingImageApproval() {
         return productRepository.findByApprovedTrueAndImageApprovedFalse();
+    }
+    public long countPendingImageApproval() {
+        return productRepository.countByApprovedTrueAndImageApprovedFalse();
     }
     public List<Product> getApprovedByVendor(User vendor) {
         return productRepository.findByVendorAndApprovedTrue(vendor);
@@ -189,7 +195,7 @@ public class ProductService {
         if (ok) {
             productRepository.findById(productId).ifPresent(p -> {
                 if (p.getStock() <= LOW_STOCK_THRESHOLD && p.getVendor() != null) {
-                    String msg = "⚠ Low stock: \"" + p.getName() + "\" has only " + p.getStock() + " unit(s) left.";
+                    String msg = "⚠ Low stock — \"" + p.getName() + "\" has " + p.getStock() + " unit(s) left.";
                     boolean alreadyNotified = notificationRepository
                             .findByUser(p.getVendor()).stream()
                             .anyMatch(n -> !n.isRead() && n.getMessage().contains("Low stock") && n.getMessage().contains(p.getName()));

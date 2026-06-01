@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 @Service
 public class InquiryService {
     private static final Logger log = LoggerFactory.getLogger(InquiryService.class);
@@ -39,6 +41,9 @@ public class InquiryService {
     }
     public List<Inquiry> getAll() {
         return inquiryRepository.findAllByOrderByCreatedAtDesc();
+    }
+    public Page<Inquiry> getPage(int page, int size) {
+        return inquiryRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size));
     }
     public void delete(Long id) {
         inquiryRepository.deleteById(id);

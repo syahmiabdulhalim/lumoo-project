@@ -13,6 +13,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByVendor(User vendor);
     List<Product> findByCategory(String category);
     List<Product> findByApproved(boolean approved);
+    Page<Product> findByApproved(boolean approved, Pageable pageable);
+    long countByApproved(boolean approved);
+    Page<Product> findByApprovedTrueAndImageApprovedFalse(Pageable pageable);
+    long countByApprovedTrueAndImageApprovedFalse();
     List<Product> findByCategoryAndApproved(String category, boolean approved);
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Product p WHERE LOWER(p.category) = LOWER(:category) AND p.approved = true")
     List<Product> findByCategoryIgnoreCaseAndApproved(@org.springframework.data.repository.query.Param("category") String category);

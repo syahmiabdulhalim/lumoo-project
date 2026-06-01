@@ -27,6 +27,7 @@ public class SiteSettings {
     private String socialTwitter;
     private boolean cookieConsentEnabled = true;
     private int dataRetentionDays = 365;
+    private int payoutHoldDays = 3;
     private String pdpaRegistrationNumber;
     private String dataControllerName;
     private String dataControllerEmail;
@@ -34,6 +35,10 @@ public class SiteSettings {
     private String privacyPolicyText;
     @Column(columnDefinition = "TEXT")
     private String termsText;
+    @Column(columnDefinition = "TEXT")
+    private String returnsText;
+    @Column(columnDefinition = "TEXT")
+    private String cookiePolicyText;
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getBankName() { return bankName; }
@@ -80,6 +85,8 @@ public class SiteSettings {
     public void setCookieConsentEnabled(boolean cookieConsentEnabled) { this.cookieConsentEnabled = cookieConsentEnabled; }
     public int getDataRetentionDays() { return dataRetentionDays; }
     public void setDataRetentionDays(int dataRetentionDays) { this.dataRetentionDays = dataRetentionDays; }
+    public int getPayoutHoldDays() { return payoutHoldDays; }
+    public void setPayoutHoldDays(int payoutHoldDays) { this.payoutHoldDays = payoutHoldDays; }
     public String getPdpaRegistrationNumber() { return pdpaRegistrationNumber; }
     public void setPdpaRegistrationNumber(String pdpaRegistrationNumber) { this.pdpaRegistrationNumber = pdpaRegistrationNumber; }
     public String getDataControllerName() { return dataControllerName; }
@@ -90,4 +97,8 @@ public class SiteSettings {
     public void setPrivacyPolicyText(String privacyPolicyText) { this.privacyPolicyText = privacyPolicyText; }
     public String getTermsText() { return termsText; }
     public void setTermsText(String termsText) { this.termsText = termsText; }
+    public String getReturnsText() { return returnsText; }
+    public void setReturnsText(String returnsText) { this.returnsText = returnsText; }
+    public String getCookiePolicyText() { return cookiePolicyText; }
+    public void setCookiePolicyText(String cookiePolicyText) { this.cookiePolicyText = cookiePolicyText; }
 }

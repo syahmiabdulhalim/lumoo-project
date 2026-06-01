@@ -1,6 +1,7 @@
 package com.example.lumoo.domain.order;
-import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findOrdersByVendorId(@Param("vendorId") Long vendorId);
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.user = :user ORDER BY o.orderDate DESC")
     List<Order> findByUserWithItems(@Param("user") User user);
+    @Query(value = "SELECT DISTINCT o FROM Order o JOIN o.items i LEFT JOIN FETCH i.product WHERE o.user = :user",
+           countQuery = "SELECT COUNT(DISTINCT o) FROM Order o WHERE o.user = :user")
+    Page<Order> findByUserPaged(@Param("user") User user, Pageable pageable);
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.id = :id")
     Optional<Order> findByIdWithItems(@Param("id") Long id);
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
@@ -49,4 +53,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     double sumRevenueSince(@Param("since") LocalDateTime since);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :since")
     long countOrdersSince(@Param("since") LocalDateTime since);
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.payoutStatus = 'HELD' AND o.deliveredAt <= :cutoff")
+    List<Order> findHeldPayoutsReadyForRelease(@Param("cutoff") LocalDateTime cutoff);
+    @Query(value = "SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status",
+           countQuery = "SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status")
+    org.springframework.data.domain.Page<Order> findVendorOrdersPagedByStatus(@Param("vendorId") Long vendorId, @Param("status") String status, org.springframework.data.domain.Pageable pageable);
+    @Query("SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status")
+    long countVendorOrdersByStatus(@Param("vendorId") Long vendorId, @Param("status") String status);
 }

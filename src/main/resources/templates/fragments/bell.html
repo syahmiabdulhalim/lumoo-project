@@ -38,50 +38,82 @@
     (function() {
         var open = false;
 
-        function fetchNotifications() {
-            fetch('/api/notifications', { credentials: 'same-origin' })
-                .then(function(r) { return r.ok ? r.json() : null; })
-                .then(function(data) {
-                    if (!data) return;
-                    var badge = document.getElementById('bell-badge');
-                    var list  = document.getElementById('bell-list');
-                    var empty = document.getElementById('bell-empty');
-                    if (!badge || !list) return;
-
-                    if (data.unread > 0) {
-                        badge.textContent = data.unread > 9 ? '9+' : data.unread;
-                        badge.classList.remove('hidden');
-                    } else {
-                        badge.classList.add('hidden');
-                    }
-
-                    var existing = list.querySelectorAll('.bell-item');
-                    existing.forEach(function(el) { el.remove(); });
-
-                    if (!data.items || data.items.length === 0) {
-                        empty.classList.remove('hidden');
-                    } else {
-                        empty.classList.add('hidden');
-                        data.items.forEach(function(n) {
-                            var div = document.createElement('div');
-                            div.className = 'bell-item px-4 py-3 flex items-start gap-3 ' + (n.read ? 'bg-white' : 'bg-blue-50');
-                            div.innerHTML =
-                                '<div class="shrink-0 mt-0.5 w-2 h-2 rounded-full ' + (n.read ? 'bg-gray-200' : 'bg-[#4d78c0]') + '"></div>' +
-                                '<div class="flex-1 min-w-0">' +
-                                  '<p class="text-xs text-gray-700 leading-snug">' + escapeHtml(n.message) + '</p>' +
-                                  '<p class="text-[9px] text-gray-400 mt-1 uppercase tracking-wider">' + n.createdAt + '</p>' +
-                                '</div>';
-                            list.appendChild(div);
-                        });
-                    }
-                })
-                .catch(function() {});
-        }
-
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function renderItems(items, list) {
+            items.forEach(function(n) {
+                var div = document.createElement('div');
+                div.className = 'bell-item px-4 py-3 flex items-start gap-3 ' + (n.read ? 'bg-white' : 'bg-blue-50');
+                div.innerHTML =
+                    '<div class="shrink-0 mt-0.5 w-2 h-2 rounded-full ' + (n.read ? 'bg-gray-200' : 'bg-[#4d78c0]') + '"></div>' +
+                    '<div class="flex-1 min-w-0">' +
+                      '<p class="text-xs text-gray-700 leading-snug">' + escapeHtml(n.message) + '</p>' +
+                      '<p class="text-[9px] text-gray-400 mt-1 uppercase tracking-wider">' + n.createdAt + '</p>' +
+                    '</div>';
+                list.appendChild(div);
+            });
+        }
+
+        function removeLoadMoreBtn(list) {
+            var btn = list.querySelector('.bell-load-more');
+            if (btn) btn.remove();
+        }
+
+        function appendLoadMoreBtn(list, cursor) {
+            removeLoadMoreBtn(list);
+            var btn = document.createElement('button');
+            btn.className = 'bell-load-more w-full px-4 py-2.5 text-[10px] font-bold text-[#4d78c0] hover:bg-blue-50 uppercase tracking-wider transition-colors';
+            btn.textContent = 'Load more';
+            btn.onclick = function() {
+                btn.textContent = '...';
+                btn.disabled = true;
+                fetchPage('/api/notifications?continue=' + cursor, false);
+            };
+            list.appendChild(btn);
+        }
+
+        function fetchPage(url, reset) {
+            fetch(url, { credentials: 'same-origin' })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(data) {
+                    if (!data) return;
+                    var list  = document.getElementById('bell-list');
+                    var empty = document.getElementById('bell-empty');
+                    if (!list) return;
+
+                    if (reset) {
+                        var badge = document.getElementById('bell-badge');
+                        if (badge) {
+                            if (data.unread > 0) {
+                                badge.textContent = data.unread > 9 ? '9+' : data.unread;
+                                badge.classList.remove('hidden');
+                            } else {
+                                badge.classList.add('hidden');
+                            }
+                        }
+                        list.querySelectorAll('.bell-item').forEach(function(el) { el.remove(); });
+                        removeLoadMoreBtn(list);
+                        if (!data.items || data.items.length === 0) {
+                            empty.classList.remove('hidden');
+                            return;
+                        }
+                        empty.classList.add('hidden');
+                    } else {
+                        removeLoadMoreBtn(list);
+                    }
+
+                    renderItems(data.items, list);
+                    if (data.continue) appendLoadMoreBtn(list, data.continue);
+                })
+                .catch(function() {});
+        }
+
+        function fetchNotifications() {
+            fetchPage('/api/notifications', true);
         }
 
         window.toggleBell = function() {

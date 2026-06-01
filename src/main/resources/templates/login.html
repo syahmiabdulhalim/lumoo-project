@@ -12,21 +12,31 @@
 <body class="bg-[#f9f9f9] text-gray-900 flex items-center justify-center min-h-screen p-6">
     <div class="w-full max-w-md bg-white p-12 shadow-sm border border-gray-100">
         <div class="text-center mb-10">
-            <h1 class="text-3xl font-black tracking-tighter mb-2 text-[#4d78c0]">LUMOO</h1>
+            <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-14 w-auto object-contain mx-auto mb-2"></a>
             <h2 class="text-sm font-medium uppercase tracking-[0.3em] text-gray-400">Welcome Back</h2>
         </div>
-        <div th:if="${param.success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
-            Please log in.
+        <div th:if="${param.success or param.registered}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-xs font-bold">
+            <span th:if="${param.registered}">Account created! Check your email to verify your address before logging in.</span>
+            <span th:if="${param.success and !param.registered}">Please log in.</span>
+        </div>
+        <div th:if="${param.email_verified}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-xs font-bold">
+            Email verified! You can now log in and place orders.
+        </div>
+        <div th:if="${param.verification_sent}" class="mb-6 p-4 bg-blue-50 border-l-2 border-blue-500 text-blue-700 text-xs font-bold">
+            Verification email sent. Check your inbox.
+        </div>
+        <div th:if="${param.verify_failed}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs font-bold">
+            Verification link is invalid or expired. <a href="/resend-verification" class="underline">Request a new one.</a>
         </div>
         <div th:if="${param.error}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-[10px] uppercase tracking-widest font-bold">
-            Incorrect email or password.
+            Incorrect email or password, or account suspended.
         </div>
         <div th:if="${param.logout}" class="mb-6 p-4 bg-blue-50 border-l-2 border-blue-500 text-blue-700 text-[10px] uppercase tracking-widest font-bold">
             You have been logged out.
         </div>
-            <div th:if="${param.reset_success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
-                Password updated successfully! 
-            </div>
+        <div th:if="${param.reset_success}" class="mb-6 p-4 bg-green-50 border-l-2 border-green-500 text-green-700 text-[10px] uppercase tracking-widest font-bold">
+            Password updated successfully!
+        </div>
         <form th:action="@{/login}" method="post" class="space-y-8">
             <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">
     Email Address

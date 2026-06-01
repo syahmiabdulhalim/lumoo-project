@@ -171,9 +171,11 @@ public class WebController {
             case INVALID_STATUS -> "redirect:/buyer/order/" + id + "?error=invalid_status";
         };
     }
+    private static final int BUYER_ORDERS_PAGE_SIZE = 10;
     @GetMapping("/buyer/dashboard")
     public String buyerDashboard(Model model, Principal principal,
-                                 @org.springframework.web.bind.annotation.RequestParam(required = false) String paid) {
+                                 @org.springframework.web.bind.annotation.RequestParam(required = false) String paid,
+                                 @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user != null) {
@@ -185,12 +187,14 @@ public class WebController {
                         .distinct()
                         .forEach(modemPayService::verifyAndSync);
             }
-            List<Order> orders = orderService.getUserOrders(user);
-            if (orders != null) orders.removeIf(Objects::isNull);
-            model.addAttribute("orders", orders);
+            var ordersPage = orderService.getUserOrdersPage(user, page, BUYER_ORDERS_PAGE_SIZE);
+            model.addAttribute("orders", ordersPage.getContent());
+            model.addAttribute("ordersCurrentPage", ordersPage.getNumber());
+            model.addAttribute("ordersTotalPages", ordersPage.getTotalPages());
             model.addAttribute("alreadyApplied", vendorApplicationService.hasAlreadyApplied(user));
-            List<Notification> notes = userService.getAndMarkNotificationsRead(user);
-            model.addAttribute("notifications", notes);
+            model.addAttribute("notifications", userService.getUnreadNotifications(user));
+            model.addAttribute("emailVerified", user.isEmailVerified());
+            model.addAttribute("currentUserEmail", user.getEmail());
         } else {
             model.addAttribute("alreadyApplied", false);
         }

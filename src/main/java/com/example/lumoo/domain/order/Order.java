@@ -30,6 +30,7 @@ public class Order {
     private String modempayPaymentId;
     private String payoutStatus;
     private String payoutTransferId;
+    private LocalDateTime deliveredAt;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -109,6 +110,8 @@ private LocalDateTime createdAt;
     public void setPayoutStatus(String payoutStatus) { this.payoutStatus = payoutStatus; }
     public String getPayoutTransferId() { return payoutTransferId; }
     public void setPayoutTransferId(String payoutTransferId) { this.payoutTransferId = payoutTransferId; }
+    public LocalDateTime getDeliveredAt() { return deliveredAt; }
+    public void setDeliveredAt(LocalDateTime deliveredAt) { this.deliveredAt = deliveredAt; }
     public boolean isPrivacyAccepted() { return privacyAccepted; }
     public void setPrivacyAccepted(boolean privacyAccepted) { this.privacyAccepted = privacyAccepted; }
     public boolean isTermsAccepted() { return termsAccepted; }

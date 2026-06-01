@@ -8,7 +8,7 @@
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
 <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm border-b">
-    <a href="/"><h1 class="text-xl font-black tracking-tighter">LUMOO</h1></a>
+    <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
     <a href="/" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-[#4d78c0] transition">← Back to Store</a>
 </nav>
 <main class="max-w-3xl mx-auto py-16 px-6">
@@ -17,7 +17,11 @@
         <h1 class="text-4xl font-light tracking-tight">Returns <span class="font-black italic text-[#4d78c0]">&amp; Refunds</span></h1>
         <p class="text-[9px] text-gray-400 mt-3 uppercase tracking-widest">Last updated: May 2025</p>
     </header>
-    <div class="space-y-8 text-sm text-gray-700 leading-relaxed">
+    <div th:if="${siteSettings != null and siteSettings.returnsText != null and !#strings.isEmpty(siteSettings.returnsText)}"
+         class="space-y-8 text-sm text-gray-700 leading-relaxed prose max-w-none"
+         th:utext="${siteSettings.returnsText}"></div>
+    <div th:if="${siteSettings == null or siteSettings.returnsText == null or #strings.isEmpty(siteSettings.returnsText)}"
+         class="space-y-8 text-sm text-gray-700 leading-relaxed">
         <section>
             <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-3">1. Return Window</h2>
             <p>You may request a return within <strong>7 days</strong> of receiving your order. Requests made after this period will not be accepted unless the item is faulty or damaged on arrival.</p>
@@ -82,7 +86,7 @@
                 <span th:text="${siteSettings?.businessWhatsapp ?: '+220 XXX XXXX'}"></span>.
             </p>
         </section>
-    </div>
+    </div><!-- end fallback -->
 </main>
 <footer class="border-t border-gray-100 py-10 px-12 mt-16 bg-white">
     <div class="max-w-3xl mx-auto flex flex-wrap gap-6 text-[9px] text-gray-400 uppercase tracking-widest">

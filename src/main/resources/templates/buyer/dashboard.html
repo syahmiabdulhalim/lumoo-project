@@ -11,7 +11,7 @@
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
     <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
-        <h1 class="text-2xl font-black tracking-tighter">LUMOO</h1>
+        <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
         <div class="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-bold">
             <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
             <div th:replace="~{fragments/bell :: bell}"></div>
@@ -25,6 +25,20 @@
             <h2 class="text-4xl font-light tracking-tighter">My <span class="font-black italic text-[#4d78c0]">Orders</span></h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-[0.3em] mt-2">Track your deliveries</p>
         </header>
+        <!-- Email verification banner -->
+        <div th:if="${emailVerified != null and !emailVerified}"
+             class="mb-8 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-xs font-bold text-amber-800">Your email address is not verified — you won't be able to place orders until you do.</p>
+            </div>
+            <form action="/resend-verification" method="post" class="shrink-0">
+                <input type="hidden" name="email" th:value="${currentUserEmail}">
+                <button type="submit" class="text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition whitespace-nowrap">
+                    Resend Email
+                </button>
+            </form>
+        </div>
         <div th:if="${notifications != null and !#lists.isEmpty(notifications)}"
              id="notif-toast"
              class="fixed top-6 right-6 z-50 max-w-sm w-full space-y-2 transition-all duration-500">
@@ -169,8 +183,18 @@
                         <p class="text-[8px] text-gray-400 uppercase mb-1">Total Amount</p>
                         <p class="text-sm font-black" th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}"></p>
                     </div>
-                    <a th:href="@{/buyer/order/{id}(id=${o.id})}"
-                       class="text-[9px] font-bold text-[#4d78c0] uppercase border-b border-[#4d78c0] pb-1">Details →</a>
+                    <div class="flex items-center gap-3">
+                        <button th:if="${o.status == 'PAID' or o.status == 'SHIPPED' or o.status == 'DELIVERED'}"
+                                type="button"
+                                onclick="openReportModal(this)"
+                                th:data-order-id="${o.id}"
+                                th:data-order-ref="${'#LMO-' + o.id}"
+                                class="text-[9px] font-bold text-red-400 hover:text-red-600 uppercase border-b border-red-200 hover:border-red-400 pb-1 transition">
+                            Report Issue
+                        </button>
+                        <a th:href="@{/buyer/order/{id}(id=${o.id})}"
+                           class="text-[9px] font-bold text-[#4d78c0] uppercase border-b border-[#4d78c0] pb-1">Details →</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -178,7 +202,74 @@
             <p class="text-[8px] text-gray-300 uppercase tracking-[0.4em] font-black mb-6">No orders yet</p>
             <a href="/" class="text-[9px] font-black uppercase tracking-widest text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1">Start Shopping →</a>
         </div>
+        <div th:if="${ordersTotalPages > 1}"
+             class="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
+            <a th:if="${ordersCurrentPage > 0}"
+               th:href="@{/buyer/dashboard(page=${ordersCurrentPage - 1})}"
+               class="text-[10px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">← Previous</a>
+            <span th:if="${ordersCurrentPage == 0}" class="invisible text-xs">←</span>
+            <span class="text-[9px] text-gray-400 uppercase tracking-widest"
+                  th:text="'Page ' + (${ordersCurrentPage} + 1) + ' of ' + ${ordersTotalPages}"></span>
+            <a th:if="${ordersCurrentPage + 1 < ordersTotalPages}"
+               th:href="@{/buyer/dashboard(page=${ordersCurrentPage + 1})}"
+               class="text-[10px] font-black uppercase tracking-widest text-[#4d78c0] border-b border-[#4d78c0] pb-0.5">Next →</a>
+            <span th:if="${ordersCurrentPage + 1 >= ordersTotalPages}" class="invisible text-xs">→</span>
+        </div>
     </main>
+
+    <!-- Report Issue modal -->
+    <div id="report-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl p-6">
+            <h3 class="text-sm font-black uppercase tracking-wider mb-1">Report an Issue</h3>
+            <p id="report-modal-ref" class="text-[10px] text-gray-400 mb-4"></p>
+            <form id="report-form" method="post" class="space-y-4">
+                <div>
+                    <label class="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Reason</label>
+                    <select name="reason" required
+                            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-red-400 outline-none">
+                        <option value="">Select a reason…</option>
+                        <option value="Item not received">Item not received</option>
+                        <option value="Item not as described">Item not as described</option>
+                        <option value="Damaged / defective item">Damaged / defective item</option>
+                        <option value="Wrong item delivered">Wrong item delivered</option>
+                        <option value="Suspected fraud">Suspected fraud</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Details <span class="font-normal normal-case tracking-normal text-gray-400">— optional</span></label>
+                    <textarea name="details" rows="3" placeholder="Describe what happened…"
+                              class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:border-red-400 outline-none resize-none"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeReportModal()"
+                            class="flex-1 border border-gray-200 text-gray-600 text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider py-2.5 rounded-lg transition">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReportModal(btn) {
+            var orderId = btn.dataset.orderId;
+            var ref     = btn.dataset.orderRef;
+            document.getElementById('report-form').action = '/buyer/order/' + orderId + '/report';
+            document.getElementById('report-modal-ref').textContent = 'Order ' + ref;
+            document.getElementById('report-modal').classList.remove('hidden');
+        }
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.add('hidden');
+        }
+        document.getElementById('report-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeReportModal();
+        });
+    </script>
     <script>
         (function() {
             var p = new URLSearchParams(window.location.search);

@@ -61,6 +61,7 @@ public class OrderController {
         if (!privacyAccepted || !termsAccepted) return "redirect:/checkout?error=consent_required";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
+        if (!user.isEmailVerified()) return "redirect:/checkout?error=email_not_verified";
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart?error=empty";
         List<Order> orders;

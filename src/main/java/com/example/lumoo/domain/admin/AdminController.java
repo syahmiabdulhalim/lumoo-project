@@ -43,6 +43,7 @@ public class AdminController {
     @Autowired private AuditService auditService;
     @Autowired private com.example.lumoo.domain.pdpp.AuditLogRepository auditLogRepository;
     @Autowired private com.example.lumoo.infrastructure.email.EmailService emailService;
+    @Autowired private com.example.lumoo.domain.order.OrderReportRepository orderReportRepository;
     @GetMapping("/audit-logs")
     public String auditLogs(@RequestParam(defaultValue = "0") int page, Model model) {
         var logsPage = auditLogRepository.findAllByOrderByCreatedAtDesc(
@@ -59,6 +60,10 @@ public class AdminController {
         model.addAttribute("totalRevenue", orderService.sumTotalRevenue());
         model.addAttribute("totalCommission", orderService.sumTotalCommission());
         model.addAttribute("totalUsers", userService.countAll());
+        model.addAttribute("pendingProductCount", productService.countPendingApproval());
+        model.addAttribute("vendorApplicationCount", vendorApplicationService.countPending());
+        model.addAttribute("pendingImageCount", productService.countPendingImageApproval());
+        model.addAttribute("openReportCount", orderReportRepository.countByResolvedFalse());
         return "admin/dashboard";
     }
     private static final int ORDERS_PAGE_SIZE = 50;
@@ -71,6 +76,7 @@ public class AdminController {
         model.addAttribute("ordersTotalPages", ordersPage.getTotalPages());
         model.addAttribute("proofOrders", ordersPage.getContent().stream()
                 .filter(o -> "PROOF_UPLOADED".equals(o.getStatus())).toList());
+        model.addAttribute("openReports", orderReportRepository.findOpenWithDetails());
         return "admin/sections/orders :: content";
     }
     @GetMapping("/sections/moderation")
@@ -91,14 +97,19 @@ public class AdminController {
         model.addAttribute("inventoryTotalPages", productsPage.getTotalPages());
         return "admin/sections/inventory :: content";
     }
+    private static final int INQUIRIES_PAGE_SIZE = 20;
     @GetMapping("/sections/users")
     public String sectionUsers(Model model,
-                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page) {
-        var usersPage = userService.getPage(page, USERS_PAGE_SIZE);
-        model.addAttribute("users", usersPage.getContent());
-        model.addAttribute("usersCurrentPage", usersPage.getNumber());
-        model.addAttribute("usersTotalPages", usersPage.getTotalPages());
-        model.addAttribute("inquiries", inquiryService.getAll());
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int usersPage,
+                               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int inquiriesPage) {
+        var up = userService.getPage(usersPage, USERS_PAGE_SIZE);
+        model.addAttribute("users", up.getContent());
+        model.addAttribute("usersCurrentPage", up.getNumber());
+        model.addAttribute("usersTotalPages", up.getTotalPages());
+        var ip = inquiryService.getPage(inquiriesPage, INQUIRIES_PAGE_SIZE);
+        model.addAttribute("inquiries", ip.getContent());
+        model.addAttribute("inquiriesCurrentPage", ip.getNumber());
+        model.addAttribute("inquiriesTotalPages", ip.getTotalPages());
         return "admin/sections/users :: content";
     }
     @GetMapping("/approve-product/{id}")
@@ -137,6 +148,24 @@ public class AdminController {
         ra.addFlashAttribute("flashType", done ? "green" : "blue");
         return "redirect:/admin/dashboard#users";
     }
+    @PostMapping("/suspend-user/{id}")
+    public String suspendUser(@PathVariable Long id, RedirectAttributes ra, HttpServletRequest req) {
+        userService.suspendUser(id);
+        auditService.log("USER_SUSPENDED", "User", String.valueOf(id), req);
+        log.warn("[Admin] User #{} suspended by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
+        ra.addFlashAttribute("flashMsg", "Account suspended.");
+        ra.addFlashAttribute("flashType", "red");
+        return "redirect:/admin/dashboard#users";
+    }
+    @PostMapping("/unsuspend-user/{id}")
+    public String unsuspendUser(@PathVariable Long id, RedirectAttributes ra, HttpServletRequest req) {
+        userService.unsuspendUser(id);
+        auditService.log("USER_UNSUSPENDED", "User", String.valueOf(id), req);
+        log.info("[Admin] User #{} unsuspended by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
+        ra.addFlashAttribute("flashMsg", "Account reinstated.");
+        ra.addFlashAttribute("flashType", "green");
+        return "redirect:/admin/dashboard#users";
+    }
     @PostMapping("/upgrade-vendor/{id}")
     public String upgradeToVendor(@PathVariable Long id, RedirectAttributes ra, HttpServletRequest req) {
         boolean done = userService.upgradeToVendor(id);
@@ -170,7 +199,7 @@ public class AdminController {
     public String deleteInquiry(@PathVariable Long id, HttpServletRequest req) {
         inquiryService.delete(id);
         auditService.log("INQUIRY_DELETED", "Inquiry", String.valueOf(id), req);
-        return "redirect:/admin/dashboard?deleted_inquiry#inquiries";
+        return "redirect:/admin/dashboard?deleted_inquiry#users";
     }
     @PostMapping("/order/{id}/resolve-return")
     public String resolveReturn(@PathVariable Long id, HttpServletRequest req) {
@@ -183,24 +212,24 @@ public class AdminController {
         orderService.verifyPayment(id);
         auditService.log("PAYMENT_VERIFIED", "Order", String.valueOf(id), req);
         log.info("[Admin] Payment verified for order #{} by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
-        return "redirect:/admin/dashboard?payment_verified#proof-review";
+        return "redirect:/admin/dashboard?payment_verified#orders";
     }
     @GetMapping("/approve-image/{id}")
     public String approveImage(@PathVariable Long id, HttpServletRequest req) {
         productService.approveImage(id);
         auditService.log("IMAGE_APPROVED", "Product", String.valueOf(id), req);
-        return "redirect:/admin/dashboard?image_approved#images";
+        return "redirect:/admin/dashboard?image_approved#moderation";
     }
     @GetMapping("/reject-image/{id}")
     public String rejectImage(@PathVariable Long id, HttpServletRequest req) {
         productService.rejectImage(id);
         auditService.log("IMAGE_REJECTED", "Product", String.valueOf(id), req);
-        return "redirect:/admin/dashboard?image_rejected#images";
+        return "redirect:/admin/dashboard?image_rejected#moderation";
     }
     @GetMapping("/application/{id}")
     public String applicationDetail(@PathVariable Long id, Model model) {
         VendorApplication app = vendorApplicationService.findById(id).orElse(null);
-        if (app == null) return "redirect:/admin/dashboard#vendor-applications";
+        if (app == null) return "redirect:/admin/dashboard#moderation";
         model.addAttribute("app", app);
         return "admin/application-detail";
     }

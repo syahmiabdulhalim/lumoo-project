@@ -9,7 +9,7 @@
 <body class="bg-[#f9f9f9] text-gray-900 flex items-center justify-center min-h-screen p-6">
     <div class="w-full max-w-md bg-white p-12 shadow-xl border border-gray-100">
         <div class="text-center mb-10">
-            <h1 class="text-3xl font-black tracking-tighter mb-2 text-[#4d78c0]">LUMOO</h1>
+            <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-14 w-auto object-contain mx-auto mb-2"></a>
             <h2 class="text-xs font-medium uppercase tracking-[0.3em] text-gray-400">Create New Account</h2>
         </div>
         <form th:action="@{/register}" method="post" class="space-y-6" id="registerForm">

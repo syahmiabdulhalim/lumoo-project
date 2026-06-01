@@ -12,7 +12,7 @@
         <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
     </div>
     <nav class="flex justify-between items-center px-12 py-5 bg-white shadow-sm">
-        <a href="/" class="text-2xl font-black tracking-tighter">LUMOO</a>
+        <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
         <div class="flex items-center gap-8 text-[10px] uppercase font-bold tracking-widest">
             <a href="/" class="text-gray-400 hover:text-black transition">Home</a>
             <a href="/buyer/dashboard" class="text-gray-400 hover:text-black transition">My Orders</a>
@@ -365,6 +365,19 @@
 
         // Load rates on page load
         fetchShippingRates();
+
+        // Show email_not_verified error
+        (function() {
+            var p = new URLSearchParams(window.location.search);
+            if (p.get('error') === 'email_not_verified') {
+                var el = document.createElement('div');
+                el.className = 'fixed top-6 right-6 z-50 max-w-sm bg-amber-50 border-l-4 border-amber-500 shadow-lg rounded-r-lg px-5 py-4';
+                el.innerHTML = '<p class="text-xs font-bold text-amber-800">Please verify your email address before placing an order. Check your inbox or <a href="/buyer/dashboard" class="underline">go to your dashboard</a> to resend.</p>';
+                document.body.appendChild(el);
+                setTimeout(function() { el.remove(); }, 10000);
+                history.replaceState(null, '', '/checkout');
+            }
+        })();
 
         const bankDiv = document.getElementById('bankDetails');
         const mobileDiv = document.getElementById('mobileDetails');

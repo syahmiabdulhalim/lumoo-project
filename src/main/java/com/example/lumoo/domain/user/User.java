@@ -21,6 +21,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean verified;
+    private boolean suspended;
+    private boolean emailVerified;
+    private String emailVerificationToken;
     private String payoutPhone;
     private String payoutNetwork;
     @ManyToOne
@@ -28,6 +31,12 @@ public class User {
     private User vendor;
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+    public String getDisplayName() {
+        if (fullName != null && !fullName.isBlank()) return fullName;
+        if (username != null && !username.isBlank())
+            return username.contains("@") ? username.split("@")[0] : username;
+        return email != null ? email.split("@")[0] : "User";
+    }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public String getEmail() { return email; }
@@ -50,6 +59,12 @@ public class User {
     public void setId(Long id) { this.id = id; }
     public boolean isVerified() { return verified; }
     public void setVerified(boolean verified) { this.verified = verified; }
+    public boolean isSuspended() { return suspended; }
+    public void setSuspended(boolean suspended) { this.suspended = suspended; }
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+    public String getEmailVerificationToken() { return emailVerificationToken; }
+    public void setEmailVerificationToken(String emailVerificationToken) { this.emailVerificationToken = emailVerificationToken; }
     public String getPayoutPhone() { return payoutPhone; }
     public void setPayoutPhone(String payoutPhone) { this.payoutPhone = payoutPhone; }
     public String getPayoutNetwork() { return payoutNetwork; }

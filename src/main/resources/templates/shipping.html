@@ -10,10 +10,10 @@
 <body class="bg-[#f4f6fb] font-['Nunito_Sans'] min-h-screen">
 
 <nav class="bg-white border-b border-gray-100 px-6 md:px-12 py-4 flex justify-between items-center sticky top-0 z-50">
-    <a href="/" class="text-xl font-black tracking-tighter text-[#1a2336]">LUMOO</a>
+    <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
     <div class="flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em]">
-        <a href="/track"     class="text-gray-400 hover:text-[#4d78c0] transition">Track Order</a>
-        <a href="/"          class="text-gray-400 hover:text-[#4d78c0] transition">Store</a>
+        <a href="/track" class="text-gray-400 hover:text-[#4d78c0] transition">Track Order</a>
+        <a href="/"      class="text-gray-400 hover:text-[#4d78c0] transition">Store</a>
     </div>
 </nav>
 
@@ -21,54 +21,189 @@
 <div class="bg-[#1a2336] py-14 px-6 text-center">
     <p class="text-[9px] font-black uppercase tracking-[0.5em] text-blue-400 mb-3">Delivery Rates</p>
     <h1 class="text-3xl md:text-4xl font-black tracking-tighter text-white mb-2">Shipping Calculator</h1>
-    <p class="text-sm text-slate-400">Get the best courier rates instantly. Compare DHL, GAMPOST, Red Code &amp; more.</p>
+    <p class="text-sm text-slate-400">Get instant rates. Weight is determined by actual or volumetric weight, whichever is higher.</p>
 </div>
 
 <main class="max-w-3xl mx-auto px-4 py-10 space-y-6">
 
     <!-- Calculator card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-6">Enter Shipment Details</p>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div>
+        <!-- Type tabs -->
+        <div class="flex border-b border-gray-100">
+            <button onclick="switchType('normal')" id="tab-normal"
+                    class="type-tab flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors">
+                📦 Normal
+            </button>
+            <button onclick="switchType('cargo')" id="tab-cargo"
+                    class="type-tab flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors">
+                🏗 Cargo
+            </button>
+            <button onclick="switchType('cold')" id="tab-cold"
+                    class="type-tab flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors">
+                ❄️ Cold
+            </button>
+        </div>
+
+        <div class="p-6 md:p-8">
+
+            <!-- Shared: coverage -->
+            <div class="mb-6">
                 <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Delivery Type</label>
-                <select id="coverage"
-                        class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">
-                    <option value="NATIONAL">National (Within Gambia)</option>
-                    <option value="INTERNATIONAL">International</option>
-                </select>
+                <div class="flex gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="coverage" value="NATIONAL" checked
+                               class="accent-[#4d78c0]">
+                        <span class="text-sm font-semibold text-gray-700">National (Within Gambia)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="coverage" value="INTERNATIONAL"
+                               class="accent-[#4d78c0]">
+                        <span class="text-sm font-semibold text-gray-700">International</span>
+                    </label>
+                </div>
             </div>
-            <div>
-                <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Weight (KG)</label>
-                <input type="number" id="weight" min="0.1" max="999" step="0.1" value="1"
-                       class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold"
-                       placeholder="e.g. 2.5">
+
+            <!-- NORMAL panel -->
+            <div id="panel-normal">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Weight (KG)</label>
+                        <input type="number" id="normal-weight" min="0.1" step="0.1" placeholder="e.g. 2.5"
+                               oninput="updateNormalVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">
+                        Volumetric (CM) <span class="text-gray-300 font-normal normal-case tracking-normal text-[10px]">— optional</span>
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="normal-l" min="0" step="0.1" placeholder="Length"
+                               oninput="updateNormalVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                        <span class="text-gray-300 font-black shrink-0">×</span>
+                        <input type="number" id="normal-w" min="0" step="0.1" placeholder="Width"
+                               oninput="updateNormalVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                        <span class="text-gray-300 font-black shrink-0">×</span>
+                        <input type="number" id="normal-h" min="0" step="0.1" placeholder="Height"
+                               oninput="updateNormalVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                    </div>
+                </div>
+                <div id="normal-vw-display" class="hidden mb-4 text-xs text-gray-500 bg-gray-50 rounded-lg px-4 py-3 space-y-1">
+                    <div class="flex justify-between">
+                        <span>Volumetric weight</span>
+                        <span id="normal-vw-val" class="font-bold text-gray-700">— KG</span>
+                    </div>
+                    <div class="flex justify-between font-black text-[#1a2336] text-sm border-t border-gray-100 pt-2 mt-1">
+                        <span>Chargeable weight</span>
+                        <span id="normal-eff-val">— KG</span>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-end">
-                <button onclick="calculate()"
-                        class="w-full bg-[#1a2336] hover:bg-[#4d78c0] text-white font-black uppercase tracking-widest text-[10px] py-3.5 rounded-lg transition">
-                    Get Rates →
+
+            <!-- CARGO panel -->
+            <div id="panel-cargo" class="hidden">
+                <div id="cargo-items" class="space-y-4 mb-4">
+                    <!-- items injected by JS -->
+                </div>
+                <button onclick="addCargoItem()"
+                        class="w-full border border-dashed border-gray-300 text-gray-400 hover:border-[#4d78c0] hover:text-[#4d78c0] py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition mb-4">
+                    + Add Item
                 </button>
+                <div id="cargo-total-display" class="hidden text-xs text-gray-500 bg-gray-50 rounded-lg px-4 py-3 space-y-1 mb-4">
+                    <div class="flex justify-between font-black text-[#1a2336] text-sm">
+                        <span>Total chargeable weight</span>
+                        <span id="cargo-total-val">— KG</span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div id="error-msg" class="hidden bg-red-50 text-red-600 text-xs font-semibold px-4 py-3 rounded-lg mb-4"></div>
-
-        <!-- Results -->
-        <div id="results" class="hidden">
-            <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4" id="results-label">Available Couriers</p>
-
-            <div id="quotes-list" class="space-y-3"></div>
-
-            <div id="no-rates" class="hidden text-center py-10">
-                <p class="text-sm text-gray-400">No courier rates available for this shipment. Please contact us.</p>
+            <!-- COLD panel -->
+            <div id="panel-cold" class="hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Weight (KG)</label>
+                        <input type="number" id="cold-weight" min="0.1" step="0.1" placeholder="e.g. 5.0"
+                               oninput="updateColdVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">Polystyrene Box</label>
+                        <select id="cold-box" onchange="updateColdVW()"
+                                class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">
+                            <option value="0">None</option>
+                            <option value="0.5">Small (+ 0.5 KG)</option>
+                            <option value="1">Medium (+ 1 KG)</option>
+                            <option value="2">Large (+ 2 KG)</option>
+                            <option value="4">Extra Large (+ 4 KG)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 mb-2">
+                        Volumetric (CM) <span class="text-gray-300 font-normal normal-case tracking-normal text-[10px]">— optional</span>
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="cold-l" min="0" step="0.1" placeholder="Length"
+                               oninput="updateColdVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                        <span class="text-gray-300 font-black shrink-0">×</span>
+                        <input type="number" id="cold-w" min="0" step="0.1" placeholder="Width"
+                               oninput="updateColdVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                        <span class="text-gray-300 font-black shrink-0">×</span>
+                        <input type="number" id="cold-h" min="0" step="0.1" placeholder="Height"
+                               oninput="updateColdVW()"
+                               class="w-full border-b-2 border-gray-200 py-3 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">
+                    </div>
+                </div>
+                <div id="cold-vw-display" class="hidden mb-4 text-xs text-gray-500 bg-blue-50 rounded-lg px-4 py-3 space-y-1">
+                    <div class="flex justify-between">
+                        <span>Cargo weight</span>
+                        <span id="cold-cargo-val" class="font-bold text-gray-700">— KG</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Volumetric weight</span>
+                        <span id="cold-vw-val" class="font-bold text-gray-700">— KG</span>
+                    </div>
+                    <div class="flex justify-between font-black text-[#1a2336] text-sm border-t border-blue-100 pt-2 mt-1">
+                        <span>Chargeable weight</span>
+                        <span id="cold-eff-val">— KG</span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div id="loading" class="hidden text-center py-8">
-            <div class="inline-block w-6 h-6 border-2 border-[#4d78c0] border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-gray-400 mt-2">Fetching rates...</p>
+            <!-- VW note -->
+            <p class="text-[10px] text-gray-400 mb-5">
+                Weight will be determined by actual or volumetric weight (VW = L×W×H ÷ 5000), whichever is higher.
+            </p>
+
+            <!-- Error + button -->
+            <div id="error-msg" class="hidden bg-red-50 text-red-600 text-xs font-semibold px-4 py-3 rounded-lg mb-4"></div>
+
+            <button onclick="calculate()"
+                    class="w-full bg-[#1a2336] hover:bg-[#4d78c0] text-white font-black uppercase tracking-widest text-[10px] py-4 rounded-xl transition">
+                Get Rates →
+            </button>
+
+            <!-- Loading -->
+            <div id="loading" class="hidden text-center py-8">
+                <div class="inline-block w-6 h-6 border-2 border-[#4d78c0] border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-xs text-gray-400 mt-2">Fetching rates...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="results" class="hidden mt-6">
+                <p class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4" id="results-label">Available Couriers</p>
+                <div id="quotes-list" class="space-y-3"></div>
+                <div id="no-rates" class="hidden text-center py-10">
+                    <p class="text-sm text-gray-400">No courier rates available for this shipment. Please contact us.</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -113,7 +248,7 @@
                 <span class="w-7 h-7 rounded-full bg-[#4d78c0] text-white text-[10px] font-black flex items-center justify-center shrink-0">3</span>
                 <div>
                     <p class="text-sm font-bold text-[#4d78c0]">Get your tracking number</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Once dispatched, you receive a tracking number by email. Use it at <a href="/track" class="text-[#4d78c0] font-bold hover:underline">lumoo.my/track</a> or the courier&apos;s website.</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Once dispatched, you receive a tracking number by email. Use it at <a href="/track" class="text-[#4d78c0] font-bold hover:underline">lumoo.my/track</a> or the courier's website.</p>
                 </div>
             </li>
             <li class="flex gap-4">
@@ -131,16 +266,220 @@
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <script>
+var currentType = 'normal';
+var cargoItemCount = 0;
+
+// ── Volumetric weight helper ─────────────────────────────────────────────────
+function vw(l, w, h) {
+    if (!l || !w || !h || l <= 0 || w <= 0 || h <= 0) return null;
+    return Math.round((l * w * h / 5000) * 100) / 100;
+}
+
+function fmt(kg) { return kg.toFixed(2) + ' KG'; }
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+function switchType(type) {
+    currentType = type;
+    ['normal','cargo','cold'].forEach(function(t) {
+        document.getElementById('panel-' + t).classList.toggle('hidden', t !== type);
+        var btn = document.getElementById('tab-' + t);
+        var active = t === type;
+        btn.classList.toggle('border-[#4d78c0]', active);
+        btn.classList.toggle('text-[#4d78c0]', active);
+        btn.classList.toggle('border-transparent', !active);
+        btn.classList.toggle('text-gray-400', !active);
+    });
+    document.getElementById('results').classList.add('hidden');
+    document.getElementById('error-msg').classList.add('hidden');
+}
+
+// ── Normal: live VW ──────────────────────────────────────────────────────────
+function updateNormalVW() {
+    var w   = parseFloat(document.getElementById('normal-weight').value) || 0;
+    var l   = parseFloat(document.getElementById('normal-l').value);
+    var wi  = parseFloat(document.getElementById('normal-w').value);
+    var h   = parseFloat(document.getElementById('normal-h').value);
+    var vol = vw(l, wi, h);
+    var display = document.getElementById('normal-vw-display');
+
+    if (vol !== null || w > 0) {
+        var eff = Math.max(w, vol || 0);
+        document.getElementById('normal-vw-val').textContent = vol !== null ? fmt(vol) : '—';
+        document.getElementById('normal-eff-val').textContent = eff > 0 ? fmt(eff) : '—';
+        display.classList.toggle('hidden', w <= 0 && vol === null);
+    } else {
+        display.classList.add('hidden');
+    }
+}
+
+// ── Cargo: item rows ─────────────────────────────────────────────────────────
+function addCargoItem() {
+    cargoItemCount++;
+    var idx = cargoItemCount;
+    var container = document.getElementById('cargo-items');
+    var row = document.createElement('div');
+    row.id = 'cargo-item-' + idx;
+    row.className = 'border border-gray-100 rounded-xl p-4 relative';
+    row.innerHTML =
+        '<div class="flex items-center justify-between mb-3">' +
+        '  <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Item ' + idx + '</span>' +
+        '  <button onclick="removeCargoItem(' + idx + ')" class="text-gray-300 hover:text-red-400 transition text-sm font-black">✕</button>' +
+        '</div>' +
+        '<div class="grid grid-cols-2 gap-3 mb-3">' +
+        '  <div>' +
+        '    <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Weight (KG)</label>' +
+        '    <input type="number" id="cargo-w-' + idx + '" min="0.1" step="0.1" placeholder="0.0"' +
+        '           oninput="updateCargoTotal()"' +
+        '           class="w-full border-b-2 border-gray-200 py-2 text-sm focus:border-[#4d78c0] outline-none bg-transparent font-semibold">' +
+        '  </div>' +
+        '  <div id="cargo-vw-info-' + idx + '" class="flex items-end pb-2 text-[10px] text-gray-400 font-semibold"></div>' +
+        '</div>' +
+        '<div>' +
+        '  <label class="block text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">Volumetric (CM) — optional</label>' +
+        '  <div class="flex items-center gap-1.5">' +
+        '    <input type="number" id="cargo-l-' + idx + '" min="0" step="0.1" placeholder="L"' +
+        '           oninput="updateCargoItemVW(' + idx + ')"' +
+        '           class="w-full border-b-2 border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">' +
+        '    <span class="text-gray-300 text-xs">×</span>' +
+        '    <input type="number" id="cargo-d-' + idx + '" min="0" step="0.1" placeholder="W"' +
+        '           oninput="updateCargoItemVW(' + idx + ')"' +
+        '           class="w-full border-b-2 border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">' +
+        '    <span class="text-gray-300 text-xs">×</span>' +
+        '    <input type="number" id="cargo-h-' + idx + '" min="0" step="0.1" placeholder="H"' +
+        '           oninput="updateCargoItemVW(' + idx + ')"' +
+        '           class="w-full border-b-2 border-gray-200 py-2 text-xs focus:border-[#4d78c0] outline-none bg-transparent font-semibold text-center">' +
+        '  </div>' +
+        '</div>';
+    container.appendChild(row);
+    updateCargoTotal();
+}
+
+function removeCargoItem(idx) {
+    var el = document.getElementById('cargo-item-' + idx);
+    if (el) el.remove();
+    updateCargoTotal();
+}
+
+function updateCargoItemVW(idx) {
+    var w   = parseFloat(document.getElementById('cargo-w-' + idx)?.value) || 0;
+    var l   = parseFloat(document.getElementById('cargo-l-' + idx)?.value);
+    var wi  = parseFloat(document.getElementById('cargo-d-' + idx)?.value);
+    var h   = parseFloat(document.getElementById('cargo-h-' + idx)?.value);
+    var vol = vw(l, wi, h);
+    var info = document.getElementById('cargo-vw-info-' + idx);
+    if (info) {
+        if (vol !== null) {
+            var eff = Math.max(w, vol);
+            info.textContent = 'VW: ' + fmt(vol) + ' → ' + fmt(eff);
+        } else {
+            info.textContent = '';
+        }
+    }
+    updateCargoTotal();
+}
+
+function getCargoItemEffectiveWeight(idx) {
+    var wEl = document.getElementById('cargo-w-' + idx);
+    var lEl = document.getElementById('cargo-l-' + idx);
+    var dEl = document.getElementById('cargo-d-' + idx);
+    var hEl = document.getElementById('cargo-h-' + idx);
+    if (!wEl) return null;
+    var w  = parseFloat(wEl.value) || 0;
+    var vol = vw(
+        parseFloat(lEl?.value),
+        parseFloat(dEl?.value),
+        parseFloat(hEl?.value)
+    );
+    return Math.max(w, vol || 0);
+}
+
+function updateCargoTotal() {
+    var items = document.querySelectorAll('[id^="cargo-item-"]');
+    var total = 0;
+    var valid = false;
+    items.forEach(function(el) {
+        var idx = el.id.replace('cargo-item-', '');
+        var eff = getCargoItemEffectiveWeight(idx);
+        if (eff !== null && eff > 0) { total += eff; valid = true; }
+    });
+    var display = document.getElementById('cargo-total-display');
+    var val = document.getElementById('cargo-total-val');
+    if (valid) {
+        val.textContent = fmt(Math.round(total * 100) / 100);
+        display.classList.remove('hidden');
+    } else {
+        display.classList.add('hidden');
+    }
+}
+
+// ── Cold: live VW ────────────────────────────────────────────────────────────
+function updateColdVW() {
+    var w    = parseFloat(document.getElementById('cold-weight').value) || 0;
+    var box  = parseFloat(document.getElementById('cold-box').value) || 0;
+    var l    = parseFloat(document.getElementById('cold-l').value);
+    var wi   = parseFloat(document.getElementById('cold-w').value);
+    var h    = parseFloat(document.getElementById('cold-h').value);
+    var vol  = vw(l, wi, h);
+    var cargo = w + box;
+    var eff  = Math.max(cargo, vol || 0);
+    var display = document.getElementById('cold-vw-display');
+
+    if (w > 0 || box > 0 || vol !== null) {
+        document.getElementById('cold-cargo-val').textContent = cargo > 0 ? fmt(cargo) : '—';
+        document.getElementById('cold-vw-val').textContent = vol !== null ? fmt(vol) : '—';
+        document.getElementById('cold-eff-val').textContent = eff > 0 ? fmt(eff) : '—';
+        display.classList.remove('hidden');
+    } else {
+        display.classList.add('hidden');
+    }
+}
+
+// ── Get effective weight for current type ────────────────────────────────────
+function getEffectiveWeight() {
+    if (currentType === 'normal') {
+        var w  = parseFloat(document.getElementById('normal-weight').value) || 0;
+        var l  = parseFloat(document.getElementById('normal-l').value);
+        var wi = parseFloat(document.getElementById('normal-w').value);
+        var h  = parseFloat(document.getElementById('normal-h').value);
+        var vol = vw(l, wi, h);
+        return Math.max(w, vol || 0);
+    }
+    if (currentType === 'cargo') {
+        var items = document.querySelectorAll('[id^="cargo-item-"]');
+        var total = 0;
+        items.forEach(function(el) {
+            var idx = el.id.replace('cargo-item-', '');
+            var eff = getCargoItemEffectiveWeight(idx);
+            if (eff !== null) total += eff;
+        });
+        return Math.round(total * 100) / 100;
+    }
+    if (currentType === 'cold') {
+        var w    = parseFloat(document.getElementById('cold-weight').value) || 0;
+        var box  = parseFloat(document.getElementById('cold-box').value) || 0;
+        var l    = parseFloat(document.getElementById('cold-l').value);
+        var wi   = parseFloat(document.getElementById('cold-w').value);
+        var h    = parseFloat(document.getElementById('cold-h').value);
+        var vol  = vw(l, wi, h);
+        return Math.max(w + box, vol || 0);
+    }
+    return 0;
+}
+
+// ── Main calculate ───────────────────────────────────────────────────────────
 function calculate() {
-    var weight   = parseFloat(document.getElementById('weight').value);
-    var coverage = document.getElementById('coverage').value;
     var errEl    = document.getElementById('error-msg');
     var loading  = document.getElementById('loading');
     var results  = document.getElementById('results');
+    var coverage = document.querySelector('input[name="coverage"]:checked').value;
 
     errEl.classList.add('hidden');
-    if (isNaN(weight) || weight <= 0) {
-        errEl.textContent = 'Please enter a valid weight greater than 0 KG.';
+
+    var weight = getEffectiveWeight();
+    if (!weight || weight <= 0) {
+        errEl.textContent = currentType === 'cargo'
+            ? 'Please add at least one cargo item with a weight.'
+            : 'Please enter a valid weight greater than 0 KG.';
         errEl.classList.remove('hidden');
         return;
     }
@@ -154,11 +493,13 @@ function calculate() {
             loading.classList.add('hidden');
             results.classList.remove('hidden');
 
-            var label = document.getElementById('results-label');
-            var list  = document.getElementById('quotes-list');
+            var label   = document.getElementById('results-label');
+            var list    = document.getElementById('quotes-list');
             var noRates = document.getElementById('no-rates');
+            var typeLabel = { normal: 'Normal', cargo: 'Cargo', cold: 'Cold Chain' }[currentType];
+            var covLabel  = coverage === 'NATIONAL' ? 'Within Gambia' : 'International';
 
-            label.textContent = 'Rates for ' + weight + ' KG — ' + (coverage === 'NATIONAL' ? 'Within Gambia' : 'International');
+            label.textContent = typeLabel + ' · ' + fmt(weight) + ' · ' + covLabel;
             list.innerHTML = '';
 
             if (!resp.data || resp.data.length === 0) {
@@ -168,15 +509,21 @@ function calculate() {
             noRates.classList.add('hidden');
 
             resp.data.forEach(function(q, i) {
-                var days = q.daysMin === q.daysMax ? q.daysMin + ' day(s)' : q.daysMin + '–' + q.daysMax + ' days';
+                var days     = q.daysMin === q.daysMax ? q.daysMin + ' day(s)' : q.daysMin + '–' + q.daysMax + ' days';
                 var trackBadge = q.hasTracking
                     ? '<span class="text-[8px] bg-green-100 text-green-700 font-black uppercase tracking-wider px-2 py-0.5 rounded">✓ Live Tracking</span>'
                     : '<span class="text-[8px] bg-gray-100 text-gray-500 font-black uppercase tracking-wider px-2 py-0.5 rounded">Manual Tracking</span>';
-                var best = i === 0 ? '<span class="text-[8px] bg-[#4d78c0] text-white font-black uppercase tracking-wider px-2 py-0.5 rounded ml-2">Best Price</span>' : '';
-                var desc = q.description ? '<p class="text-[10px] text-gray-400 mt-1">' + q.description + '</p>' : '';
+                var best = i === 0
+                    ? '<span class="text-[8px] bg-[#4d78c0] text-white font-black uppercase tracking-wider px-2 py-0.5 rounded ml-2">Best Price</span>'
+                    : '';
+                var desc = q.description
+                    ? '<p class="text-[10px] text-gray-400 mt-1">' + q.description + '</p>'
+                    : '';
 
                 list.insertAdjacentHTML('beforeend',
-                    '<div class="flex items-center justify-between p-4 rounded-xl border ' + (i === 0 ? 'border-[#4d78c0] bg-blue-50' : 'border-gray-100 bg-white') + ' hover:shadow-sm transition">' +
+                    '<div class="flex items-center justify-between p-4 rounded-xl border ' +
+                    (i === 0 ? 'border-[#4d78c0] bg-blue-50' : 'border-gray-100 bg-white') +
+                    ' hover:shadow-sm transition">' +
                     '  <div class="flex items-center gap-3">' +
                     '    <span class="text-2xl">' + q.emoji + '</span>' +
                     '    <div>' +
@@ -204,9 +551,9 @@ function calculate() {
         });
 }
 
-document.getElementById('weight').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') calculate();
-});
+// ── Init ─────────────────────────────────────────────────────────────────────
+switchType('normal');
+addCargoItem();
 </script>
 </body>
 </html>
