@@ -35,6 +35,6 @@ public class CareerController {
         if (posting == null || !posting.isActive()) return "redirect:/careers";
         careerService.submitApplication(id, applicantName, email, phone, coverLetter);
         ra.addFlashAttribute("applied", true);
-        return "redirect:/careers/" + id + "?applied";
+        return "redirect:/careers/" + id;
     }
 }

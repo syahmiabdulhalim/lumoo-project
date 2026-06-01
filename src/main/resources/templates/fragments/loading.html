@@ -214,6 +214,7 @@
             // hide when page becomes visible (normal load, back/forward)
             window.addEventListener('pageshow', hideLoading);
             window.addEventListener('popstate', hideLoading);
+            document.addEventListener('lm:sectionsUpdated', hideLoading);
         })();
     </script>
 </div>

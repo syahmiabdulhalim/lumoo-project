@@ -211,13 +211,13 @@
                  class="py-16 text-center border border-dashed border-gray-200 mb-20">
                 <p class="text-[9px] text-gray-300 uppercase tracking-[0.4em] font-bold">No reviews yet. Be the first.</p>
             </div>
-            <div th:if="${param.containsKey('review_success')}"
+            <div th:if="${review_success != null}"
                  id="review-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-green-500 shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
                 <span class="text-green-500 text-lg">✓</span>
                 <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Review submitted. Thank you!</p>
             </div>
-            <script th:if="${param.containsKey('review_success')}">
+            <script th:if="${review_success != null}">
                 setTimeout(function() {
                     var t = document.getElementById('review-toast');
                     if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }
@@ -279,13 +279,13 @@
                 Ask a <span class="font-black italic text-[#4d78c0]">Question.</span>
             </h2>
             <p class="text-[9px] text-gray-400 uppercase tracking-widest mb-10">Send a message to the vendor about this product</p>
-            <div th:if="${param.containsKey('inquiry_sent')}"
+            <div th:if="${inquiry_sent != null}"
                  id="inquiry-toast"
                  class="fixed top-6 right-6 z-50 max-w-sm bg-white border-l-4 border-[#4d78c0] shadow-lg rounded-r-lg px-5 py-4 flex items-center gap-3 transition-all duration-500">
                 <span class="text-[#4d78c0] text-lg">✓</span>
                 <p class="text-xs font-bold text-slate-700 uppercase tracking-widest">Message sent! We'll get back to you soon.</p>
             </div>
-            <script th:if="${param.containsKey('inquiry_sent')}">
+            <script th:if="${inquiry_sent != null}">
                 setTimeout(function() {
                     var t = document.getElementById('inquiry-toast');
                     if (t) { t.style.opacity='0'; t.style.transform='translateY(-8px)'; setTimeout(function(){ t.remove(); },500); }

@@ -3,6 +3,7 @@ import com.example.lumoo.domain.inquiry.InquiryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/inquiry")
 public class InquiryController {
@@ -12,8 +13,10 @@ public class InquiryController {
                               @RequestParam String buyerName,
                               @RequestParam String email,
                               @RequestParam(required = false) String subject,
-                              @RequestParam String message) {
+                              @RequestParam String message,
+                              RedirectAttributes ra) {
         inquiryService.send(productId, buyerName, email, subject, message);
-        return "redirect:/product/" + productId + "?inquiry_sent";
+        ra.addFlashAttribute("inquiry_sent", true);
+        return "redirect:/product/" + productId;
     }
 }

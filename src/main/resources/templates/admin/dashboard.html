@@ -334,6 +334,7 @@ document.addEventListener('click', function(e) {
             var inner = tmp.firstElementChild || tmp;
             panel.innerHTML = inner.innerHTML;
             loadedTabs[tabName] = true;
+            document.dispatchEvent(new Event('lm:sectionsUpdated'));
         });
 });
 
