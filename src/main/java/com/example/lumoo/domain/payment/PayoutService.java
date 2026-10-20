@@ -33,7 +33,7 @@ public class PayoutService {
     public boolean isConfigured() {
         return apiKey != null && !apiKey.isBlank();
     }
-    @Transactional
+    /** Not transactional on purpose: it makes an HTTP call to ModemPay; order updates are saved individually. */
     public void tryPayoutVendor(Order order) {
         if (!isConfigured()) {
             log.info("[Payout] Skipped — ModemPay not configured (order #{})", order.getId());

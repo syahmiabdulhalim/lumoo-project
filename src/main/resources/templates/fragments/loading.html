@@ -5,6 +5,7 @@
     html { font-size: 17px; }
 </style>
 <div th:fragment="loading">
+    <span id="lm-csrf" hidden th:if="${_csrf != null}" th:data-name="${_csrf.parameterName}" th:data-token="${_csrf.token}"></span>
     <div id="lm-confirm-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center">
         <div class="absolute inset-0 bg-[#1a2336]/60 backdrop-blur-sm" onclick="lmCloseConfirm()"></div>
         <div class="relative bg-white w-full max-w-md mx-4 shadow-2xl">
@@ -72,6 +73,12 @@
             if (_lmMethod === 'POST') {
                 var f = document.createElement('form');
                 f.method = 'post'; f.action = _lmUrl;
+                var csrf = document.getElementById('lm-csrf');
+                if (csrf) {
+                    var i = document.createElement('input');
+                    i.type = 'hidden'; i.name = csrf.dataset.name; i.value = csrf.dataset.token;
+                    f.appendChild(i);
+                }
                 document.body.appendChild(f); f.submit();
             } else { window.location.href = _lmUrl; }
         }

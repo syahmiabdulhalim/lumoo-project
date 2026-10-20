@@ -26,7 +26,7 @@ public class PaymentController {
             return ResponseEntity.ok(ApiResponse.error(
                     "Online payment not yet available. Please use bank transfer or mobile money and upload your proof."));
         }
-        var user = userService.findByUsername(principal.getName()).orElse(null);
+        var user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return ResponseEntity.status(401).body(ApiResponse.error("Not authenticated."));
         Order order = orderService.findById(orderId).orElse(null);
         if (order == null) return ResponseEntity.status(404).body(ApiResponse.error("Order not found."));
@@ -55,8 +55,9 @@ if (!modemPayService.verifySignature(rawPayload, signature)) {
             modemPayService.processWebhook(rawPayload);
             return ResponseEntity.ok("OK");
         } catch (Exception e) {
+            // Non-2xx makes ModemPay retry; the dedup row was rolled back with the failed transaction.
             log.error("[Webhook] Processing failed", e);
-            return ResponseEntity.ok("ERROR");
+            return ResponseEntity.internalServerError().body("ERROR");
         }
     }
 }

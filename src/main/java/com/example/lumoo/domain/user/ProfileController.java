@@ -68,7 +68,7 @@ public class ProfileController {
                 yield "redirect:/profile";
             }
             case TOO_SHORT -> {
-                redirectAttributes.addFlashAttribute("passwordError", "New password must be at least 6 characters.");
+                redirectAttributes.addFlashAttribute("passwordError", com.example.lumoo.infrastructure.security.PasswordPolicy.REQUIREMENT);
                 yield "redirect:/profile";
             }
         };

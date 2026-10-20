@@ -5,6 +5,7 @@ import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.order.CartService;
 import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.payment.ModemPayService;
+import com.example.lumoo.domain.shipping.ShippingService;
 import com.example.lumoo.domain.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ public class OrderController {
     @Autowired private CartService cartService;
     @Autowired private UserService userService;
     @Autowired private ModemPayService modemPayService;
+    @Autowired private ShippingService shippingService;
+    /** Only what checkout.html's JS needs — never the CartItem entity (it carries User objects). */
+    public record CheckoutLine(String name, int quantity, double price, double weightKg) {}
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
     private static final Set<String> VALID_PAYMENT_METHODS = Set.of("COD", "TRANSFER", "AFRIMONEY", "QMONEY", "MODEMPAY");
@@ -42,6 +46,9 @@ public class OrderController {
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart";
         model.addAttribute("cart", items);
+        model.addAttribute("cartLines", items.stream()
+                .map(i -> new CheckoutLine(i.getName(), i.getQuantity(), i.getPrice(), ShippingService.unitWeightKg(i)))
+                .toList());
         model.addAttribute("total", cartService.getTotal(items));
         return "checkout";
     }
@@ -52,7 +59,6 @@ public class OrderController {
                              @RequestParam(defaultValue = "false") boolean termsAccepted,
                              @RequestParam(defaultValue = "false") boolean marketingConsent,
                              @RequestParam(required = false) String courierName,
-                             @RequestParam(required = false) Double shippingCost,
                              @RequestParam(required = false) String deliveryArea,
                              Principal principal) {
         if (principal == null) return "redirect:/login";
@@ -64,9 +70,12 @@ public class OrderController {
         if (!user.isEmailVerified()) return "redirect:/checkout?error=email_not_verified";
         List<CartItem> items = cartService.getItems(user);
         if (items.isEmpty()) return "redirect:/cart?error=empty";
+        // Shipping is always priced here; any shippingCost the browser sends is ignored.
+        Double shippingTotal = shippingService.quoteFor(courierName, ShippingService.cartWeightKg(items)).orElse(null);
+        if (shippingTotal == null) return "redirect:/checkout?error=invalid_shipping";
         List<Order> orders;
         try {
-            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, deliveryArea);
+            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent, courierName, shippingTotal, deliveryArea);
         } catch (IllegalStateException e) {
             return "redirect:/cart?error=out_of_stock";
         }

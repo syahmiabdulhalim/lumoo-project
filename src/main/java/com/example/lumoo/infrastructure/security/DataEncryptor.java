@@ -18,7 +18,7 @@ public class DataEncryptor {
     private static final int IV_LENGTH = 12;
     private static final int TAG_LENGTH = 128;
     private static final String ENC_PREFIX = "ENC:";
-    @Value("${app.encryption.key:}")
+    @Value("${app.encryption.key:${encryption.key:}}")
     private String base64Key;
     private SecretKey secretKey;
     @PostConstruct
@@ -29,7 +29,9 @@ public class DataEncryptor {
             secretKey = kg.generateKey();
             log.warn("[DataEncryptor] ENCRYPTION_KEY not set — using ephemeral key. Encrypted data will be lost on restart. Set ENCRYPTION_KEY env var.");
         } else {
-            byte[] keyBytes = Base64.getDecoder().decode(base64Key);
+            byte[] keyBytes = Base64.getDecoder().decode(base64Key.trim());
+            if (keyBytes.length != 32)
+                throw new IllegalStateException("ENCRYPTION_KEY must be base64 of exactly 32 bytes (got " + keyBytes.length + ")");
             secretKey = new SecretKeySpec(keyBytes, "AES");
         }
     }
@@ -63,6 +65,8 @@ public class DataEncryptor {
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new GCMParameterSpec(TAG_LENGTH, iv));
             return new String(cipher.doFinal(encrypted));
         } catch (Exception e) {
+            // Usually means ENCRYPTION_KEY changed since this value was written.
+            log.error("[DataEncryptor] Failed to decrypt a stored value ({}) — check ENCRYPTION_KEY", e.getClass().getSimpleName());
             return ciphertext;
         }
     }

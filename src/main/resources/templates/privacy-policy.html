@@ -19,7 +19,7 @@
     </header>
     <div th:if="${siteSettings != null and siteSettings.privacyPolicyText != null and !#strings.isEmpty(siteSettings.privacyPolicyText)}"
          class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4"
-         th:utext="${siteSettings.privacyPolicyText}">
+         th:utext="${siteSettings.safePrivacyPolicyText}">
     </div>
     <div th:if="${siteSettings == null or siteSettings.privacyPolicyText == null or #strings.isEmpty(siteSettings.privacyPolicyText)}"
          class="space-y-8 text-sm text-gray-700 leading-relaxed">

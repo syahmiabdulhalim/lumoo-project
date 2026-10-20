@@ -22,16 +22,16 @@ services:
     environment:
       JAVA_OPTS: "-Xms128m -Xmx384m"
       SPRING_PROFILES_ACTIVE: prod
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/lumoo?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kuala_Lumpur
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}
+      # Traffic stays on the private compose network; allowPublicKeyRetrieval is needed for MySQL 8 caching_sha2 auth without TLS.
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/lumoo?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kuala_Lumpur
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-lumoo_user}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-lumoo_pass}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
       UPLOAD_DIR: /app/uploads/products
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
-      RESEND_API_KEY: ${RESEND_API_KEY:-dummy-key}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
       MODEMPAY_PUBLIC_KEY: ${MODEMPAY_PUBLIC_KEY:-}
       MODEMPAY_API_KEY: ${MODEMPAY_API_KEY:-}
       MODEMPAY_WEBHOOK_SECRET: ${MODEMPAY_WEBHOOK_SECRET:-}
@@ -39,6 +39,9 @@ services:
       REDIS_PORT: 6379
     volumes:
       - lumoo_uploads:/app/uploads
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
     depends_on:
       db:
         condition: service_healthy
@@ -53,8 +56,8 @@ services:
     environment:
       MYSQL_DATABASE: lumoo
       MYSQL_USER: ${DB_USER:-lumoo_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-lumoo_pass}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be set in .env}
     volumes:
       - lumoo_db_data:/var/lib/mysql
     healthcheck:
@@ -69,7 +72,7 @@ services:
     container_name: lumoo-redis
     mem_limit: 64m
     command: >
-      redis-server --requirepass ${REDIS_PASSWORD}
+      redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:

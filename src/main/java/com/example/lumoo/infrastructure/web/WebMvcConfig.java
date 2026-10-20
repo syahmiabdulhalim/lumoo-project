@@ -1,6 +1,5 @@
 package com.example.lumoo.infrastructure.web;
 import com.example.lumoo.domain.admin.SiteSettingsInterceptor;
-import com.example.lumoo.infrastructure.security.RateLimitInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${app.upload.dir:/app/uploads/products}")
     private String uploadDir;
     @Autowired private SiteSettingsInterceptor siteSettingsInterceptor;
-    @Autowired private RateLimitInterceptor rateLimitInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(rateLimitInterceptor);
         registry.addInterceptor(siteSettingsInterceptor);
         registry.addInterceptor(new HandlerInterceptor() {
             @Override

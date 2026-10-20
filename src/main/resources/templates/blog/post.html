@@ -152,7 +152,7 @@
                 </div>
             </div>
         </header>
-        <div class="prose max-w-none" th:utext="${post.content}">
+        <div class="prose max-w-none" th:utext="${post.safeContent}">
             Content goes here.
         </div>
         <div th:if="${post.tags != null}" class="mt-12 pt-8 border-t border-gray-100">

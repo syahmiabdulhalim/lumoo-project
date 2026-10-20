@@ -18,6 +18,7 @@ class UserServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private NotificationRepository notificationRepository;
     @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
+    @Mock private com.example.lumoo.infrastructure.security.SessionRevoker sessionRevoker;
     @InjectMocks private UserService userService;
     private User user;
     @BeforeEach
@@ -49,7 +50,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("hashed");
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        userService.register("new@test.com", "pass");
+        userService.register("new@test.com", "password123");
         verify(userRepository).save(captor.capture());
         assertEquals(Role.USER, captor.getValue().getRole());
     }
@@ -155,5 +156,37 @@ class UserServiceTest {
         assertEquals("+220123456", user.getPhone());
         assertEquals("Banjul", user.getAddress());
         verify(userRepository).save(user);
+    }
+    @Test
+    void register_rejectsWeakPassword() {
+        assertThrows(IllegalArgumentException.class, () -> userService.register("new@test.com", "short"));
+        assertThrows(IllegalArgumentException.class, () -> userService.register("new@test.com", "        "));
+        verify(userRepository, never()).save(any());
+    }
+    @Test
+    void register_storesHashedVerificationToken_andRequiresVerification() {
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("hashed");
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        userService.register("new@test.com", "password123");
+        verify(userRepository).save(captor.capture());
+        User saved = captor.getValue();
+        assertTrue(saved.isEmailVerificationRequired());
+        assertEquals(64, saved.getEmailVerificationToken().length()); // SHA-256 hex, not a raw UUID
+    }
+    @Test
+    void verifyEmail_looksUpByHashOfRawToken() {
+        User u = new User();
+        when(userRepository.findByEmailVerificationToken(
+                com.example.lumoo.infrastructure.security.TokenHasher.hash("raw-token"))).thenReturn(Optional.of(u));
+        assertTrue(userService.verifyEmail("raw-token"));
+        assertTrue(u.isEmailVerified());
+    }
+    @Test
+    void suspendUser_endsTheirSessions() {
+        user.setEmail("buyer@test.com");
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        userService.suspendUser(1L);
+        verify(sessionRevoker).expireAllSessions("buyer@test.com");
     }
 }

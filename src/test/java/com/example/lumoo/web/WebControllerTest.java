@@ -1,7 +1,6 @@
 package com.example.lumoo.web;
 import com.example.lumoo.domain.admin.SiteSettingsService;
 import com.example.lumoo.domain.blog.BlogService;
-import com.example.lumoo.infrastructure.security.RateLimitInterceptor;
 import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.ProductService;
@@ -44,11 +43,6 @@ class WebControllerTest {
     @MockitoBean SubscriberService subscriberService;
     @MockitoBean SiteSettingsService siteSettingsService;
     @MockitoBean ModemPayService modemPayService;
-    @MockitoBean RateLimitInterceptor rateLimitInterceptor;
-    @BeforeEach
-    void allowRequests() throws Exception {
-        when(rateLimitInterceptor.preHandle(any(), any(), any())).thenReturn(true);
-    }
     @Test
     void home_returns200() throws Exception {
         when(productService.getAllApproved(any())).thenReturn(new PageImpl<>(List.of()));
@@ -238,7 +232,8 @@ class WebControllerTest {
                         .param("rating", "4")
                         .param("comment", "Good product"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(header().string("Location", "/product/1?review_success"));
+                .andExpect(header().string("Location", "/product/1"))
+                .andExpect(flash().attribute("review_success", true));
         verify(reviewService).addReview(p, user, 4, "Good product");
     }
     @Test

@@ -87,7 +87,7 @@
                             <button type="button" class="btn-lm-delete text-[10px] font-black text-slate-300 hover:text-red-500 transition uppercase"
                                     data-title="Delete Product"
                                     th:data-msg="|Remove '${p.name}' from your store? Buyers will no longer see it.|"
-                                    th:data-url="@{/vendor/delete-product/{id}(id=${p.id})}">Delete</button>
+                                    data-method="post" th:data-url="@{/vendor/delete-product/{id}(id=${p.id})}">Delete</button>
                         </div>
                     </td>
                 </tr>

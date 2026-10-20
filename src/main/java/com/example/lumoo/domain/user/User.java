@@ -1,12 +1,14 @@
 package com.example.lumoo.domain.user;
 import com.example.lumoo.infrastructure.security.EncryptedStringConverter;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 @Entity @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
+    @JsonIgnore // never in Redis cache / JSON output
     private String password;
     @Column(unique = true)
     private String email;
@@ -16,14 +18,21 @@ public class User {
     @Convert(converter = EncryptedStringConverter.class)
     private String address;
     private String profilePicture;
+    @JsonIgnore // never in Redis cache / JSON output
     private String resetToken;
+    @JsonIgnore // never in Redis cache / JSON output
     private LocalDateTime tokenExpiry;
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean verified;
     private boolean suspended;
     private boolean emailVerified;
+    @JsonIgnore // never in Redis cache / JSON output
     private String emailVerificationToken;
+    /** True for accounts registered after login started requiring a verified email. */
+    @Column(name = "email_verification_required", nullable = false)
+    private boolean emailVerificationRequired;
+    @JsonIgnore // never in Redis cache / JSON output
     private String payoutPhone;
     private String payoutNetwork;
     @ManyToOne
@@ -63,6 +72,8 @@ public class User {
     public void setSuspended(boolean suspended) { this.suspended = suspended; }
     public boolean isEmailVerified() { return emailVerified; }
     public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+    public boolean isEmailVerificationRequired() { return emailVerificationRequired; }
+    public void setEmailVerificationRequired(boolean emailVerificationRequired) { this.emailVerificationRequired = emailVerificationRequired; }
     public String getEmailVerificationToken() { return emailVerificationToken; }
     public void setEmailVerificationToken(String emailVerificationToken) { this.emailVerificationToken = emailVerificationToken; }
     public String getPayoutPhone() { return payoutPhone; }

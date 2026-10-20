@@ -47,25 +47,25 @@ class AdminControllerTest {
     }
     @Test
     void approveProduct_redirects() throws Exception {
-        mvc.perform(get("/admin/approve-product/1"))
+        mvc.perform(post("/admin/approve-product/1"))
                 .andExpect(status().is3xxRedirection());
         verify(productService).approve(1L);
     }
     @Test
     void rejectProduct_redirects() throws Exception {
-        mvc.perform(get("/admin/reject-product/2"))
+        mvc.perform(post("/admin/reject-product/2"))
                 .andExpect(status().is3xxRedirection());
         verify(productService).delete(2L);
     }
     @Test
     void deleteProduct_redirects() throws Exception {
-        mvc.perform(get("/admin/delete-product/3"))
+        mvc.perform(post("/admin/delete-product/3"))
                 .andExpect(status().is3xxRedirection());
         verify(productService).delete(3L);
     }
     @Test
     void deleteUser_redirects() throws Exception {
-        mvc.perform(get("/admin/delete-user/4"))
+        mvc.perform(post("/admin/delete-user/4"))
                 .andExpect(status().is3xxRedirection());
         verify(userService).delete(4L);
     }
@@ -104,14 +104,15 @@ class AdminControllerTest {
         verify(orderService).updateStatus(1L, "SHIPPED", null, null);
     }
     @Test
-    void deleteOrder_redirects() throws Exception {
-        mvc.perform(get("/admin/delete-order/9"))
+    void deleteOrder_cancelsInsteadOfDeleting() throws Exception {
+        when(orderService.adminCancel(9L)).thenReturn(OrderService.AdminCancelResult.CANCELLED);
+        mvc.perform(post("/admin/delete-order/9"))
                 .andExpect(status().is3xxRedirection());
-        verify(orderService).delete(9L);
+        verify(orderService).adminCancel(9L);
     }
     @Test
     void deleteInquiry_redirects() throws Exception {
-        mvc.perform(get("/admin/delete-inquiry/10"))
+        mvc.perform(post("/admin/delete-inquiry/10"))
                 .andExpect(status().is3xxRedirection());
         verify(inquiryService).delete(10L);
     }
@@ -129,13 +130,13 @@ class AdminControllerTest {
     }
     @Test
     void approveImage_redirects() throws Exception {
-        mvc.perform(get("/admin/approve-image/13"))
+        mvc.perform(post("/admin/approve-image/13"))
                 .andExpect(status().is3xxRedirection());
         verify(productService).approveImage(13L);
     }
     @Test
     void rejectImage_redirects() throws Exception {
-        mvc.perform(get("/admin/reject-image/14"))
+        mvc.perform(post("/admin/reject-image/14"))
                 .andExpect(status().is3xxRedirection());
         verify(productService).rejectImage(14L);
     }
@@ -158,7 +159,7 @@ class AdminControllerTest {
     }
     @Test
     void approveVendor_redirects() throws Exception {
-        mvc.perform(get("/admin/approve-vendor/15"))
+        mvc.perform(post("/admin/approve-vendor/15"))
                 .andExpect(status().is3xxRedirection());
         verify(vendorApplicationService).approve(15L);
     }

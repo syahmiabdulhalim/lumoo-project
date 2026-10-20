@@ -37,8 +37,8 @@ build/
 /*.iml
 /out/
 .DS_Store
-.mvn/wrapper/
-application.properties
+.mvn/wrapper/maven-wrapper.jar
+/src/main/resources/application.properties
 
 # Local environment variables
 .env
@@ -46,5 +46,6 @@ application.properties
 
 # Log files
 *.log
+logs/
 
 .claude

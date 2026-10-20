@@ -19,7 +19,7 @@
     </header>
     <div th:if="${siteSettings != null and siteSettings.termsText != null and !#strings.isEmpty(siteSettings.termsText)}"
          class="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4"
-         th:utext="${siteSettings.termsText}">
+         th:utext="${siteSettings.safeTermsText}">
     </div>
     <div th:if="${siteSettings == null or siteSettings.termsText == null or #strings.isEmpty(siteSettings.termsText)}"
          class="space-y-8 text-sm text-gray-700 leading-relaxed">

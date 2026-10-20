@@ -52,7 +52,7 @@ public class CartController {
             default -> "redirect:/cart";
         };
     }
-    @GetMapping("/cart/remove/{id}")
+    @PostMapping("/cart/remove/{id}")
     public String removeFromCart(@PathVariable Long id, Principal principal) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);

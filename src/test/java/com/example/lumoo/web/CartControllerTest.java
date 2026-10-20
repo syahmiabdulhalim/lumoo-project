@@ -96,7 +96,7 @@ class CartControllerTest {
     }
     @Test
     void removeFromCart_redirectsToLogin_whenUnauthenticated() throws Exception {
-        mvc.perform(get("/cart/remove/1"))
+        mvc.perform(post("/cart/remove/1"))
                 .andExpect(status().is3xxRedirection());
     }
     @Test
@@ -104,7 +104,7 @@ class CartControllerTest {
         User u = user(1L, "buyer@test.com");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.removeItem(1L, u)).thenReturn(true);
-        mvc.perform(get("/cart/remove/1").principal(principal("buyer@test.com")))
+        mvc.perform(post("/cart/remove/1").principal(principal("buyer@test.com")))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/cart?removed"));
     }
@@ -113,7 +113,7 @@ class CartControllerTest {
         User u = user(1L, "buyer@test.com");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.removeItem(1L, u)).thenReturn(false);
-        mvc.perform(get("/cart/remove/1").principal(principal("buyer@test.com")))
+        mvc.perform(post("/cart/remove/1").principal(principal("buyer@test.com")))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/cart?error=unauthorized"));
     }

@@ -14,6 +14,8 @@ public class AuthController {
     public String registerPage() { return "register"; }
     @PostMapping("/register")
     public String processRegister(@ModelAttribute RegisterRequest req) {
+        if (!com.example.lumoo.infrastructure.security.PasswordPolicy.isAcceptable(req.password()))
+            return "redirect:/register?weak_password";
         try {
             boolean registered = userService.register(req.email(), req.password());
             return registered ? "redirect:/login?registered" : "redirect:/register?email_taken";

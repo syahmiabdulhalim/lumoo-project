@@ -1,0 +1,19 @@
+# Build context only needs pom.xml and src/ (see Dockerfile)
+.git
+.github
+.claude
+.idea
+.vscode
+.mvn
+target/
+logs/
+scripts/
+*.md
+*.log
+*.gz
+.DS_Store
+
+# Secrets must never enter the build context
+.env
+.env.*
+*.local.properties

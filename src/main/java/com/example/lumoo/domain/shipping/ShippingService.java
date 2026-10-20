@@ -1,9 +1,11 @@
 package com.example.lumoo.domain.shipping;
 
+import com.example.lumoo.domain.order.CartItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +32,31 @@ public class ShippingService {
                 ))
                 .sorted(java.util.Comparator.comparingDouble(ShippingQuote::rateGmd))
                 .collect(Collectors.toList());
+    }
+
+    /** Weight of one unit; products without a weight count as 1 kg (same rule as checkout.html). */
+    public static double unitWeightKg(CartItem item) {
+        Double kg = item.getProduct() != null ? item.getProduct().getWeightKg() : null;
+        return kg != null && kg > 0 ? kg : 1.0;
+    }
+
+    public static double cartWeightKg(List<CartItem> items) {
+        if (items == null || items.isEmpty()) return 1;
+        double w = items.stream().mapToDouble(i -> unitWeightKg(i) * i.getQuantity()).sum();
+        return Math.round(w * 10) / 10.0;
+    }
+
+    /**
+     * Server-side price for the courier the buyer picked. Blank or "none" means self collect (free).
+     * Empty when the courier is unknown, inactive, or doesn't carry this weight.
+     */
+    public Optional<Double> quoteFor(String courierName, double weightKg) {
+        if (courierName == null || courierName.isBlank() || courierName.equalsIgnoreCase("none")) return Optional.of(0.0);
+        return repo.findByActiveTrueOrderByDisplayOrderAscCourierNameAsc().stream()
+                .filter(r -> r.getCourierName().equalsIgnoreCase(courierName.trim()))
+                .filter(r -> weightKg >= r.getMinWeightKg() && weightKg <= r.getMaxWeightKg())
+                .map(r -> r.calculateRate(weightKg))
+                .findFirst();
     }
 
     public List<ShippingRate> getAll() {

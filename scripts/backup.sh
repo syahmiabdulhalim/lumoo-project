@@ -30,13 +30,10 @@ backup_db() {
     log "Starting MySQL backup..."
     local out="$BACKUP_DIR/db/lumoo_db_${TIMESTAMP}.sql.gz"
 
-    docker exec "$DB_CONTAINER" \
-        mysqldump -u lumoo_user -plumoo_pass \
-        --single-transaction \
-        --routines \
-        --triggers \
-        --add-drop-table \
-        lumoo 2>/dev/null | gzip > "$out"
+    # Credentials come from the db container's own env (set from .env by compose) — never hard-coded here.
+    docker exec "$DB_CONTAINER" sh -c \
+        'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump -u"$MYSQL_USER" --single-transaction --routines --triggers --add-drop-table "$MYSQL_DATABASE"' \
+        2>>"$BACKUP_DIR/logs/backup.log" | gzip > "$out"
 
     local size
     size=$(du -sh "$out" | cut -f1)

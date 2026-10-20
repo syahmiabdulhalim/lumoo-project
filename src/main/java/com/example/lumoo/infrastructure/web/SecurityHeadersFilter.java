@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * The single source of security headers (SecurityConfig only keeps Spring's matching defaults).
+ * No page is ever framed, so framing is denied outright.
+ */
 @Component
 @Order(1)
 public class SecurityHeadersFilter implements Filter {
@@ -17,8 +21,8 @@ public class SecurityHeadersFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) res;
 
         response.setHeader("X-Content-Type-Options",    "nosniff");
-        response.setHeader("X-Frame-Options",           "SAMEORIGIN");
-        response.setHeader("X-XSS-Protection",          "1; mode=block");
+        response.setHeader("X-Frame-Options",           "DENY");
+        response.setHeader("X-XSS-Protection",          "0"); // legacy auditor is itself exploitable; CSP covers this
         response.setHeader("Referrer-Policy",           "strict-origin-when-cross-origin");
         response.setHeader("Permissions-Policy",        "camera=(), microphone=(), geolocation=()");
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
@@ -29,7 +33,9 @@ public class SecurityHeadersFilter implements Filter {
             "font-src 'self' https://fonts.gstatic.com; " +
             "img-src 'self' data: https: blob:; " +
             "connect-src 'self' https://www.google-analytics.com; " +
-            "frame-ancestors 'self';"
+            "frame-ancestors 'none'; " +
+            // no form-action: checkout POSTs then redirects to ModemPay, which form-action would block
+            "base-uri 'self';"
         );
 
         chain.doFilter(req, res);

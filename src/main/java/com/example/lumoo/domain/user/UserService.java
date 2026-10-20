@@ -7,6 +7,9 @@ import com.example.lumoo.domain.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.lumoo.infrastructure.security.PasswordPolicy;
+import com.example.lumoo.infrastructure.security.SessionRevoker;
+import com.example.lumoo.infrastructure.security.TokenHasher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class UserService {
     private String baseUrl;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private SessionRevoker sessionRevoker;
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private com.example.lumoo.infrastructure.email.EmailService emailService;
     public Optional<User> findByUsername(String username) {
@@ -56,16 +60,19 @@ public class UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
     }
+    /** @throws IllegalArgumentException if the password fails {@link PasswordPolicy} */
     public boolean register(String email, String password) {
+        if (!PasswordPolicy.isAcceptable(password)) throw new IllegalArgumentException(PasswordPolicy.REQUIREMENT);
         if (userRepository.findByEmail(email).isPresent()) return false;
         User user = new User();
         user.setUsername(email);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.USER);
-        String token = UUID.randomUUID().toString();
-        user.setEmailVerificationToken(token);
+        String token = TokenHasher.newToken();
+        user.setEmailVerificationToken(TokenHasher.hash(token));
         user.setEmailVerified(false);
+        user.setEmailVerificationRequired(true);
         userRepository.save(user);
         String link = baseUrl + "/verify-email?token=" + token;
         emailService.sendEmail(email, "Verify your LUMOO account",
@@ -73,7 +80,8 @@ public class UserService {
         return true;
     }
     public boolean verifyEmail(String token) {
-        return userRepository.findByEmailVerificationToken(token).map(user -> {
+        if (token == null || token.isBlank()) return false;
+        return userRepository.findByEmailVerificationToken(TokenHasher.hash(token)).map(user -> {
             user.setEmailVerified(true);
             user.setEmailVerificationToken(null);
             userRepository.save(user);
@@ -83,8 +91,8 @@ public class UserService {
     public void resendVerification(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             if (user.isEmailVerified()) return;
-            String token = UUID.randomUUID().toString();
-            user.setEmailVerificationToken(token);
+            String token = TokenHasher.newToken();
+            user.setEmailVerificationToken(TokenHasher.hash(token));
             userRepository.save(user);
             String link = baseUrl + "/verify-email?token=" + token;
             emailService.sendEmail(email, "Verify your LUMOO account",
@@ -144,7 +152,7 @@ public class UserService {
     public PasswordChangeResult changePassword(User user, String current, String newPwd, String confirm) {
         if (!passwordEncoder.matches(current, user.getPassword())) return PasswordChangeResult.WRONG_CURRENT;
         if (!newPwd.equals(confirm)) return PasswordChangeResult.MISMATCH;
-        if (newPwd.length() < 8) return PasswordChangeResult.TOO_SHORT;
+        if (!PasswordPolicy.isAcceptable(newPwd)) return PasswordChangeResult.TOO_SHORT;
         user.setPassword(passwordEncoder.encode(newPwd));
         userRepository.save(user);
         return PasswordChangeResult.SUCCESS;
@@ -175,6 +183,7 @@ public class UserService {
         userRepository.findById(id).ifPresent(u -> {
             u.setSuspended(true);
             userRepository.save(u);
+            sessionRevoker.expireAllSessions(u.getEmail());
             notificationRepository.save(new Notification(
                 "⛔ Your account has been suspended. Contact support@lumoo.my if you believe this is an error.", u));
         });

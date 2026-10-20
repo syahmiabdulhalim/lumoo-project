@@ -271,10 +271,10 @@
         </div>
     </main>
     <div th:replace="~{fragments/footer :: footer}"></div>
-    <script>
+    <script th:inline="javascript">
         const radios = document.querySelectorAll('input[name="paymentMethod"]');
         // Shipping calculator
-        var cartItems = /*[[${cart}]]*/ [];
+        var cartItems = /*[[${cartLines}]]*/ [];
         var subtotal  = /*[[${total}]]*/ 0;
 
         function totalWeightKg() {
@@ -369,6 +369,14 @@
         // Show email_not_verified error
         (function() {
             var p = new URLSearchParams(window.location.search);
+            if (p.get('error') === 'invalid_shipping') {
+                var se = document.createElement('div');
+                se.className = 'fixed top-6 right-6 z-50 max-w-sm bg-amber-50 border-l-4 border-amber-500 shadow-lg rounded-r-lg px-5 py-4';
+                se.innerHTML = '<p class="text-xs font-bold text-amber-800">That shipping option is no longer available for your cart. Please choose another one.</p>';
+                document.body.appendChild(se);
+                setTimeout(function() { se.remove(); }, 10000);
+                history.replaceState(null, '', '/checkout');
+            }
             if (p.get('error') === 'email_not_verified') {
                 var el = document.createElement('div');
                 el.className = 'fixed top-6 right-6 z-50 max-w-sm bg-amber-50 border-l-4 border-amber-500 shadow-lg rounded-r-lg px-5 py-4';

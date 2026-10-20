@@ -2,7 +2,8 @@ package com.example.lumoo.domain.product;
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-@Entity @Table(name = "reviews")
+@Entity @Table(name = "reviews", uniqueConstraints =
+    @UniqueConstraint(name = "uk_review_user_product", columnNames = {"user_id", "product_id"}))
 public class Review {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

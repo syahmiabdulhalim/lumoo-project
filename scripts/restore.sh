@@ -38,8 +38,8 @@ read -rp "Continue? (yes/no): " confirm
 [ "$confirm" = "yes" ] || { log "Aborted."; exit 0; }
 
 log "Restoring from $(basename "$BACKUP_FILE")..."
-gunzip -c "$BACKUP_FILE" | docker exec -i "$DB_CONTAINER" \
-    mysql -u lumoo_user -plumoo_pass lumoo
+gunzip -c "$BACKUP_FILE" | docker exec -i "$DB_CONTAINER" sh -c \
+    'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql -u"$MYSQL_USER" "$MYSQL_DATABASE"'
 
 log "Restore complete."
 log "Restart the app container: docker compose restart app"

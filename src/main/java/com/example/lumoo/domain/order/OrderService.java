@@ -6,6 +6,7 @@ import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderItem;
 import com.example.lumoo.domain.order.CartItem;
 import com.example.lumoo.domain.payment.PayoutService;
+import com.example.lumoo.domain.shipping.ShippingService;
 import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
@@ -46,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -114,23 +116,18 @@ public class OrderService {
                                    List<CartItem> cartItems,
                                    boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
         return placeOrders(user, address, paymentMethod, cartItems,
-                privacyAccepted, termsAccepted, marketingConsent, null, null);
+                privacyAccepted, termsAccepted, marketingConsent, null, 0.0, null);
     }
 
+    /**
+     * @param shippingTotal shipping for the whole cart, computed server-side by ShippingService.
+     *                      It is split across the per-vendor orders by weight.
+     */
     @Transactional
     public List<Order> placeOrders(User user, String address, String paymentMethod,
                                    List<CartItem> cartItems,
                                    boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
-                                   String courierName, Double shippingCost) {
-        return placeOrders(user, address, paymentMethod, cartItems,
-                privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, null);
-    }
-
-    @Transactional
-    public List<Order> placeOrders(User user, String address, String paymentMethod,
-                                   List<CartItem> cartItems,
-                                   boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
-                                   String courierName, Double shippingCost, String deliveryArea) {
+                                   String courierName, double shippingTotal, String deliveryArea) {
         Map<Long, List<CartItem>> byVendor = cartItems.stream()
                 .collect(Collectors.groupingBy(ci ->
                         ci.getProduct() != null && ci.getProduct().getVendor() != null
@@ -142,10 +139,12 @@ public class OrderService {
                         "Insufficient stock for: " + ci.getName() + ". Please update your cart.");
             }
         }
+        List<List<CartItem>> groups = new ArrayList<>(byVendor.values());
+        double[] shippingShares = splitShipping(groups, Math.max(0.0, shippingTotal));
         List<Order> orders = new ArrayList<>();
-        for (List<CartItem> vendorItems : byVendor.values()) {
-            orders.add(createOrder(user, address, paymentMethod, vendorItems,
-                    privacyAccepted, termsAccepted, marketingConsent, courierName, shippingCost, deliveryArea));
+        for (int i = 0; i < groups.size(); i++) {
+            orders.add(createOrder(user, address, paymentMethod, groups.get(i),
+                    privacyAccepted, termsAccepted, marketingConsent, courierName, shippingShares[i], deliveryArea));
         }
         cartRepository.deleteAll(cartItems);
         for (Order o : orders) {
@@ -157,12 +156,28 @@ public class OrderService {
         }
         return orders;
     }
+    /** Splits one shipping charge across vendor orders by weight; the last order absorbs rounding. */
+    static double[] splitShipping(List<List<CartItem>> groups, double shippingTotal) {
+        double[] shares = new double[groups.size()];
+        if (shippingTotal <= 0 || groups.isEmpty()) return shares;
+        double[] weights = groups.stream()
+                .mapToDouble(g -> g.stream().mapToDouble(i -> ShippingService.unitWeightKg(i) * i.getQuantity()).sum())
+                .toArray();
+        double totalWeight = java.util.Arrays.stream(weights).sum();
+        double allocated = 0;
+        for (int i = 0; i < shares.length - 1; i++) {
+            shares[i] = Math.round(shippingTotal * weights[i] / totalWeight * 100.0) / 100.0;
+            allocated += shares[i];
+        }
+        shares[shares.length - 1] = Math.round((shippingTotal - allocated) * 100.0) / 100.0;
+        return shares;
+    }
     private Order createOrder(User user, String address, String paymentMethod,
                               List<CartItem> items,
                               boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
-                              String courierName, Double shippingCost, String deliveryArea) {
+                              String courierName, double shippingCost, String deliveryArea) {
         double itemsTotal = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
-        double shipping   = shippingCost != null ? shippingCost : 0.0;
+        double shipping   = shippingCost;
         double total      = itemsTotal + shipping;
         double commission = itemsTotal * 0.10;
         Order order = new Order();
@@ -181,8 +196,8 @@ public class OrderService {
         order.setPrivacyAccepted(privacyAccepted);
         order.setTermsAccepted(termsAccepted);
         order.setMarketingConsent(marketingConsent);
-        if (courierName != null && !courierName.isBlank()) order.setCourierName(courierName);
-        if (shippingCost != null && shippingCost > 0) order.setShippingCost(shippingCost);
+        if (courierName != null && !courierName.isBlank() && !courierName.equalsIgnoreCase("none")) order.setCourierName(courierName);
+        if (shippingCost > 0) order.setShippingCost(shippingCost);
         if (deliveryArea != null && !deliveryArea.isBlank()) order.setDeliveryArea(deliveryArea);
         Order saved = orderRepository.save(order);
         for (CartItem ci : items) {
@@ -196,6 +211,21 @@ public class OrderService {
         }
         return saved;
     }
+    /** Statuses in which the order's items are still taken out of stock (not shipped yet). */
+    static final Set<String> STOCK_RESERVED =
+            Set.of("PENDING", "AWAITING_PROOF", "PROOF_UPLOADED", "AWAITING_PAYMENT", "PAID");
+    /** Orders past this point are part of the financial record and can no longer be cancelled. */
+    private static final Set<String> NOT_CANCELLABLE =
+            Set.of("CANCELLED", "DELIVERED", "RETURN_REQUESTED", "RETURNED");
+
+    /**
+     * Orders are never deleted: they are part of the financial/audit trail and a late ModemPay
+     * payment must still find its order. Cancelling releases reserved stock exactly once.
+     */
+    public void cancelAndRelease(Order order) {
+        if (STOCK_RESERVED.contains(order.getStatus())) returnStockForOrder(order);
+        order.setStatus("CANCELLED");
+    }
     public enum CancelResult { CANCELLED, NOT_FOUND, UNAUTHORIZED, CANNOT_CANCEL }
     @Transactional
     public CancelResult cancelOrder(Long id, User user) {
@@ -204,10 +234,10 @@ public class OrderService {
         if (!order.getUser().getId().equals(user.getId())) return CancelResult.UNAUTHORIZED;
         String st = order.getStatus();
         if (!st.equals("PENDING") && !st.equals("AWAITING_PROOF") && !st.equals("AWAITING_PAYMENT")) return CancelResult.CANNOT_CANCEL;
-        returnStockForOrder(order);
+        cancelAndRelease(order);
+        orderRepository.save(order);
         String buyerEmail = order.getUser().getEmail();
         String orderId    = String.valueOf(order.getId());
-        orderRepository.delete(order);
         emailService.sendEmail(buyerEmail, "Order #LMO-" + orderId + " cancelled",
                 EmailTemplates.orderCancelled(order.getUser().getUsername(), orderId, null));
         return CancelResult.CANCELLED;
@@ -238,12 +268,13 @@ public class OrderService {
         return ShipResult.SHIPPED;
     }
     public enum DeliverResult { DELIVERED, NOT_FOUND, UNAUTHORIZED, INVALID_STATUS }
+    @Transactional
     public DeliverResult markDelivered(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) return DeliverResult.NOT_FOUND;
         if (!order.getUser().getId().equals(userId)) return DeliverResult.UNAUTHORIZED;
         if (!order.getStatus().equals("SHIPPED")) return DeliverResult.INVALID_STATUS;
-        order.setStatus("DELIVERED");
+        applyDelivered(order);
         orderRepository.save(order);
         String name = order.getUser().getUsername();
         String id   = String.valueOf(orderId);
@@ -265,11 +296,15 @@ public class OrderService {
         userService.notifyAdmins("↩ Return requested — #LMO-" + orderId + " by " + order.getUser().getDisplayName());
         return ReturnResult.REQUESTED;
     }
-    public void resolveReturn(Long orderId) {
-        orderRepository.findById(orderId).ifPresent(o -> {
-            o.setStatus("RETURNED");
-            orderRepository.save(o);
-        });
+    /** Completes a requested return. A payout still on hold is cancelled — the vendor isn't paid for returned goods. */
+    @Transactional
+    public boolean resolveReturn(Long orderId) {
+        Order o = orderRepository.findById(orderId).orElse(null);
+        if (o == null || !"RETURN_REQUESTED".equals(o.getStatus())) return false;
+        o.setStatus("RETURNED");
+        if ("HELD".equals(o.getPayoutStatus())) o.setPayoutStatus("CANCELLED");
+        orderRepository.save(o);
+        return true;
     }
     public void submitProof(Long orderId, String proofUrl) {
         orderRepository.findById(orderId).ifPresent(o -> {
@@ -279,23 +314,45 @@ public class OrderService {
             userService.notifyAdmins("📎 Payment proof uploaded for order #LMO-" + orderId + " — awaiting verification.");
         });
     }
-    public void verifyPayment(Long orderId) {
-        orderRepository.findById(orderId).ifPresent(o -> {
-            o.setStatus("PAID");
-            orderRepository.save(o);
-            emailService.sendEmail(o.getUser().getEmail(),
-                    "Payment confirmed for order #LMO-" + o.getId(),
-                    EmailTemplates.orderPaid(o.getUser().getUsername(),
-                            String.valueOf(o.getId()), o.getTotalAmount()));
-        });
+    /** Admin confirms a bank-transfer / mobile-money proof. Only valid while a proof is pending. */
+    @Transactional
+    public boolean verifyPayment(Long orderId) {
+        Order o = orderRepository.findById(orderId).orElse(null);
+        if (o == null || !Set.of("AWAITING_PROOF", "PROOF_UPLOADED").contains(o.getStatus())) return false;
+        markPaid(o);
+        return true;
+    }
+    /** The one PAID transition (manual proof, webhook and polling all use it). */
+    public void markPaid(Order o) {
+        o.setStatus("PAID");
+        orderRepository.save(o);
+        emailService.sendEmail(o.getUser().getEmail(),
+                "Payment confirmed for order #LMO-" + o.getId(),
+                EmailTemplates.orderPaid(o.getUser().getUsername(),
+                        String.valueOf(o.getId()), o.getTotalAmount()));
+    }
+    public enum AdminCancelResult { CANCELLED, NOT_FOUND, NOT_ALLOWED }
+    /** Replaces the old hard delete: the row stays, stock is released, status becomes CANCELLED. */
+    @Transactional
+    public AdminCancelResult adminCancel(Long orderId) {
+        Order o = orderRepository.findByIdWithItems(orderId).orElse(null);
+        if (o == null) return AdminCancelResult.NOT_FOUND;
+        if (NOT_CANCELLABLE.contains(o.getStatus())) return AdminCancelResult.NOT_ALLOWED;
+        if ("PAID".equals(o.getStatus()))
+            log.warn("[Order] Paid order #{} cancelled by admin — buyer needs a refund", o.getId());
+        cancelAndRelease(o);
+        orderRepository.save(o);
+        return AdminCancelResult.CANCELLED;
     }
     @Transactional
     public void updateStatus(Long orderId, String status) {
         updateStatus(orderId, status, null, null);
     }
 
+    @Transactional
     public void updateStatus(Long orderId, String status, String trackingNumber, java.time.LocalDate estimatedDelivery) {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
+            if ("CANCELLED".equals(status) && STOCK_RESERVED.contains(o.getStatus())) returnStockForOrder(o);
             o.setStatus(status);
             if ("SHIPPED".equals(status)) {
                 o.setShippedAt(LocalDateTime.now());
@@ -306,6 +363,7 @@ public class OrderService {
                 if (estimatedDelivery != null)
                     o.setEstimatedDeliveryDate(estimatedDelivery);
             }
+            if ("DELIVERED".equals(status)) applyDelivered(o);
             orderRepository.save(o);
             String email = o.getUser().getEmail();
             String name  = o.getUser().getUsername();
@@ -316,8 +374,6 @@ public class OrderService {
                 case "SHIPPED"   -> emailService.sendEmail(email, "Order #LMO-" + id + " shipped",
                                         EmailTemplates.orderShipped(name, id, o.getTrackingNumber()));
                 case "DELIVERED" -> {
-                    o.setDeliveredAt(LocalDateTime.now());
-                    o.setPayoutStatus("HELD");
                     emailService.sendEmail(email, "Order #LMO-" + id + " delivered",
                             EmailTemplates.orderDelivered(name, id));
                     sendReviewRequest(o, name, id);
@@ -327,9 +383,6 @@ public class OrderService {
             }
         });
     }
-    public void delete(Long id) {
-        orderRepository.deleteById(id);
-    }
     @Transactional
     public void returnStockForOrder(Order order) {
         if (order.getItems() == null) return;
@@ -338,6 +391,18 @@ public class OrderService {
                 productService.returnStock(item.getProduct().getId(), item.getQuantity());
             }
         }
+    }
+
+    /**
+     * Single place where an order becomes DELIVERED. Starts the payout hold that
+     * PayoutReleaseJob releases after payoutHoldDays. COD orders are skipped: the
+     * vendor/courier already collected the cash, so a ModemPay payout would pay twice.
+     */
+    public void applyDelivered(Order order) {
+        order.setStatus("DELIVERED");
+        if (order.getDeliveredAt() == null) order.setDeliveredAt(LocalDateTime.now());
+        if (order.getPayoutStatus() == null || order.getPayoutStatus().isBlank())
+            order.setPayoutStatus("COD".equals(order.getPaymentMethod()) ? "SKIPPED" : "HELD");
     }
 
     private void sendReviewRequest(Order order, String name, String orderId) {

@@ -51,4 +51,20 @@ class DataEncryptorTest {
         String encrypted = encryptor.encrypt("test");
         assertTrue(encrypted.startsWith("ENC:"));
     }
+    @Test
+    void configuredKey_decryptsAcrossInstances() throws Exception {
+        DataEncryptor a = new DataEncryptor();
+        ReflectionTestUtils.setField(a, "base64Key", "dGVzdC1rZXktbm90LWZvci1wcm9kdWN0aW9uLXVzZTE=");
+        a.init();
+        DataEncryptor b = new DataEncryptor();
+        ReflectionTestUtils.setField(b, "base64Key", "dGVzdC1rZXktbm90LWZvci1wcm9kdWN0aW9uLXVzZTE=");
+        b.init();
+        assertEquals("+220 777 0000", b.decrypt(a.encrypt("+220 777 0000")));
+    }
+    @Test
+    void wrongLengthKey_isRejected() {
+        DataEncryptor e = new DataEncryptor();
+        ReflectionTestUtils.setField(e, "base64Key", "c2hvcnQ=");
+        assertThrows(IllegalStateException.class, e::init);
+    }
 }

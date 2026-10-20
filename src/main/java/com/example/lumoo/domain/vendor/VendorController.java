@@ -139,7 +139,7 @@ public class VendorController {
         }
         return "redirect:/vendor/dashboard";
     }
-    @GetMapping("/delete-product/{id}")
+    @PostMapping("/delete-product/{id}")
     public String deleteProduct(@PathVariable Long id, Principal principal, RedirectAttributes ra) {
         if (principal == null) return "redirect:/login";
         User vendor = userService.findByEmail(principal.getName()).orElse(null);

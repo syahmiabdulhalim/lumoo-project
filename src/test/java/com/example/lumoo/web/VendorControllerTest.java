@@ -172,7 +172,7 @@ class VendorControllerTest {
     void deleteProduct_redirectsToDashboard() throws Exception {
         User v = vendor(1L, "vendor@test.com");
         when(userService.findByEmail("vendor@test.com")).thenReturn(Optional.of(v));
-        mvc.perform(get("/vendor/delete-product/1"))
+        mvc.perform(post("/vendor/delete-product/1").with(csrf()))
                 .andExpect(status().is3xxRedirection());
         verify(productService).deleteByVendor(1L, v);
     }

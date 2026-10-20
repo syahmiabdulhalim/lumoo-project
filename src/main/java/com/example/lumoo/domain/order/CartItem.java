@@ -3,7 +3,8 @@ import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
 @Entity 
-@Table(name = "cart_items")
+@Table(name = "cart_items", uniqueConstraints =
+    @UniqueConstraint(name = "uk_cart_user_product", columnNames = {"user_id", "product_id"}))
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

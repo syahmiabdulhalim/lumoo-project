@@ -4,6 +4,7 @@ import com.example.lumoo.domain.blog.BlogPostRepository;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import com.example.lumoo.infrastructure.web.HtmlSanitizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class BlogService {
             Node document = MD_PARSER.parse(post.getContent());
             post.setContent(MD_RENDERER.render(document));
         }
+        post.setContent(HtmlSanitizer.sanitize(post.getContent()));
         post.setReadingTimeMinutes(estimateReadingTime(post.getContent()));
         return repo.save(post);
     }

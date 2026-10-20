@@ -190,6 +190,8 @@ public class ProductService {
     public void delete(Long id) {
         productRepository.deleteById(id);
     }
+    // Stock is shown in cached product lists, so every stock change evicts them.
+    @CacheEvict(value = "products", allEntries = true)
     public boolean decrementStock(Long productId, int qty) {
         boolean ok = productRepository.decrementStock(productId, qty) > 0;
         if (ok) {
@@ -207,6 +209,7 @@ public class ProductService {
         }
         return ok;
     }
+    @CacheEvict(value = "products", allEntries = true)
     public void returnStock(Long productId, int qty) {
         productRepository.returnStock(productId, qty);
     }

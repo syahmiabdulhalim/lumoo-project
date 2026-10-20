@@ -40,6 +40,8 @@ public class BlogPost {
     public String getExcerpt() { return excerpt; }
     public void setExcerpt(String excerpt) { this.excerpt = excerpt; }
     public String getContent() { return content; }
+    /** Sanitised HTML for th:utext; also covers posts saved before sanitising on save existed. */
+    public String getSafeContent() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(content); }
     public void setContent(String content) { this.content = content; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }

@@ -12,6 +12,15 @@
             <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-14 w-auto object-contain mx-auto mb-2"></a>
             <h2 class="text-xs font-medium uppercase tracking-[0.3em] text-gray-400">Create New Account</h2>
         </div>
+        <div th:if="${param.weak_password != null}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs font-bold">
+            Password must be 8–72 characters.
+        </div>
+        <div th:if="${param.email_taken != null}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs font-bold">
+            An account with this email already exists. <a href="/login" class="underline">Log in</a> or reset your password.
+        </div>
+        <div th:if="${param.error != null}" class="mb-6 p-4 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs font-bold">
+            Registration failed. Please try again.
+        </div>
         <form th:action="@{/register}" method="post" class="space-y-6" id="registerForm">
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Email Address</label>
@@ -21,7 +30,7 @@
             </div>
             <div>
                 <label class="block text-[10px] uppercase tracking-widest font-bold text-gray-400 mb-2">Password</label>
-                <input type="password" name="password" id="password"
+                <input type="password" name="password" id="password" minlength="8" maxlength="72"
                        class="w-full border-b border-gray-200 py-2 focus:border-[#1a2336] outline-none transition text-sm bg-transparent"
                        placeholder="••••••••" required>
             </div>

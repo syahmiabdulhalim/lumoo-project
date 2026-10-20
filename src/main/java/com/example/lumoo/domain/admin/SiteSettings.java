@@ -94,6 +94,11 @@ public class SiteSettings {
     public String getDataControllerEmail() { return dataControllerEmail; }
     public void setDataControllerEmail(String dataControllerEmail) { this.dataControllerEmail = dataControllerEmail; }
     public String getPrivacyPolicyText() { return privacyPolicyText; }
+    // Sanitised views for th:utext (admin-authored HTML). Field access, so JPA ignores these getters.
+    public String getSafePrivacyPolicyText() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(privacyPolicyText); }
+    public String getSafeTermsText() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(termsText); }
+    public String getSafeReturnsText() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(returnsText); }
+    public String getSafeCookiePolicyText() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(cookiePolicyText); }
     public void setPrivacyPolicyText(String privacyPolicyText) { this.privacyPolicyText = privacyPolicyText; }
     public String getTermsText() { return termsText; }
     public void setTermsText(String termsText) { this.termsText = termsText; }

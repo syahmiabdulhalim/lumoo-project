@@ -11,7 +11,9 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserOrderByOrderDateDesc(User user);
     List<Order> findByStatusOrderByOrderDateDesc(String status);
-    List<Order> findByCreatedAtBeforeAndCustomerNameNot(LocalDateTime before, String customerName);
+    /** customerName is NULL for most orders, and NULL <> 'ANONYMISED' is never true in SQL — hence the explicit IS NULL. */
+    @Query("SELECT o FROM Order o WHERE o.createdAt < :cutoff AND (o.customerName IS NULL OR o.customerName <> 'ANONYMISED')")
+    List<Order> findOrdersToAnonymise(@Param("cutoff") LocalDateTime cutoff);
     @Query("SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     List<Order> findOrdersByVendorId(@Param("vendorId") Long vendorId);
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.user = :user ORDER BY o.orderDate DESC")
@@ -23,18 +25,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdWithItems(@Param("id") Long id);
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     List<Order> findVendorOrdersWithItems(@Param("vendorId") Long vendorId);
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o")
+    // Revenue = money actually received: paid or later, never failed/cancelled/awaiting orders.
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED')")
     double sumTotalRevenue();
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
+    // EXISTS instead of JOIN: a join counted the order total once per item.
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId)")
     double sumVendorRevenue(@Param("vendorId") Long vendorId);
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId) AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
     double sumVendorMonthlySales(@Param("vendorId") Long vendorId);
     @Query("SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     long countVendorOrders(@Param("vendorId") Long vendorId);
     @Query(value = "SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId",
            countQuery = "SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     org.springframework.data.domain.Page<Order> findVendorOrdersPaged(@Param("vendorId") Long vendorId, org.springframework.data.domain.Pageable pageable);
-    @Query("SELECT COALESCE(SUM(o.adminCommission), 0) FROM Order o")
+    @Query("SELECT COALESCE(SUM(o.adminCommission), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED')")
     double sumTotalCommission();
     Optional<Order> findByPayoutTransferId(String payoutTransferId);
     List<Order> findByModempayPaymentId(String modempayPaymentId);
@@ -45,11 +49,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findStaleAwaitingProof(@Param("cutoff") LocalDateTime cutoff);
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'DELIVERED' AND o.payoutStatus = 'FAILED'")
     List<Order> findDeliveredWithFailedPayout();
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'SHIPPED' AND o.orderDate < :cutoff")
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.status = 'SHIPPED' AND COALESCE(o.shippedAt, o.orderDate) < :cutoff")
     List<Order> findStaleShipped(@Param("cutoff") LocalDateTime cutoff);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = :status")
     long countByStatus(@Param("status") String status);
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.orderDate >= :since")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND o.orderDate >= :since")
     double sumRevenueSince(@Param("since") LocalDateTime since);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :since")
     long countOrdersSince(@Param("since") LocalDateTime since);

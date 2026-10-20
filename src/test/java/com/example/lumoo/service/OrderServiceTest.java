@@ -135,6 +135,31 @@ class OrderServiceTest {
         assertEquals(2, orders.size());
     }
     @Test
+    void placeOrder_splitsOneShippingChargeAcrossVendorsByWeight() {
+        User vendor2 = new User();
+        vendor2.setId(3L);
+        Product p1 = new Product(); p1.setId(1L); p1.setVendor(vendor);  p1.setWeightKg(1.0);
+        Product p2 = new Product(); p2.setId(2L); p2.setVendor(vendor2); p2.setWeightKg(2.0);
+        CartItem a = cartItem(50.0, 1); a.setProduct(p1);
+        CartItem b = cartItem(80.0, 1); b.setProduct(p2);
+        when(productService.decrementStock(anyLong(), anyInt())).thenReturn(true);
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        List<Order> orders = orderService.placeOrders(buyer, "123 Street", "COD",
+                List.of(a, b), true, true, false, "Gamcel Express", 90.0, null);
+        double shippingSum = orders.stream().mapToDouble(o -> o.getShippingCost() == null ? 0 : o.getShippingCost()).sum();
+        double grandTotal  = orders.stream().mapToDouble(Order::getTotalAmount).sum();
+        assertEquals(90.0, shippingSum, 0.001);
+        assertEquals(50.0 + 80.0 + 90.0, grandTotal, 0.001);
+    }
+    @Test
+    void placeOrder_negativeShippingIsTreatedAsZero() {
+        CartItem item = cartItem(100.0, 1);
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        Order result = orderService.placeOrders(buyer, "123 Street", "COD", List.of(item),
+                true, true, false, null, -500.0, null).get(0);
+        assertEquals(100.0, result.getTotalAmount(), 0.001);
+    }
+    @Test
     void cancelOrder_notFound() {
         when(orderRepository.findByIdWithItems(99L)).thenReturn(Optional.empty());
         assertEquals(OrderService.CancelResult.NOT_FOUND, orderService.cancelOrder(99L, buyer));
@@ -159,7 +184,9 @@ class OrderServiceTest {
         order.setItems(List.of());
         when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
         assertEquals(OrderService.CancelResult.CANCELLED, orderService.cancelOrder(1L, buyer));
-        verify(orderRepository).delete(order);
+        assertEquals("CANCELLED", order.getStatus());
+        verify(orderRepository).save(order);
+        verify(orderRepository, never()).delete(any());
     }
     @Test
     void cancelOrder_success_whenAwaitingProof() {
@@ -224,6 +251,47 @@ class OrderServiceTest {
         assertEquals("DELIVERED", order.getStatus());
     }
     @Test
+    void markDelivered_startsPayoutHold() {
+        Order order = orderWithStatus("SHIPPED", buyer);
+        order.setPaymentMethod("MODEMPAY");
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        orderService.markDelivered(1L, 1L);
+        assertEquals("HELD", order.getPayoutStatus());
+        assertNotNull(order.getDeliveredAt());
+        verify(payoutService, never()).tryPayoutVendor(any());
+    }
+    @Test
+    void updateStatus_delivered_setsHoldBeforeSave() {
+        Order order = orderWithStatus("SHIPPED", buyer);
+        order.setPaymentMethod("MODEMPAY");
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenAnswer(inv -> {
+            Order saved = inv.getArgument(0);
+            // the hold must already be on the entity when it is saved
+            assertEquals("HELD", saved.getPayoutStatus());
+            assertNotNull(saved.getDeliveredAt());
+            return saved;
+        });
+        orderService.updateStatus(1L, "DELIVERED", null, null);
+        verify(orderRepository).save(order);
+    }
+    @Test
+    void applyDelivered_skipsPayoutForCod() {
+        Order order = orderWithStatus("SHIPPED", buyer);
+        order.setPaymentMethod("COD");
+        orderService.applyDelivered(order);
+        assertEquals("DELIVERED", order.getStatus());
+        assertEquals("SKIPPED", order.getPayoutStatus());
+    }
+    @Test
+    void applyDelivered_neverOverwritesExistingPayoutStatus() {
+        Order order = orderWithStatus("SHIPPED", buyer);
+        order.setPaymentMethod("MODEMPAY");
+        order.setPayoutStatus("PAID");
+        orderService.applyDelivered(order);
+        assertEquals("PAID", order.getPayoutStatus());
+    }
+    @Test
     void requestReturn_invalidStatus_whenNotDelivered() {
         Order order = orderWithStatus("SHIPPED", buyer);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -275,5 +343,68 @@ class OrderServiceTest {
         OrderItem oi = new OrderItem();
         oi.setProduct(p);
         return oi;
+    }
+    private Order orderWithItem(String status, int qty) {
+        Order o = orderWithStatus(status, buyer);
+        Product p = new Product();
+        p.setId(77L);
+        OrderItem item = new OrderItem();
+        item.setProduct(p);
+        item.setQuantity(qty);
+        o.setItems(new java.util.ArrayList<>(List.of(item)));
+        return o;
+    }
+    @Test
+    void adminCancel_keepsRow_andReturnsStock() {
+        Order o = orderWithItem("PAID", 2);
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
+        assertEquals(OrderService.AdminCancelResult.CANCELLED, orderService.adminCancel(1L));
+        assertEquals("CANCELLED", o.getStatus());
+        verify(productService).returnStock(77L, 2);
+        verify(orderRepository, never()).delete(any());
+        verify(orderRepository, never()).deleteById(any());
+    }
+    @Test
+    void adminCancel_refusesDeliveredOrders() {
+        Order o = orderWithItem("DELIVERED", 1);
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
+        assertEquals(OrderService.AdminCancelResult.NOT_ALLOWED, orderService.adminCancel(1L));
+        assertEquals("DELIVERED", o.getStatus());
+        verify(productService, never()).returnStock(anyLong(), anyInt());
+    }
+    @Test
+    void adminStatusCancelled_returnsStockOnce() {
+        Order o = orderWithItem("PENDING", 3);
+        when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
+        orderService.updateStatus(1L, "CANCELLED", null, null);
+        orderService.updateStatus(1L, "CANCELLED", null, null); // second time: already CANCELLED, nothing to return
+        verify(productService, times(1)).returnStock(77L, 3);
+    }
+    @Test
+    void verifyPayment_onlyWhenProofPending() {
+        Order shipped = orderWithStatus("SHIPPED", buyer);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(shipped));
+        assertFalse(orderService.verifyPayment(1L));
+        assertEquals("SHIPPED", shipped.getStatus());
+        Order proof = orderWithStatus("PROOF_UPLOADED", buyer);
+        when(orderRepository.findById(2L)).thenReturn(Optional.of(proof));
+        assertTrue(orderService.verifyPayment(2L));
+        assertEquals("PAID", proof.getStatus());
+    }
+    @Test
+    void resolveReturn_cancelsHeldPayout() {
+        Order o = orderWithStatus("RETURN_REQUESTED", buyer);
+        o.setPayoutStatus("HELD");
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(o));
+        assertTrue(orderService.resolveReturn(1L));
+        assertEquals("RETURNED", o.getStatus());
+        assertEquals("CANCELLED", o.getPayoutStatus());
+    }
+    @Test
+    void resolveReturn_requiresOpenReturnRequest() {
+        Order o = orderWithStatus("DELIVERED", buyer);
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(o));
+        assertFalse(orderService.resolveReturn(1L));
+        assertEquals("DELIVERED", o.getStatus());
     }
 }

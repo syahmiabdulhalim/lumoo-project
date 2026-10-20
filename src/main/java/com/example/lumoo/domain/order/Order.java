@@ -6,7 +6,12 @@ import java.util.List;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "orders", indexes = {
-    @Index(name = "idx_order_user", columnList = "user_id")
+    @Index(name = "idx_order_user", columnList = "user_id"),
+    @Index(name = "idx_order_status", columnList = "status"),
+    @Index(name = "idx_order_payout_status", columnList = "payout_status"),
+    @Index(name = "idx_order_modempay_payment", columnList = "modempayPaymentId"),
+    @Index(name = "idx_order_payout_transfer", columnList = "payoutTransferId"),
+    @Index(name = "idx_order_created_at", columnList = "createdAt")
 })
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +40,9 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 private LocalDateTime createdAt;
+    /** Optimistic lock: webhook, payment sync and admin edits can no longer overwrite each other. */
+    @Version
+    private Long version;
     private LocalDateTime orderDate;
     private String status;
     private double totalAmount;

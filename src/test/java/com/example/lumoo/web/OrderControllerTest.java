@@ -6,6 +6,8 @@ import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderController;
 import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.payment.ModemPayService;
+import com.example.lumoo.domain.product.Product;
+import com.example.lumoo.domain.shipping.ShippingService;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.UserService;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 @WebMvcTest(value = OrderController.class,
@@ -31,6 +37,7 @@ class OrderControllerTest {
     @MockitoBean UserService userService;
     @MockitoBean ModemPayService modemPayService;
     @MockitoBean SiteSettingsService siteSettingsService;
+    @MockitoBean ShippingService shippingService;
     private UsernamePasswordAuthenticationToken principal(String email) {
         return new UsernamePasswordAuthenticationToken(email, null, List.of());
     }
@@ -114,8 +121,9 @@ class OrderControllerTest {
         order.setPaymentMethod("COD");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), any(), any()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
                 .thenReturn(List.of(order));
+        when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.of(0.0));
         mvc.perform(post("/order/place")
                         .principal(principal("buyer@test.com"))
                         .param("address", "123 Street")
@@ -134,8 +142,9 @@ class OrderControllerTest {
         order.setPaymentMethod("TRANSFER");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), any(), any()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
                 .thenReturn(List.of(order));
+        when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.of(0.0));
         mvc.perform(post("/order/place")
                         .principal(principal("buyer@test.com"))
                         .param("address", "123 Street")
@@ -165,5 +174,72 @@ class OrderControllerTest {
         when(orderService.findById(99L)).thenReturn(Optional.empty());
         mvc.perform(get("/checkout/success/99").principal(principal("buyer@test.com")))
                 .andExpect(status().is3xxRedirection());
+    }
+    @Test
+    void checkout_passesCartWeightsToJs_withoutUserData() throws Exception {
+        User u = user(1L, "buyer@test.com");
+        u.setPassword("BUYER_PASSWORD_HASH");
+        User vendor = user(2L, "vendor@test.com");
+        vendor.setPassword("VENDOR_PASSWORD_HASH");
+        Product p = new Product();
+        p.setId(7L);
+        p.setVendor(vendor);
+        p.setWeightKg(2.5);
+        CartItem item = new CartItem();
+        item.setUser(u);
+        item.setProduct(p);
+        item.setName("Cement");
+        item.setQuantity(2);
+        item.setPrice(100.0);
+        when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
+        when(cartService.getItems(u)).thenReturn(List.of(item));
+        when(cartService.getTotal(any())).thenReturn(200.0);
+        mvc.perform(get("/checkout").principal(principal("buyer@test.com")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"weightKg\":2.5")))
+                .andExpect(content().string(containsString("var subtotal  = 200.0;")))
+                .andExpect(content().string(not(containsString("BUYER_PASSWORD_HASH"))))
+                .andExpect(content().string(not(containsString("VENDOR_PASSWORD_HASH"))));
+    }
+    @Test
+    void placeOrder_ignoresClientShippingCost_andUsesServerQuote() throws Exception {
+        User u = user(1L, "buyer@test.com");
+        CartItem item = new CartItem();
+        item.setQuantity(3);
+        Order order = new Order();
+        order.setId(42L);
+        when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
+        when(cartService.getItems(u)).thenReturn(List.of(item));
+        when(shippingService.quoteFor("Gamcel Express", 3.0)).thenReturn(Optional.of(150.0));
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
+                .thenReturn(List.of(order));
+        mvc.perform(post("/order/place")
+                        .principal(principal("buyer@test.com"))
+                        .param("address", "123 Street")
+                        .param("paymentMethod", "COD")
+                        .param("privacyAccepted", "true")
+                        .param("termsAccepted", "true")
+                        .param("courierName", "Gamcel Express")
+                        .param("shippingCost", "-500"))
+                .andExpect(status().is3xxRedirection());
+        verify(orderService).placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq("Gamcel Express"), eq(150.0), any());
+    }
+    @Test
+    void placeOrder_rejectsUnknownCourier() throws Exception {
+        User u = user(1L, "buyer@test.com");
+        when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
+        when(cartService.getItems(u)).thenReturn(List.of(new CartItem()));
+        when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.empty());
+        mvc.perform(post("/order/place")
+                        .principal(principal("buyer@test.com"))
+                        .param("address", "123 Street")
+                        .param("paymentMethod", "COD")
+                        .param("privacyAccepted", "true")
+                        .param("termsAccepted", "true")
+                        .param("courierName", "Fake Courier"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", "/checkout?error=invalid_shipping"));
+        verify(orderService, never()).placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any());
     }
 }

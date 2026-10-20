@@ -29,7 +29,7 @@ public class DataRetentionService {
     @Transactional
     public int anonymiseOldOrders() {
         LocalDateTime cutoff = LocalDateTime.now().minusYears(ordersAnonymiseYears);
-        List<Order> oldOrders = orderRepository.findByCreatedAtBeforeAndCustomerNameNot(cutoff, "ANONYMISED");
+        List<Order> oldOrders = orderRepository.findOrdersToAnonymise(cutoff);
         for (Order order : oldOrders) {
             order.setCustomerName("ANONYMISED");
             order.setAddress(null);

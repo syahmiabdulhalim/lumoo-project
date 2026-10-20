@@ -19,7 +19,7 @@
     </header>
     <div th:if="${siteSettings != null and siteSettings.cookiePolicyText != null and !#strings.isEmpty(siteSettings.cookiePolicyText)}"
          class="space-y-8 text-sm text-gray-700 leading-relaxed prose max-w-none"
-         th:utext="${siteSettings.cookiePolicyText}"></div>
+         th:utext="${siteSettings.safeCookiePolicyText}"></div>
     <div th:if="${siteSettings == null or siteSettings.cookiePolicyText == null or #strings.isEmpty(siteSettings.cookiePolicyText)}"
          class="space-y-8 text-sm text-gray-700 leading-relaxed">
         <section>

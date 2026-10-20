@@ -60,10 +60,7 @@
                                        class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
                                         Full KYC
                                     </a>
-                                    <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
-                                       class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors text-center">
-                                        Approve
-                                    </a>
+                                    <form th:action="@{/admin/approve-vendor/{id}(id=${app.id})}" method="post" class="contents"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><button type="submit" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors text-center">Approve</button></form>
                                     <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post"
                                           th:id="'reject-form-' + ${app.id}"
                                           onsubmit="return fillRejectNote(this)">
@@ -110,14 +107,11 @@
                         <p class="text-xs text-slate-400 mb-1" th:text="${p.category}">Category</p>
                         <p class="text-xs text-slate-400 mb-3" th:text="${'Vendor: ' + (p.vendor != null ? p.vendor.email : 'Unknown')}">Vendor</p>
                         <div class="flex gap-2">
-                            <a th:href="@{/admin/approve-image/{id}(id=${p.id})}"
-                               class="flex-1 text-center bg-green-600 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">
-                                Approve
-                            </a>
+                            <form th:action="@{/admin/approve-image/{id}(id=${p.id})}" method="post" class="contents"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><button type="submit" class="flex-1 text-center bg-green-600 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded">Approve</button></form>
                             <button type="button" class="btn-lm-delete flex-1 text-center bg-red-500 text-white py-2 text-[9px] font-bold uppercase tracking-wider hover:bg-red-600 transition rounded"
                                data-title="Reject Image" data-msg="This image will be removed from the product listing."
                                data-btn="Reject Image"
-                               th:data-url="@{/admin/reject-image/{id}(id=${p.id})}">
+                               data-method="post" th:data-url="@{/admin/reject-image/{id}(id=${p.id})}">
                                 Reject
                             </button>
                         </div>
@@ -179,14 +173,8 @@
                             <td class="px-4 py-4 text-xs text-slate-500" th:text="${p.vendor != null ? p.vendor.email : '-'}">Vendor</td>
                             <td class="px-4 py-4">
                                 <div class="flex flex-col gap-2">
-                                    <a th:href="@{/admin/approve-product/{id}(id=${p.id})}"
-                                       class="text-center bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded whitespace-nowrap">
-                                        ✓ Approve
-                                    </a>
-                                    <a th:href="@{/admin/reject-product/{id}(id=${p.id})}"
-                                       class="text-center bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-red-100 transition rounded whitespace-nowrap">
-                                        ✗ Reject
-                                    </a>
+                                    <form th:action="@{/admin/approve-product/{id}(id=${p.id})}" method="post" class="contents"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><button type="submit" class="text-center bg-green-600 text-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-green-700 transition rounded whitespace-nowrap">✓ Approve</button></form>
+                                    <form th:action="@{/admin/reject-product/{id}(id=${p.id})}" method="post" class="contents"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><button type="submit" class="text-center bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider hover:bg-red-100 transition rounded whitespace-nowrap">✗ Reject</button></form>
                                 </div>
                             </td>
                         </tr>

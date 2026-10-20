@@ -9,11 +9,16 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 @Autowired
 private CustomSuccessHandler customSuccessHandler;
+@Autowired
+private LoginFailureHandler loginFailureHandler;
    @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
@@ -21,17 +26,10 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
             .ignoringRequestMatchers("/api/payment/webhook", "/subscribe", "/api/notifications/read-all")
         )
+        // CSP and the other security headers are set once, in SecurityHeadersFilter.
         .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
             .contentTypeOptions(opt -> {})
-            .contentSecurityPolicy(csp -> csp.policyDirectives(
-                "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; " +
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-                "font-src 'self' https://fonts.gstatic.com; " +
-                "img-src 'self' data: https: blob:; " +
-                "frame-ancestors 'none';"
-            ))
         )
         .authorizeHttpRequests(auth -> auth
     .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/error").permitAll()
@@ -45,7 +43,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     .requestMatchers("/.well-known/**").permitAll()
     .requestMatchers("/forgot-password/**", "/reset-password/**").permitAll()
     .requestMatchers("/verify-email", "/resend-verification").permitAll()
-    .requestMatchers("/api/customer-rights/**").permitAll()
+    .requestMatchers("/api/customer-rights/**").authenticated()
     .requestMatchers("/api/payment/webhook").permitAll()
     .requestMatchers("/api/payment/initiate").authenticated()
     .requestMatchers("/api/notifications", "/api/notifications/**").authenticated()
@@ -60,11 +58,13 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
             .loginPage("/login")
             .usernameParameter("username")
             .successHandler(customSuccessHandler)
+            .failureHandler(loginFailureHandler)
             .permitAll()
         )
         .sessionManagement(session -> session
             .sessionFixation().changeSessionId()
             .maximumSessions(5).expiredUrl("/login?expired")
+            .sessionRegistry(sessionRegistry())
         )
         .logout(logout -> logout
             .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
@@ -75,6 +75,15 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         );
     return http.build();
 }
+    /** Tracks live sessions so SessionRevoker can end them after a password reset or suspension. */
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

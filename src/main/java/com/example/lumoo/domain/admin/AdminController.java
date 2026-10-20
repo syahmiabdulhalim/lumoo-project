@@ -112,7 +112,7 @@ public class AdminController {
         model.addAttribute("inquiriesTotalPages", ip.getTotalPages());
         return "admin/sections/users :: content";
     }
-    @GetMapping("/approve-product/{id}")
+    @PostMapping("/approve-product/{id}")
     public String approveProduct(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         productService.approve(id);
         auditService.log("PRODUCT_APPROVED", "Product", String.valueOf(id), req);
@@ -121,7 +121,7 @@ public class AdminController {
         ra.addFlashAttribute("flashType", "green");
         return "redirect:/admin/dashboard#moderation";
     }
-    @GetMapping("/reject-product/{id}")
+    @PostMapping("/reject-product/{id}")
     public String rejectProduct(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         productService.delete(id);
         auditService.log("PRODUCT_REJECTED", "Product", String.valueOf(id), req);
@@ -130,7 +130,7 @@ public class AdminController {
         ra.addFlashAttribute("flashType", "red");
         return "redirect:/admin/dashboard#moderation";
     }
-    @GetMapping("/delete-product/{id}")
+    @PostMapping("/delete-product/{id}")
     public String adminDeleteProduct(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         productService.delete(id);
         auditService.log("PRODUCT_DELETED", "Product", String.valueOf(id), req);
@@ -139,7 +139,7 @@ public class AdminController {
         ra.addFlashAttribute("flashType", "red");
         return "redirect:/admin/dashboard#inventory";
     }
-    @GetMapping("/delete-user/{id}")
+    @PostMapping("/delete-user/{id}")
     public String adminDeleteUser(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         userService.delete(id);
         auditService.log("USER_DELETED", "User", String.valueOf(id), req);
@@ -196,14 +196,22 @@ public class AdminController {
         log.info("[Admin] Order #{} status set to {} by {}", orderId, status, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
         return "redirect:/admin/dashboard#orders";
     }
-    @GetMapping("/delete-order/{id}")
-    public String deleteOrder(@PathVariable Long id, HttpServletRequest req) {
-        orderService.delete(id);
-        auditService.log("ORDER_DELETED", "Order", String.valueOf(id), req);
-        log.warn("[Admin] Order #{} deleted by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
+    @PostMapping("/delete-order/{id}")
+    public String deleteOrder(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
+        // Orders are kept for the financial record; "delete" now cancels and releases stock.
+        OrderService.AdminCancelResult result = orderService.adminCancel(id);
+        if (result == OrderService.AdminCancelResult.CANCELLED) {
+            auditService.log("ORDER_CANCELLED", "Order", String.valueOf(id), req);
+            log.warn("[Admin] Order #{} cancelled by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
+            ra.addFlashAttribute("flashMsg", "Order cancelled. It stays in the records.");
+            ra.addFlashAttribute("flashType", "red");
+        } else {
+            ra.addFlashAttribute("flashMsg", "This order can't be cancelled in its current status.");
+            ra.addFlashAttribute("flashType", "red");
+        }
         return "redirect:/admin/dashboard#orders";
     }
-    @GetMapping("/delete-inquiry/{id}")
+    @PostMapping("/delete-inquiry/{id}")
     public String deleteInquiry(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         inquiryService.delete(id);
         auditService.log("INQUIRY_DELETED", "Inquiry", String.valueOf(id), req);
@@ -213,7 +221,11 @@ public class AdminController {
     }
     @PostMapping("/order/{id}/resolve-return")
     public String resolveReturn(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
-        orderService.resolveReturn(id);
+        if (!orderService.resolveReturn(id)) {
+            ra.addFlashAttribute("flashMsg", "No return request is open for this order.");
+            ra.addFlashAttribute("flashType", "red");
+            return "redirect:/admin/dashboard#orders";
+        }
         auditService.log("RETURN_RESOLVED", "Order", String.valueOf(id), req);
         ra.addFlashAttribute("flashMsg", "Return resolved.");
         ra.addFlashAttribute("flashType", "green");
@@ -221,14 +233,18 @@ public class AdminController {
     }
     @PostMapping("/order/{id}/verify-payment")
     public String verifyPayment(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
-        orderService.verifyPayment(id);
+        if (!orderService.verifyPayment(id)) {
+            ra.addFlashAttribute("flashMsg", "This order has no payment proof waiting for verification.");
+            ra.addFlashAttribute("flashType", "red");
+            return "redirect:/admin/dashboard#orders";
+        }
         auditService.log("PAYMENT_VERIFIED", "Order", String.valueOf(id), req);
         log.info("[Admin] Payment verified for order #{} by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
         ra.addFlashAttribute("flashMsg", "Payment verified.");
         ra.addFlashAttribute("flashType", "green");
         return "redirect:/admin/dashboard#orders";
     }
-    @GetMapping("/approve-image/{id}")
+    @PostMapping("/approve-image/{id}")
     public String approveImage(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         productService.approveImage(id);
         auditService.log("IMAGE_APPROVED", "Product", String.valueOf(id), req);
@@ -236,7 +252,7 @@ public class AdminController {
         ra.addFlashAttribute("flashType", "green");
         return "redirect:/admin/dashboard#moderation";
     }
-    @GetMapping("/reject-image/{id}")
+    @PostMapping("/reject-image/{id}")
     public String rejectImage(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         productService.rejectImage(id);
         auditService.log("IMAGE_REJECTED", "Product", String.valueOf(id), req);
@@ -251,7 +267,7 @@ public class AdminController {
         model.addAttribute("app", app);
         return "admin/application-detail";
     }
-    @GetMapping("/approve-vendor/{id}")
+    @PostMapping("/approve-vendor/{id}")
     public String approveVendor(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         vendorApplicationService.approve(id);
         auditService.log("VENDOR_APPLICATION_APPROVED", "VendorApplication", String.valueOf(id), req);

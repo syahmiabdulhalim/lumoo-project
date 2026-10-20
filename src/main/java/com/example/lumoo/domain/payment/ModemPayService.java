@@ -14,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import com.example.lumoo.domain.user.UserService;
+import com.example.lumoo.infrastructure.security.TokenHasher;
+import java.security.MessageDigest;
+import java.util.Set;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
@@ -42,6 +47,10 @@ public class ModemPayService {
     @Autowired private OrderService orderService;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private EmailService emailService;
+    @Autowired private UserService userService;
+    @Autowired private TransactionTemplate transactionTemplate;
+    /** Statuses where a successful charge can't be applied automatically and an admin must act. */
+    private static final Set<String> CLOSED_STATUSES = Set.of("CANCELLED", "PAYMENT_FAILED", "PAYMENT_EXPIRED");
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(java.time.Duration.ofSeconds(10))
             .build();
@@ -95,7 +104,10 @@ public class ModemPayService {
         log.info("[ModemPay] Payment intent created — orderIds=[{}] intentSecret={}", orderIds, intentSecret);
         return paymentLink;
     }
-    @Transactional
+    /**
+     * Backup for missed webhooks. The HTTP call runs outside any DB transaction; the result is
+     * applied in a short transaction through the same code path as the webhook.
+     */
     public void verifyAndSync(String intentSecret) {
         if (!isConfigured() || intentSecret == null || intentSecret.isBlank()) return;
         try {
@@ -108,20 +120,15 @@ public class ModemPayService {
             if (response.statusCode() != 200) return;
             JsonNode json   = objectMapper.readTree(response.body());
             String  status  = json.path("data").path("status").asText();
-            List<Order> orders = orderRepository.findByModempayPaymentId(intentSecret);
-            for (Order order : orders) {
-                if (!"AWAITING_PAYMENT".equals(order.getStatus())) continue;
+            long    amount  = json.path("data").path("amount").asLong(-1);
+            transactionTemplate.executeWithoutResult(tx -> {
+                List<Order> orders = orderRepository.findByModempayPaymentId(intentSecret);
                 if ("successful".equals(status)) {
-                    order.setStatus("PAID");
-                    orderRepository.save(order);
-                    log.info("[ModemPay] Order #{} verified PAID via polling (webhook was missed)", order.getId());
+                    applySuccessfulCharge(orders, amount, "polling");
                 } else if ("failed".equals(status) || "cancelled".equals(status)) {
-                    order.setStatus("PAYMENT_FAILED");
-                    orderRepository.save(order);
-                    orderService.returnStockForOrder(order);
-                    log.info("[ModemPay] Order #{} verified PAYMENT_FAILED via polling", order.getId());
+                    orders.forEach(o -> handlePaymentFailed(o.getId()));
                 }
-            }
+            });
         } catch (Exception e) {
             log.warn("[ModemPay] Verification polling failed for secret={}: {}", intentSecret, e.getMessage());
         }
@@ -133,7 +140,10 @@ public class ModemPayService {
             mac.init(new SecretKeySpec(webhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA512"));
             byte[] computed = mac.doFinal(rawPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             String computedHex = HexFormat.of().formatHex(computed);
-            return computedHex.equalsIgnoreCase(receivedSignature.trim());
+            // constant-time comparison so the signature can't be guessed byte by byte
+            return MessageDigest.isEqual(
+                    computedHex.getBytes(java.nio.charset.StandardCharsets.US_ASCII),
+                    receivedSignature.trim().toLowerCase(java.util.Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII));
         } catch (Exception e) {
             log.error("[ModemPay] Signature verification failed", e);
             return false;
@@ -155,18 +165,21 @@ public class ModemPayService {
             try { orderIds.add(Long.parseLong(metadata.path("order_id").asText())); } catch (NumberFormatException ignored) {}
         }
         Long firstOrderId = orderIds.isEmpty() ? null : orderIds.get(0);
-        if (webhookEventRepository.existsByEventId(eventId)) {
-            log.info("[ModemPay] Duplicate webhook ignored — eventId={}", eventId);
+        // payload.id identifies the charge/transfer, not the event: transfer.succeeded and a later
+        // transfer.reversed share it. Deduplicate on (event type, object id) instead.
+        String dedupKey = dedupKey(eventType, eventId);
+        if (webhookEventRepository.existsByEventId(dedupKey)) {
+            log.info("[ModemPay] Duplicate webhook ignored — eventId={} eventType={}", eventId, eventType);
             return;
         }
         WebhookEvent event = new WebhookEvent();
-        event.setEventId(eventId);
+        event.setEventId(dedupKey);
         event.setEventType(eventType);
         event.setOrderId(firstOrderId);
         webhookEventRepository.save(event);
         long paidAmount = payload.path("amount").asLong(-1);
         switch (eventType) {
-            case "charge.succeeded"     -> orderIds.forEach(id -> handlePaymentSuccess(id, paidAmount));
+            case "charge.succeeded"     -> applySuccessfulCharge(orderRepository.findAllById(orderIds), paidAmount, "webhook");
             case "charge.failed",
                  "charge.cancelled"    -> orderIds.forEach(this::handlePaymentFailed);
             case "charge.expired"      -> orderIds.forEach(this::handlePaymentExpired);
@@ -177,28 +190,40 @@ public class ModemPayService {
         }
         log.info("[ModemPay] Webhook processed — eventId={} eventType={} orderIds={}", eventId, eventType, orderIds);
     }
-    private void handlePaymentSuccess(Long orderId, long paidAmount) {
-        orderRepository.findById(orderId).ifPresent(order -> {
-            if (!"AWAITING_PAYMENT".equals(order.getStatus())) {
-                log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", orderId, order.getStatus());
-                return;
+    static String dedupKey(String eventType, String objectId) {
+        String key = eventType + ":" + objectId;
+        return key.length() <= 100 ? key : TokenHasher.hash(key); // webhook_events.event_id is 100 chars
+    }
+    /**
+     * One charge can pay several vendor orders. The paid amount is checked against the sum of all
+     * of them (createPaymentIntent charged that sum), then each order goes through OrderService.markPaid.
+     */
+    void applySuccessfulCharge(List<Order> orders, long paidAmount, String source) {
+        if (orders.isEmpty()) return;
+        long expected = orders.stream().mapToLong(o -> Math.round(o.getTotalAmount())).sum();
+        boolean underpaid = paidAmount >= 0 && paidAmount < expected;
+        for (Order order : orders) {
+            String status = order.getStatus();
+            if ("AWAITING_PAYMENT".equals(status)) {
+                if (underpaid) {
+                    log.warn("[ModemPay] Order #{} amount mismatch — charge total expected={}GMD paid={}GMD ({}) — NOT marking PAID",
+                            order.getId(), expected, paidAmount, source);
+                    order.setStatus("PAYMENT_FAILED");
+                    orderRepository.save(order);
+                    orderService.returnStockForOrder(order);
+                } else {
+                    orderService.markPaid(order);
+                    log.info("[ModemPay] Order #{} marked PAID via {} (paid={}GMD)", order.getId(), source, paidAmount);
+                }
+            } else if (CLOSED_STATUSES.contains(status)) {
+                log.error("[ModemPay] Payment received for order #{} which is {} ({}) — needs refund or manual restore",
+                        order.getId(), status, source);
+                userService.notifyAdmins("⚠ Payment received for order #LMO-" + order.getId() + " but it is " + status
+                        + ". Refund the buyer or restore the order manually.");
+            } else {
+                log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", order.getId(), status);
             }
-            long expected = Math.round(order.getTotalAmount());
-            if (paidAmount >= 0 && paidAmount < expected) {
-                log.warn("[ModemPay] Order #{} amount mismatch — expected={}GMD paid={}GMD — NOT marking PAID", orderId, expected, paidAmount);
-                order.setStatus("PAYMENT_FAILED");
-                orderRepository.save(order);
-                orderService.returnStockForOrder(order);
-                return;
-            }
-            order.setStatus("PAID");
-            orderRepository.save(order);
-            emailService.sendEmail(order.getUser().getEmail(),
-                    "Payment confirmed — #LMO-" + orderId,
-                    EmailTemplates.orderPaid(order.getUser().getUsername(),
-                            String.valueOf(orderId), order.getTotalAmount()));
-            log.info("[ModemPay] Order #{} marked PAID (paid={}GMD)", orderId, paidAmount);
-        });
+        }
     }
     private void handlePaymentFailed(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {

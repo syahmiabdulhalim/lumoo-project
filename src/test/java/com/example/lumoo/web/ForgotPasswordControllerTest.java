@@ -4,7 +4,8 @@ import com.example.lumoo.domain.user.ForgotPasswordController;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.UserRepository;
 import com.example.lumoo.infrastructure.email.EmailService;
-import com.example.lumoo.infrastructure.security.RateLimitInterceptor;
+import com.example.lumoo.infrastructure.security.SessionRevoker;
+import com.example.lumoo.infrastructure.security.TokenHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,11 +33,7 @@ class ForgotPasswordControllerTest {
     @MockitoBean PasswordEncoder passwordEncoder;
     @MockitoBean EmailService emailService;
     @MockitoBean SiteSettingsService siteSettingsService;
-    @MockitoBean RateLimitInterceptor rateLimitInterceptor;
-    @BeforeEach
-    void allowRequests() throws Exception {
-        when(rateLimitInterceptor.preHandle(any(), any(), any())).thenReturn(true);
-    }
+    @MockitoBean SessionRevoker sessionRevoker;
     @Test
     void showForgotPage_returns200() throws Exception {
         mvc.perform(get("/forgot-password"))
@@ -68,13 +68,13 @@ class ForgotPasswordControllerTest {
     void showResetPage_validToken_returns200() throws Exception {
         User user = new User();
         user.setTokenExpiry(LocalDateTime.now().plusHours(1));
-        when(userRepository.findByResetToken("valid-token")).thenReturn(Optional.of(user));
+        when(userRepository.findByResetToken(TokenHasher.hash("valid-token"))).thenReturn(Optional.of(user));
         mvc.perform(get("/reset-password").param("token", "valid-token"))
                 .andExpect(status().isOk());
     }
     @Test
     void showResetPage_tokenNotFound_redirects() throws Exception {
-        when(userRepository.findByResetToken("bad-token")).thenReturn(Optional.empty());
+        when(userRepository.findByResetToken(TokenHasher.hash("bad-token"))).thenReturn(Optional.empty());
         mvc.perform(get("/reset-password").param("token", "bad-token"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/login?error=invalid_token"));
@@ -83,7 +83,7 @@ class ForgotPasswordControllerTest {
     void showResetPage_expiredToken_redirects() throws Exception {
         User user = new User();
         user.setTokenExpiry(LocalDateTime.now().minusHours(1));
-        when(userRepository.findByResetToken("expired-token")).thenReturn(Optional.of(user));
+        when(userRepository.findByResetToken(TokenHasher.hash("expired-token"))).thenReturn(Optional.of(user));
         mvc.perform(get("/reset-password").param("token", "expired-token"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/login?error=invalid_token"));
@@ -92,7 +92,7 @@ class ForgotPasswordControllerTest {
     void showResetPage_nullTokenExpiry_redirects() throws Exception {
         User user = new User();
         user.setTokenExpiry(null);
-        when(userRepository.findByResetToken("null-expiry")).thenReturn(Optional.of(user));
+        when(userRepository.findByResetToken(TokenHasher.hash("null-expiry"))).thenReturn(Optional.of(user));
         mvc.perform(get("/reset-password").param("token", "null-expiry"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/login?error=invalid_token"));
@@ -101,7 +101,7 @@ class ForgotPasswordControllerTest {
     void handleReset_validToken_redirectsToLoginSuccess() throws Exception {
         User user = new User();
         user.setTokenExpiry(LocalDateTime.now().plusHours(1));
-        when(userRepository.findByResetToken("valid-token")).thenReturn(Optional.of(user));
+        when(userRepository.findByResetToken(TokenHasher.hash("valid-token"))).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("newPass123")).thenReturn("encoded");
         mvc.perform(post("/reset-password")
                         .param("token", "valid-token")
@@ -112,7 +112,7 @@ class ForgotPasswordControllerTest {
     }
     @Test
     void handleReset_invalidToken_redirectsWithError() throws Exception {
-        when(userRepository.findByResetToken("bad-token")).thenReturn(Optional.empty());
+        when(userRepository.findByResetToken(TokenHasher.hash("bad-token"))).thenReturn(Optional.empty());
         mvc.perform(post("/reset-password")
                         .param("token", "bad-token")
                         .param("password", "newPass123"))
@@ -123,11 +123,58 @@ class ForgotPasswordControllerTest {
     void handleReset_expiredToken_redirectsWithError() throws Exception {
         User user = new User();
         user.setTokenExpiry(LocalDateTime.now().minusMinutes(5));
-        when(userRepository.findByResetToken("expired-token")).thenReturn(Optional.of(user));
+        when(userRepository.findByResetToken(TokenHasher.hash("expired-token"))).thenReturn(Optional.of(user));
         mvc.perform(post("/reset-password")
                         .param("token", "expired-token")
                         .param("password", "newPass123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/login?error=invalid_token"));
+    }
+    @Test
+    void processForgot_sameMessage_whetherOrNotAccountExists() throws Exception {
+        User user = new User();
+        user.setEmail("user@test.com");
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("nobody@test.com")).thenReturn(Optional.empty());
+        when(emailService.sendResetEmail(any(), any())).thenReturn(false);
+        String known = mvc.perform(post("/forgot-password").param("email", "user@test.com"))
+                .andReturn().getResponse().getContentAsString();
+        String unknown = mvc.perform(post("/forgot-password").param("email", "nobody@test.com"))
+                .andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(known.contains("If an account exists for that email"));
+        org.junit.jupiter.api.Assertions.assertTrue(unknown.contains("If an account exists for that email"));
+        org.junit.jupiter.api.Assertions.assertFalse(known.contains("could not send"));
+    }
+    @Test
+    void processForgot_storesOnlyHashOfToken_andEmailsRawToken() throws Exception {
+        User user = new User();
+        user.setEmail("user@test.com");
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        org.mockito.ArgumentCaptor<String> raw = org.mockito.ArgumentCaptor.forClass(String.class);
+        when(emailService.sendResetEmail(any(), raw.capture())).thenReturn(true);
+        mvc.perform(post("/forgot-password").param("email", "user@test.com")).andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertNotEquals(raw.getValue(), user.getResetToken());
+        org.junit.jupiter.api.Assertions.assertEquals(TokenHasher.hash(raw.getValue()), user.getResetToken());
+    }
+    @Test
+    void handleReset_weakPassword_isRejected() throws Exception {
+        User user = new User();
+        user.setTokenExpiry(LocalDateTime.now().plusHours(1));
+        when(userRepository.findByResetToken(TokenHasher.hash("valid-token"))).thenReturn(Optional.of(user));
+        mvc.perform(post("/reset-password").param("token", "valid-token").param("password", "short"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Password must be 8")));
+        verify(userRepository, never()).save(any());
+    }
+    @Test
+    void handleReset_success_endsAllSessionsOfThatUser() throws Exception {
+        User user = new User();
+        user.setEmail("user@test.com");
+        user.setTokenExpiry(LocalDateTime.now().plusHours(1));
+        when(userRepository.findByResetToken(TokenHasher.hash("valid-token"))).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded");
+        mvc.perform(post("/reset-password").param("token", "valid-token").param("password", "newPass123"))
+                .andExpect(status().is3xxRedirection());
+        verify(sessionRevoker).expireAllSessions("user@test.com");
     }
 }

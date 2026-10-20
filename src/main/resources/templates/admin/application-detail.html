@@ -145,10 +145,7 @@
             </div>
             <div th:if="${app.status == 'PENDING'}"
                  class="bg-white border border-slate-200 rounded-xl p-6 flex gap-4">
-                <a th:href="@{/admin/approve-vendor/{id}(id=${app.id})}"
-                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg">
-                    Approve Vendor
-                </a>
+                <form th:action="@{/admin/approve-vendor/{id}(id=${app.id})}" method="post" class="contents"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/><button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-xs font-bold uppercase tracking-widest transition rounded-lg">Approve Vendor</button></form>
                 <form th:action="@{/admin/reject-vendor/{id}(id=${app.id})}" method="post"
                       th:id="'reject-form-' + ${app.id}" onsubmit="return fillRejectNote(this)">
                     <input type="hidden" name="note">

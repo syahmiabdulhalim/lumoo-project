@@ -16,6 +16,8 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 @WebMvcTest(value = BlogController.class,
@@ -60,6 +62,21 @@ class BlogControllerTest {
         when(blogService.getRelated("news", 1L)).thenReturn(List.of());
         mvc.perform(get("/blog/my-post"))
                 .andExpect(status().isOk());
+    }
+    @Test
+    void post_rendersSanitisedContent() throws Exception {
+        BlogPost post = new BlogPost();
+        post.setId(2L);
+        post.setSlug("xss");
+        post.setCategory("news");
+        post.setContent("<p>Hello</p><script>alert('pwned')</script><img src=x onerror=alert(2)>");
+        when(blogService.getBySlug("xss")).thenReturn(Optional.of(post));
+        when(blogService.getRelated("news", 2L)).thenReturn(List.of());
+        mvc.perform(get("/blog/xss"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<p>Hello</p>")))
+                .andExpect(content().string(not(containsString("alert('pwned')"))))
+                .andExpect(content().string(not(containsString("onerror=alert(2)"))));
     }
     @Test
     void post_redirects_whenNotFound() throws Exception {

@@ -23,7 +23,7 @@ class DataRetentionServiceTest {
         Order order = new Order();
         order.setCustomerName("John");
         order.setAddress("123 Street");
-        when(orderRepository.findByCreatedAtBeforeAndCustomerNameNot(any(LocalDateTime.class), anyString()))
+        when(orderRepository.findOrdersToAnonymise(any(LocalDateTime.class)))
                 .thenReturn(List.of(order));
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         int count = service.anonymiseOldOrders();
@@ -33,7 +33,7 @@ class DataRetentionServiceTest {
     }
     @Test
     void anonymiseOldOrders_whenNoOrders_returnsZero() {
-        when(orderRepository.findByCreatedAtBeforeAndCustomerNameNot(any(LocalDateTime.class), anyString()))
+        when(orderRepository.findOrdersToAnonymise(any(LocalDateTime.class)))
                 .thenReturn(List.of());
         int count = service.anonymiseOldOrders();
         assertEquals(0, count);
@@ -43,7 +43,7 @@ class DataRetentionServiceTest {
     void anonymiseOldOrders_anonymisesMultipleOrders() {
         Order o1 = new Order(); o1.setCustomerName("Alice");
         Order o2 = new Order(); o2.setCustomerName("Bob");
-        when(orderRepository.findByCreatedAtBeforeAndCustomerNameNot(any(LocalDateTime.class), anyString()))
+        when(orderRepository.findOrdersToAnonymise(any(LocalDateTime.class)))
                 .thenReturn(List.of(o1, o2));
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         int count = service.anonymiseOldOrders();

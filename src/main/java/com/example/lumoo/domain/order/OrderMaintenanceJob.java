@@ -37,11 +37,11 @@ public class OrderMaintenanceJob {
         if (stale.isEmpty()) return;
         log.info("[OrderMaintenance] Auto-cancelling {} stale AWAITING_PROOF order(s)", stale.size());
         for (Order order : stale) {
-            orderService.returnStockForOrder(order);
+            orderService.cancelAndRelease(order);
+            orderRepository.save(order);
             String buyerEmail = order.getUser().getEmail();
             String orderId    = String.valueOf(order.getId());
             String buyerName  = order.getUser().getUsername();
-            orderRepository.delete(order);
             emailService.sendEmail(buyerEmail,
                     "Order #LMO-" + orderId + " expired",
                     EmailTemplates.staleCancelled(buyerName, orderId));
@@ -49,8 +49,8 @@ public class OrderMaintenanceJob {
         }
     }
 
+    // No surrounding transaction: each payout makes an HTTP call and saves its own order.
     @Scheduled(cron = "0 30 3 * * *")
-    @Transactional
     public void retryFailedPayouts() {
         List<Order> failed = orderRepository.findDeliveredWithFailedPayout();
         if (failed.isEmpty()) return;
@@ -67,11 +67,11 @@ public class OrderMaintenanceJob {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(14);
         List<Order> stale = orderRepository.findStaleShipped(cutoff);
         if (stale.isEmpty()) return;
-        log.info("[OrderMaintenance] Auto-confirming {} SHIPPED order(s) older than 14 days", stale.size());
+        log.info("[OrderMaintenance] Auto-confirming {} SHIPPED order(s) shipped over 14 days ago", stale.size());
         for (Order order : stale) {
-            order.setStatus("DELIVERED");
+            // Goes through the normal payout hold; PayoutReleaseJob pays the vendor later.
+            orderService.applyDelivered(order);
             orderRepository.save(order);
-            payoutService.tryPayoutVendor(order);
             emailService.sendEmail(order.getUser().getEmail(),
                     "Order #LMO-" + order.getId() + " marked as delivered",
                     EmailTemplates.orderDelivered(order.getUser().getUsername(), String.valueOf(order.getId())));
