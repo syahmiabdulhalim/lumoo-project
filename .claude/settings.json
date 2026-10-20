@@ -4,7 +4,23 @@
       "Bash(awk -F: '{print $1}')",
       "Bash(python3)",
       "Bash(xargs ls)",
-      "Bash(./mvnw test *)"
+      "Bash(./mvnw test *)",
+      "Bash(./mvnw *)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/compile-check.sh",
+            "timeout": 180,
+            "statusMessage": "Compiling…"
+          }
+        ]
+      }
     ]
   }
 }

@@ -54,6 +54,7 @@ class OrderServiceTest {
     @Mock private com.example.lumoo.domain.product.ProductService productService;
     @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
     @Mock private com.example.lumoo.domain.user.UserService userService;
+    @Mock private com.example.lumoo.domain.promo.PromoService promoService;
     @InjectMocks private OrderService orderService;
     private User buyer;
     private User vendor;
@@ -145,7 +146,7 @@ class OrderServiceTest {
         when(productService.decrementStock(anyLong(), anyInt())).thenReturn(true);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         List<Order> orders = orderService.placeOrders(buyer, "123 Street", "COD",
-                List.of(a, b), true, true, false, "Gamcel Express", 90.0, null);
+                List.of(a, b), true, true, false, "Gamcel Express", 90.0, null, null);
         double shippingSum = orders.stream().mapToDouble(o -> o.getShippingCost() == null ? 0 : o.getShippingCost()).sum();
         double grandTotal  = orders.stream().mapToDouble(Order::getTotalAmount).sum();
         assertEquals(90.0, shippingSum, 0.001);
@@ -156,8 +157,38 @@ class OrderServiceTest {
         CartItem item = cartItem(100.0, 1);
         when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         Order result = orderService.placeOrders(buyer, "123 Street", "COD", List.of(item),
-                true, true, false, null, -500.0, null).get(0);
+                true, true, false, null, -500.0, null, null).get(0);
         assertEquals(100.0, result.getTotalAmount(), 0.001);
+    }
+    @Test
+    void promo_isSplitByItemValue_andFundedFromCommission() {
+        User vendor2 = new User();
+        vendor2.setId(3L);
+        Product p1 = new Product(); p1.setId(1L); p1.setVendor(vendor);
+        Product p2 = new Product(); p2.setId(2L); p2.setVendor(vendor2);
+        CartItem a = cartItem(300.0, 1); a.setProduct(p1);
+        CartItem b = cartItem(100.0, 1); b.setProduct(p2);
+        when(productService.decrementStock(anyLong(), anyInt())).thenReturn(true);
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(promoService.redeem("SAVE", 400.0)).thenReturn(Optional.of(40.0));
+        List<Order> orders = orderService.placeOrders(buyer, "123 Street", "COD",
+                List.of(a, b), true, true, false, null, 20.0, null, "SAVE");
+        Order o1 = orders.stream().filter(o -> o.getDiscountAmount() == 30.0).findFirst().orElseThrow();
+        Order o2 = orders.stream().filter(o -> o.getDiscountAmount() == 10.0).findFirst().orElseThrow();
+        assertEquals(400.0 + 20.0 - 40.0, orders.stream().mapToDouble(Order::getTotalAmount).sum(), 0.001);
+        // vendor paid as if full price: items + shipping share - 10% of items
+        assertEquals(o1.getTotalAmount() - o1.getAdminCommission(), 300 + (o1.getShippingCost() == null ? 0 : o1.getShippingCost()) - 30, 0.001);
+        assertEquals(30.0 - 30.0, o1.getAdminCommission(), 0.001); // 10% of 300 minus the 30 discount
+        assertEquals("SAVE", o1.getPromoCode());
+        assertEquals("SAVE", o2.getPromoCode());
+    }
+    @Test
+    void promo_unavailable_abortsTheOrder() {
+        CartItem item = cartItem(100.0, 1);
+        when(promoService.redeem("GONE", 100.0)).thenReturn(Optional.empty());
+        assertThrows(OrderService.PromoUnavailableException.class, () -> orderService.placeOrders(
+                buyer, "123 Street", "COD", List.of(item), true, true, false, null, 0.0, null, "GONE"));
+        verify(orderRepository, never()).save(any());
     }
     @Test
     void cancelOrder_notFound() {

@@ -16,10 +16,33 @@ public class BreachIncident {
     private String affectedData;
     private int affectedUsers;
     private LocalDateTime dpaNotifiedAt;
+    /** When Lumoo became aware of the breach — the PDPP 72-hour notification clock starts here. */
+    private LocalDateTime discoveredAt;
+    @Column(columnDefinition = "TEXT")
+    private String containmentActions;
+    private String reportedBy;
     @Enumerated(EnumType.STRING)
     private Status status = Status.DETECTED;
     @PrePersist
-    protected void onCreate() { this.detectedAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        this.detectedAt = LocalDateTime.now();
+        if (this.discoveredAt == null) this.discoveredAt = this.detectedAt;
+    }
+    public LocalDateTime getDiscoveredAt() { return discoveredAt; }
+    public void setDiscoveredAt(LocalDateTime discoveredAt) { this.discoveredAt = discoveredAt; }
+    public String getContainmentActions() { return containmentActions; }
+    public void setContainmentActions(String containmentActions) { this.containmentActions = containmentActions; }
+    public String getReportedBy() { return reportedBy; }
+    public void setReportedBy(String reportedBy) { this.reportedBy = reportedBy; }
+    /** PDPP: the regulator must be told within 72 hours of discovery. */
+    public LocalDateTime getRegulatorDeadline() {
+        LocalDateTime start = discoveredAt != null ? discoveredAt : detectedAt;
+        return start == null ? null : start.plusHours(72);
+    }
+    public boolean isRegulatorOverdue() {
+        LocalDateTime d = getRegulatorDeadline();
+        return dpaNotifiedAt == null && d != null && d.isBefore(LocalDateTime.now());
+    }
     public Long getId() { return id; }
     public LocalDateTime getDetectedAt() { return detectedAt; }
     public String getDescription() { return description; }

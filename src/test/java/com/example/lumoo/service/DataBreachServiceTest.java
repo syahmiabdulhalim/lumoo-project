@@ -5,11 +5,14 @@ import com.example.lumoo.domain.pdpp.BreachIncidentRepository;
 import com.example.lumoo.domain.pdpp.DataBreachService;
 import com.example.lumoo.infrastructure.email.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.lang.reflect.Field;
+import org.springframework.test.util.ReflectionTestUtils;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -19,64 +22,68 @@ class DataBreachServiceTest {
     @Mock private AuditService auditService;
     @Mock private EmailService emailService;
     @InjectMocks private DataBreachService service;
-    private HttpServletRequest mockRequest() {
-        HttpServletRequest req = mock(HttpServletRequest.class, org.mockito.Answers.RETURNS_DEFAULTS);
-        lenient().when(req.getHeader("X-Forwarded-For")).thenReturn(null);
-        lenient().when(req.getRemoteAddr()).thenReturn("127.0.0.1");
-        lenient().when(req.getHeader("User-Agent")).thenReturn(null);
-        lenient().when(req.getUserPrincipal()).thenReturn(null);
-        return req;
+    private final HttpServletRequest req = mock(HttpServletRequest.class);
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(service, "dpaEmail", "regulator@example.gm");
+        ReflectionTestUtils.setField(service, "adminEmail", "admin@lumoo.my");
+        ReflectionTestUtils.setField(service, "dpaEnabled", true);
     }
-    private BreachIncident incidentWithId(long id) {
+    private BreachIncident incident(long id) {
         BreachIncident b = new BreachIncident();
-        try {
-            Field f = BreachIncident.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(b, id);
-        } catch (Exception ignored) {}
+        ReflectionTestUtils.setField(b, "id", id);
+        b.setDescription("Leaked <script>alert(1)</script> export");
+        b.setDiscoveredAt(LocalDateTime.now().minusHours(1));
         return b;
     }
     @Test
-    void reportBreach_savesIncidentAndSendsEmails() {
-        BreachIncident saved = incidentWithId(1L);
-        when(breachIncidentRepository.save(any())).thenReturn(saved);
-        when(emailService.sendBreachAlert(any(), any(), any())).thenReturn(true);
-        BreachIncident result = service.reportBreach("SQL injection", "emails", 10, mockRequest());
-        assertNotNull(result);
-        verify(breachIncidentRepository, atLeastOnce()).save(any(BreachIncident.class));
-        verify(emailService, times(2)).sendBreachAlert(any(), any(), any());
+    void reportBreach_alertsAdminOnly_neverTheRegulator() {
+        when(breachIncidentRepository.save(any())).thenAnswer(inv -> { BreachIncident b = inv.getArgument(0); ReflectionTestUtils.setField(b, "id", 7L); return b; });
+        BreachIncident b = service.reportBreach("desc", "emails", 10, LocalDateTime.now(), "rotated keys", "admin@lumoo.my", req);
+        verify(emailService).sendBreachAlert(eq("admin@lumoo.my"), any(), any());
+        verify(emailService, never()).sendBreachAlert(eq("regulator@example.gm"), any(), any());
+        assertNull(b.getDpaNotifiedAt());
+        assertEquals("admin@lumoo.my", b.getReportedBy());
     }
     @Test
-    void reportBreach_whenDpaNotified_setsDpaNotifiedAt() {
-        BreachIncident saved = incidentWithId(2L);
-        when(breachIncidentRepository.save(any())).thenReturn(saved);
-        when(emailService.sendBreachAlert(any(), any(), any()))
-                .thenReturn(true)
-                .thenReturn(true);
-        service.reportBreach("desc", "data", 5, mockRequest());
-        verify(breachIncidentRepository, atLeastOnce()).save(any(BreachIncident.class));
+    void notifyRegulator_sendsOnce_andRecordsTime() {
+        BreachIncident b = incident(1);
+        when(breachIncidentRepository.findById(1L)).thenReturn(Optional.of(b));
+        when(emailService.sendBreachAlert(eq("regulator@example.gm"), any(), any())).thenReturn(true);
+        assertEquals(DataBreachService.NotifyResult.SENT, service.notifyRegulator(1L, "admin", req));
+        assertNotNull(b.getDpaNotifiedAt());
+        assertEquals(DataBreachService.NotifyResult.ALREADY_SENT, service.notifyRegulator(1L, "admin", req));
+        verify(emailService, times(1)).sendBreachAlert(eq("regulator@example.gm"), any(), any());
     }
     @Test
-    void reportBreach_whenDpaNotNotified_doesNotSetDpaNotifiedAt() {
-        BreachIncident saved = incidentWithId(3L);
-        when(breachIncidentRepository.save(any())).thenReturn(saved);
+    void notifyRegulator_disabledUntilAddressConfirmed() {
+        ReflectionTestUtils.setField(service, "dpaEnabled", false);
+        when(breachIncidentRepository.findById(1L)).thenReturn(Optional.of(incident(1)));
+        assertEquals(DataBreachService.NotifyResult.DISABLED, service.notifyRegulator(1L, "admin", req));
+        verifyNoInteractions(emailService);
+    }
+    @Test
+    void notifyRegulator_sendFailure_doesNotMarkNotified() {
+        BreachIncident b = incident(1);
+        when(breachIncidentRepository.findById(1L)).thenReturn(Optional.of(b));
         when(emailService.sendBreachAlert(any(), any(), any())).thenReturn(false);
-        service.reportBreach("desc", "data", 0, mockRequest());
-        verify(breachIncidentRepository, atLeastOnce()).save(any(BreachIncident.class));
+        assertEquals(DataBreachService.NotifyResult.SEND_FAILED, service.notifyRegulator(1L, "admin", req));
+        assertNull(b.getDpaNotifiedAt());
     }
     @Test
-    void updateStatus_setsStatusAndSaves() {
-        BreachIncident incident = new BreachIncident();
-        incident.setStatus(BreachIncident.Status.DETECTED);
-        when(breachIncidentRepository.findById(1L)).thenReturn(java.util.Optional.of(incident));
-        when(breachIncidentRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        BreachIncident result = service.updateStatus(1L, BreachIncident.Status.CONTAINED);
-        assertEquals(BreachIncident.Status.CONTAINED, result.getStatus());
-        verify(breachIncidentRepository).save(incident);
+    void regulatorEmail_isEscaped_andHasNoInventedClaims() {
+        String html = service.buildRegulatorEmail(incident(1));
+        assertFalse(html.contains("<script>"));
+        assertTrue(html.contains("&lt;script&gt;"));
+        assertFalse(html.contains("isolated and contained"));
+        assertFalse(html.contains("investigation commenced"));
     }
     @Test
-    void updateStatus_throwsWhenNotFound() {
-        when(breachIncidentRepository.findById(99L)).thenReturn(java.util.Optional.empty());
-        assertThrows(RuntimeException.class, () -> service.updateStatus(99L, BreachIncident.Status.RESOLVED));
+    void deadline_is72hAfterDiscovery_andOverdueFlag() {
+        BreachIncident b = incident(1);
+        b.setDiscoveredAt(LocalDateTime.now().minusHours(80));
+        assertTrue(b.isRegulatorOverdue());
+        b.setDpaNotifiedAt(LocalDateTime.now());
+        assertFalse(b.isRegulatorOverdue());
     }
 }

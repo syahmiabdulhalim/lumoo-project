@@ -5,6 +5,8 @@ import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.ProductRepository;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.product.ReviewRepository;
+import com.example.lumoo.domain.promo.PromoCode;
+import com.example.lumoo.domain.promo.PromoCodeRepository;
 import com.example.lumoo.domain.user.Role;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.UserRepository;
@@ -24,6 +26,7 @@ class MigrationConstraintsTest {
     @Autowired CartRepository carts;
     @Autowired ReviewRepository reviews;
     @Autowired JdbcTemplate jdbc;
+    @Autowired PromoCodeRepository promos;
     private User user() {
         User u = new User();
         u.setEmail("buyer" + System.nanoTime() + "@test.com");
@@ -57,5 +60,16 @@ class MigrationConstraintsTest {
         Review b = new Review(); b.setUser(u); b.setProduct(p); b.setRating(4);
         reviews.saveAndFlush(a);
         assertThrows(DataIntegrityViolationException.class, () -> reviews.saveAndFlush(b));
+    }
+    @Test
+    void promoUsageLimit_isEnforcedAtomically() {
+        PromoCode p = new PromoCode();
+        p.setCode("ONCE");
+        p.setDiscountValue(10);
+        p.setUsageLimit(1);
+        p = promos.saveAndFlush(p);
+        assertEquals(1, promos.incrementUsage(p.getId()));
+        assertEquals(0, promos.incrementUsage(p.getId()));
+        assertEquals(1, promos.findById(p.getId()).orElseThrow().getUsedCount());
     }
 }

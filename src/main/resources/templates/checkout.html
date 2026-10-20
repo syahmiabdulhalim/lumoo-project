@@ -70,6 +70,7 @@
                             <div id="shipping-options" class="space-y-2"></div>
                             <input type="hidden" name="courierName"  id="selectedCourierName">
                             <input type="hidden" name="shippingCost" id="selectedShippingCost" value="0">
+                            <input type="hidden" name="promoCode" th:if="${promoCode != null}" th:value="${promoCode}">
                             <p class="text-[9px] text-gray-400 mt-3">Don't need delivery? Select "Self Collect / No Shipping" below.</p>
                         </div>
 
@@ -105,7 +106,7 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Send via QMoney wallet. Share your transaction ID after placing the order.</p>
                                 </div>
                             </label>
-                            <label th:if="${total >= 10}"
+                            <label th:if="${payable >= 10}"
                                    class="flex items-start gap-4 p-4 border border-gray-200 cursor-pointer hover:border-[#1a2336] transition has-[:checked]:border-[#1a2336] has-[:checked]:bg-gray-50">
                                 <input type="radio" name="paymentMethod" value="MODEMPAY" class="mt-1 accent-black">
                                 <div>
@@ -113,7 +114,7 @@
                                     <p class="text-[9px] text-gray-400 mt-1">Secure instant payment. You'll be redirected to complete payment — no upload needed.</p>
                                 </div>
                             </label>
-                            <div th:unless="${total >= 10}"
+                            <div th:unless="${payable >= 10}"
                                  class="flex items-start gap-4 p-4 border border-dashed border-gray-200 bg-gray-50 opacity-60">
                                 <div class="w-4 h-4 mt-1 rounded-full border-2 border-gray-300 shrink-0"></div>
                                 <div>
@@ -227,15 +228,20 @@
                             <span>Subtotal</span>
                             <span th:text="${'GMD ' + total}"></span>
                         </div>
+                        <div th:if="${discount > 0}" class="flex justify-between text-[9px] text-green-600 uppercase tracking-wider mb-2">
+                            <span th:text="|Discount (${promoCode})|">Discount</span>
+                            <span th:text="${'-GMD ' + #numbers.formatDecimal(discount, 1, 2)}"></span>
+                        </div>
+                        <div th:if="${promoRejected}" class="text-[9px] text-red-500 font-bold mb-2">Promo code is no longer valid — not applied.</div>
                         <div id="shipping-summary-row" class="hidden flex justify-between text-[9px] text-gray-400 uppercase tracking-wider mb-2">
                             <span>Shipping (<span id="summary-courier">—</span>)</span>
                             <span id="summary-shipping-cost" class="font-bold text-gray-700">GMD 0</span>
                         </div>
                         <div class="flex justify-between items-baseline border-t border-gray-100 pt-4">
                             <span class="text-[9px] font-black uppercase tracking-widest">Total</span>
-                            <span id="grand-total-display" class="text-xl font-black text-[#4d78c0]" th:text="${'GMD ' + total}"></span>
+                            <span id="grand-total-display" class="text-xl font-black text-[#4d78c0]" th:text="${'GMD ' + #numbers.formatDecimal(payable, 1, 2)}"></span>
                         </div>
-                        <div th:if="${total < 10}"
+                        <div th:if="${payable < 10}"
                              class="mt-3 bg-orange-50 border border-orange-200 rounded px-3 py-2 text-[9px] text-orange-700 font-bold uppercase tracking-wider">
                             ⚠ Minimum order for online payment is GMD 10. Add more items or pay by bank transfer.
                         </div>
@@ -275,7 +281,7 @@
         const radios = document.querySelectorAll('input[name="paymentMethod"]');
         // Shipping calculator
         var cartItems = /*[[${cartLines}]]*/ [];
-        var subtotal  = /*[[${total}]]*/ 0;
+        var subtotal  = /*[[${payable}]]*/ 0; // items after promo discount; shipping is added in JS
 
         function totalWeightKg() {
             if (!cartItems || cartItems.length === 0) return 1;
@@ -369,6 +375,14 @@
         // Show email_not_verified error
         (function() {
             var p = new URLSearchParams(window.location.search);
+            if (p.get('error') === 'promo_invalid') {
+                var pe = document.createElement('div');
+                pe.className = 'fixed top-6 right-6 z-50 max-w-sm bg-amber-50 border-l-4 border-amber-500 shadow-lg rounded-r-lg px-5 py-4';
+                pe.innerHTML = '<p class="text-xs font-bold text-amber-800">That promo code just expired or ran out, so no order was placed. Please check out again without it.</p>';
+                document.body.appendChild(pe);
+                setTimeout(function() { pe.remove(); }, 10000);
+                history.replaceState(null, '', '/checkout');
+            }
             if (p.get('error') === 'invalid_shipping') {
                 var se = document.createElement('div');
                 se.className = 'fixed top-6 right-6 z-50 max-w-sm bg-amber-50 border-l-4 border-amber-500 shadow-lg rounded-r-lg px-5 py-4';

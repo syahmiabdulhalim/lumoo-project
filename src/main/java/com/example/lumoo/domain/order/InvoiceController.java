@@ -48,6 +48,10 @@ public class InvoiceController {
             });
         }
         document.add(new Paragraph("------------------------------------------------------------------"));
+        if (order.getShippingCost() != null && order.getShippingCost() > 0)
+            document.add(new Paragraph("Shipping: GMD " + String.format("%.2f", order.getShippingCost())));
+        if (order.getDiscountAmount() > 0)
+            document.add(new Paragraph("Discount (" + order.getPromoCode() + "): -GMD " + String.format("%.2f", order.getDiscountAmount())));
         Font fontTotal = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14);
         document.add(new Paragraph("TOTAL AMOUNT: GMD " + order.getTotalAmount(), fontTotal));
         document.add(new Paragraph("\nThank you for building with LUMOO Gambia."));

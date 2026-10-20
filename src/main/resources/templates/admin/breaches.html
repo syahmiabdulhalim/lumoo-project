@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Data Breaches</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <span class="text-sm font-bold">Data Breaches (PDPP)</span>
+    </div>
+    <div th:replace="~{fragments/bell :: bell}"></div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-6 py-12 space-y-8">
+
+    <div th:if="${flashMsg != null}" id="flash-toast"
+         class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+         th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+        <span th:text="${flashMsg}"></span>
+        <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+    </div>
+    <script th:if="${flashMsg != null}">
+        setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+    </script>
+    <p class="text-xs text-slate-500">Record every personal-data breach here. Under PDPP 2025 s.38 the Information Commission must be
+        notified within <b>72 hours of discovery</b>. Nothing is sent to the regulator automatically.</p>
+
+    <section class="bg-white border border-slate-200 rounded-xl p-6">
+        <h2 class="text-sm font-black uppercase tracking-widest mb-4">Record a breach</h2>
+        <form th:action="@{/admin/breaches}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <label class="md:col-span-2 text-xs font-bold">What happened *
+                <textarea name="description" required rows="3" class="mt-1 w-full border rounded p-2 text-sm"></textarea></label>
+            <label class="text-xs font-bold">Data affected
+                <input name="affectedData" placeholder="e.g. emails, phone numbers" class="mt-1 w-full border rounded p-2 text-sm"></label>
+            <label class="text-xs font-bold">Estimated users affected
+                <input name="affectedUsers" type="number" min="0" value="0" class="mt-1 w-full border rounded p-2 text-sm"></label>
+            <label class="text-xs font-bold">Discovered at (starts the 72h clock)
+                <input name="discoveredAt" type="datetime-local" class="mt-1 w-full border rounded p-2 text-sm"></label>
+            <label class="text-xs font-bold">Measures actually taken
+                <textarea name="containmentActions" rows="2" class="mt-1 w-full border rounded p-2 text-sm"></textarea></label>
+            <div class="md:col-span-2"><button class="bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded">Record breach</button></div>
+        </form>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <table class="w-full text-xs">
+            <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider"><tr>
+                <th class="p-3 text-left">#</th><th class="p-3 text-left">Discovered</th><th class="p-3 text-left">Status</th>
+                <th class="p-3 text-left">Regulator deadline</th><th class="p-3 text-left">Regulator notified</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="i : ${incidents}" class="border-t">
+                <td class="p-3" th:text="${i.id}"></td>
+                <td class="p-3" th:text="${#temporals.format(i.discoveredAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td class="p-3" th:text="${i.status}"></td>
+                <td class="p-3" th:classappend="${i.regulatorOverdue} ? 'text-red-600 font-black'"
+                    th:text="${(i.regulatorOverdue ? 'OVERDUE ' : '') + #temporals.format(i.regulatorDeadline, 'yyyy-MM-dd HH:mm')}"></td>
+                <td class="p-3" th:text="${i.dpaNotifiedAt != null ? #temporals.format(i.dpaNotifiedAt, 'yyyy-MM-dd HH:mm') : 'No'}"></td>
+                <td class="p-3 text-right"><a th:href="@{/admin/breaches(view=${i.id})}" class="text-[#4d78c0] font-bold">Open</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(incidents)}"><td colspan="6" class="p-6 text-center text-slate-400">No breaches recorded.</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section th:if="${selected != null}" class="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+        <h2 class="text-sm font-black uppercase tracking-widest" th:text="|Incident #${selected.id}|"></h2>
+        <p class="text-sm whitespace-pre-line" th:text="${selected.description}"></p>
+        <form th:action="@{/admin/breaches/{id}/status(id=${selected.id})}" method="post" class="flex gap-2 items-center"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <select name="status" class="border rounded p-2 text-xs">
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == selected.status}"></option>
+            </select>
+            <button class="bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded">Update status</button>
+        </form>
+        <div>
+            <p class="text-xs font-bold mb-2">Notification to the Information Commission (<span th:text="${regulatorEmail}"></span>)</p>
+            <div class="border rounded p-4 bg-slate-50 text-xs" th:utext="${regulatorPreview}"></div>
+        </div>
+        <p th:if="${selected.dpaNotifiedAt != null}" class="text-xs text-green-700 font-bold"
+           th:text="|Sent ${#temporals.format(selected.dpaNotifiedAt, 'yyyy-MM-dd HH:mm')}|"></p>
+        <form th:if="${selected.dpaNotifiedAt == null}" th:action="@{/admin/breaches/{id}/notify-regulator(id=${selected.id})}" method="post"
+              onsubmit="return confirm('Send this notification to the Information Commission now? Check every fact first.');"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button th:disabled="${!regulatorEnabled}" class="bg-red-600 disabled:bg-slate-300 text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded">
+                Send to Information Commission</button>
+            <p th:unless="${regulatorEnabled}" class="text-[10px] text-slate-500 mt-2">Sending is off until the official address is confirmed
+                (set <code>notification.dpa-enabled=true</code>). Copy the text above and send it manually, then keep proof.</p>
+        </form>
+    </section>
+</main>
+</body>
+</html>

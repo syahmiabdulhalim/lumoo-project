@@ -38,6 +38,7 @@ class OrderControllerTest {
     @MockitoBean ModemPayService modemPayService;
     @MockitoBean SiteSettingsService siteSettingsService;
     @MockitoBean ShippingService shippingService;
+    @MockitoBean com.example.lumoo.domain.promo.PromoService promoService;
     private UsernamePasswordAuthenticationToken principal(String email) {
         return new UsernamePasswordAuthenticationToken(email, null, List.of());
     }
@@ -121,7 +122,7 @@ class OrderControllerTest {
         order.setPaymentMethod("COD");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any(), any()))
                 .thenReturn(List.of(order));
         when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.of(0.0));
         mvc.perform(post("/order/place")
@@ -142,7 +143,7 @@ class OrderControllerTest {
         order.setPaymentMethod("TRANSFER");
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any(), any()))
                 .thenReturn(List.of(order));
         when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.of(0.0));
         mvc.perform(post("/order/place")
@@ -211,7 +212,7 @@ class OrderControllerTest {
         when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
         when(cartService.getItems(u)).thenReturn(List.of(item));
         when(shippingService.quoteFor("Gamcel Express", 3.0)).thenReturn(Optional.of(150.0));
-        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any()))
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any(), any()))
                 .thenReturn(List.of(order));
         mvc.perform(post("/order/place")
                         .principal(principal("buyer@test.com"))
@@ -223,7 +224,7 @@ class OrderControllerTest {
                         .param("shippingCost", "-500"))
                 .andExpect(status().is3xxRedirection());
         verify(orderService).placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(),
-                eq("Gamcel Express"), eq(150.0), any());
+                eq("Gamcel Express"), eq(150.0), any(), any());
     }
     @Test
     void placeOrder_rejectsUnknownCourier() throws Exception {
@@ -240,6 +241,34 @@ class OrderControllerTest {
                         .param("courierName", "Fake Courier"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "/checkout?error=invalid_shipping"));
-        verify(orderService, never()).placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any());
+        verify(orderService, never()).placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any(), any());
+    }
+    @Test
+    void checkout_showsPromoDiscount_andPayableTotal() throws Exception {
+        User u = user(1L, "buyer@test.com");
+        CartItem item = new CartItem(); item.setName("Cement"); item.setQuantity(1); item.setPrice(200.0);
+        when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
+        when(cartService.getItems(u)).thenReturn(List.of(item));
+        when(cartService.getTotal(any())).thenReturn(200.0);
+        when(promoService.quote("save", 200.0)).thenReturn(Optional.of(20.0));
+        mvc.perform(get("/checkout").param("promo", "save").principal(principal("buyer@test.com")))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Discount (SAVE)")))
+                .andExpect(content().string(containsString("name=\"promoCode\" value=\"SAVE\"")))
+                .andExpect(content().string(containsString("GMD 180.00")));
+    }
+    @Test
+    void placeOrder_promoRunOut_redirectsWithError() throws Exception {
+        User u = user(1L, "buyer@test.com");
+        when(userService.findByEmail("buyer@test.com")).thenReturn(Optional.of(u));
+        when(cartService.getItems(u)).thenReturn(List.of(new CartItem()));
+        when(shippingService.quoteFor(any(), anyDouble())).thenReturn(Optional.of(0.0));
+        when(orderService.placeOrders(any(), anyString(), anyString(), anyList(), anyBoolean(), anyBoolean(), anyBoolean(), any(), anyDouble(), any(), eq("SAVE")))
+                .thenThrow(new OrderService.PromoUnavailableException("SAVE"));
+        mvc.perform(post("/order/place").principal(principal("buyer@test.com"))
+                        .param("address", "1 Street").param("paymentMethod", "COD")
+                        .param("privacyAccepted", "true").param("termsAccepted", "true")
+                        .param("promoCode", "SAVE"))
+                .andExpect(header().string("Location", "/checkout?error=promo_invalid"));
     }
 }

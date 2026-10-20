@@ -1,6 +1,6 @@
 #!/bin/bash
 # Verifies the Flyway migrations against a real MySQL 8.4 (prod engine) in a throwaway container.
-#   1. Runs V1+V2, inserts duplicate cart/review rows, runs V3+V4 and checks the dedup result.
+#   1. Runs V1+V2, inserts duplicate cart/review rows, runs V3..V6 and checks the dedup result.
 #   2. Runs the Spring context + repository tests against MySQL (Flyway + Hibernate validate).
 #
 # Usage: ./scripts/verify-mysql-migrations.sh        (needs Docker running)
@@ -26,7 +26,7 @@ sleep 3
 sql()  { "$DOCKER" exec -i "$NAME" mysql -uroot -proot --batch --skip-column-names lumoo; }
 file() { sql < "$1"; }
 
-echo "▶ Step 1: V1, V2, duplicate rows, then V3, V4 on raw MySQL"
+echo "▶ Step 1: V1, V2, duplicate rows, then V3..V6 on raw MySQL"
 file "$MIG/V1__baseline.sql"
 file "$MIG/V2__email_verification_required.sql"
 sql <<'SQL'
@@ -37,6 +37,8 @@ INSERT INTO reviews (user_id, product_id, rating) VALUES (1, 1, 5), (1, 1, 4);
 SQL
 file "$MIG/V3__order_indexes_and_unique_cart_review.sql"
 file "$MIG/V4__order_version_column.sql"
+file "$MIG/V5__order_promo.sql"
+file "$MIG/V6__breach_fields.sql"
 CART=$(echo "SELECT COUNT(*), SUM(quantity) FROM cart_items;" | sql)
 REV=$(echo "SELECT COUNT(*), MAX(rating) FROM reviews;" | sql)
 [ "$CART" = "1	5" ] || { echo "✗ cart dedup wrong: $CART (expected 1 row, qty 5)"; exit 1; }

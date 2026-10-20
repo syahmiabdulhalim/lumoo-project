@@ -32,6 +32,7 @@ public class OrderController {
     @Autowired private UserService userService;
     @Autowired private ModemPayService modemPayService;
     @Autowired private ShippingService shippingService;
+    @Autowired private com.example.lumoo.domain.promo.PromoService promoService;
     /** Only what checkout.html's JS needs — never the CartItem entity (it carries User objects). */
     public record CheckoutLine(String name, int quantity, double price, double weightKg) {}
     @Value("${app.upload.dir:/app/uploads/products}")
@@ -39,7 +40,7 @@ public class OrderController {
     private static final Set<String> VALID_PAYMENT_METHODS = Set.of("COD", "TRANSFER", "AFRIMONEY", "QMONEY", "MODEMPAY");
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp", "image/jpg");
     @GetMapping("/checkout")
-    public String checkoutPage(Model model, Principal principal) {
+    public String checkoutPage(@RequestParam(required = false) String promo, Model model, Principal principal) {
         if (principal == null) return "redirect:/login";
         User user = userService.findByEmail(principal.getName()).orElse(null);
         if (user == null) return "redirect:/login";
@@ -49,7 +50,14 @@ public class OrderController {
         model.addAttribute("cartLines", items.stream()
                 .map(i -> new CheckoutLine(i.getName(), i.getQuantity(), i.getPrice(), ShippingService.unitWeightKg(i)))
                 .toList());
-        model.addAttribute("total", cartService.getTotal(items));
+        double total = cartService.getTotal(items);
+        // Preview only; the code is re-validated and redeemed when the order is placed.
+        double discount = promoService.quote(promo, total).orElse(0.0);
+        model.addAttribute("total", total);
+        model.addAttribute("discount", discount);
+        model.addAttribute("payable", total - discount);
+        model.addAttribute("promoCode", discount > 0 ? promo.trim().toUpperCase() : null);
+        model.addAttribute("promoRejected", promo != null && !promo.isBlank() && discount == 0);
         return "checkout";
     }
     @PostMapping("/order/place")
@@ -60,6 +68,7 @@ public class OrderController {
                              @RequestParam(defaultValue = "false") boolean marketingConsent,
                              @RequestParam(required = false) String courierName,
                              @RequestParam(required = false) String deliveryArea,
+                             @RequestParam(required = false) String promoCode,
                              Principal principal) {
         if (principal == null) return "redirect:/login";
         if (address == null || address.trim().isEmpty()) return "redirect:/checkout?error=address_required";
@@ -75,7 +84,9 @@ public class OrderController {
         if (shippingTotal == null) return "redirect:/checkout?error=invalid_shipping";
         List<Order> orders;
         try {
-            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent, courierName, shippingTotal, deliveryArea);
+            orders = orderService.placeOrders(user, address, paymentMethod, items, privacyAccepted, termsAccepted, marketingConsent, courierName, shippingTotal, deliveryArea, promoCode);
+        } catch (OrderService.PromoUnavailableException e) {
+            return "redirect:/checkout?error=promo_invalid";
         } catch (IllegalStateException e) {
             return "redirect:/cart?error=out_of_stock";
         }

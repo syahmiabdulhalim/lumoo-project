@@ -25,6 +25,11 @@ public class Order {
     private java.time.LocalDate estimatedDeliveryDate;
     private String courierName;
     private Double shippingCost;
+    @Column(length = 50)
+    private String promoCode;
+    /** This order's share of the promo discount (items only, never shipping). Funded by Lumoo's commission. */
+    @Column(nullable = false)
+    private double discountAmount;
     private String shippingTrackingUrl;
     private Long riderId;
     private String riderName;
@@ -74,6 +79,10 @@ private LocalDateTime createdAt;
     public void setShippedAt(LocalDateTime shippedAt) { this.shippedAt = shippedAt; }
     public String getCourierName() { return courierName; }
     public void setCourierName(String courierName) { this.courierName = courierName; }
+    public String getPromoCode() { return promoCode; }
+    public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
+    public double getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
     public Double getShippingCost() { return shippingCost; }
     public void setShippingCost(Double shippingCost) { this.shippingCost = shippingCost; }
     public String getShippingTrackingUrl() { return shippingTrackingUrl; }

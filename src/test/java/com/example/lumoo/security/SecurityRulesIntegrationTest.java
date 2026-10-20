@@ -55,4 +55,14 @@ class SecurityRulesIntegrationTest {
         mvc.perform(get("/cart/remove/1")).andExpect(status().isMethodNotAllowed());
         mvc.perform(post("/cart/remove/1")).andExpect(status().isForbidden());
     }
+    @Test
+    @WithMockUser(roles = "VENDOR")
+    void breachRegister_isAdminOnly() throws Exception {
+        mvc.perform(get("/admin/breaches")).andExpect(status().isForbidden());
+    }
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void breachNotify_requiresCsrf() throws Exception {
+        mvc.perform(post("/admin/breaches/1/notify-regulator")).andExpect(status().isForbidden());
+    }
 }

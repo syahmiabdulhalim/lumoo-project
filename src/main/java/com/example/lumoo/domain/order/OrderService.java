@@ -61,6 +61,7 @@ public class OrderService {
     @Autowired private CartRepository cartRepository;
     @Autowired private PayoutService payoutService;
     @Autowired private ProductService productService;
+    @Autowired private com.example.lumoo.domain.promo.PromoService promoService;
     @Autowired private EmailService emailService;
     @Autowired private com.example.lumoo.domain.user.UserService userService;
     @org.springframework.beans.factory.annotation.Value("${app.base-url:http://localhost:8080}")
@@ -116,18 +117,31 @@ public class OrderService {
                                    List<CartItem> cartItems,
                                    boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent) {
         return placeOrders(user, address, paymentMethod, cartItems,
-                privacyAccepted, termsAccepted, marketingConsent, null, 0.0, null);
+                privacyAccepted, termsAccepted, marketingConsent, null, 0.0, null, null);
+    }
+
+    /** Thrown when the promo code is invalid, expired or used up at the moment of ordering. */
+    public static class PromoUnavailableException extends RuntimeException {
+        public PromoUnavailableException(String code) { super("Promo code unavailable: " + code); }
     }
 
     /**
      * @param shippingTotal shipping for the whole cart, computed server-side by ShippingService.
      *                      It is split across the per-vendor orders by weight.
+     * @param promoCode     optional; redeemed here (inside this transaction) and its discount is
+     *                      split across the vendor orders by item value.
      */
     @Transactional
     public List<Order> placeOrders(User user, String address, String paymentMethod,
                                    List<CartItem> cartItems,
                                    boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
-                                   String courierName, double shippingTotal, String deliveryArea) {
+                                   String courierName, double shippingTotal, String deliveryArea, String promoCode) {
+        double discountTotal = 0;
+        if (promoCode != null && !promoCode.isBlank()) {
+            double allItems = cartItems.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
+            discountTotal = promoService.redeem(promoCode, allItems)
+                    .orElseThrow(() -> new PromoUnavailableException(promoCode));
+        }
         Map<Long, List<CartItem>> byVendor = cartItems.stream()
                 .collect(Collectors.groupingBy(ci ->
                         ci.getProduct() != null && ci.getProduct().getVendor() != null
@@ -140,11 +154,19 @@ public class OrderService {
             }
         }
         List<List<CartItem>> groups = new ArrayList<>(byVendor.values());
-        double[] shippingShares = splitShipping(groups, Math.max(0.0, shippingTotal));
+        double[] shippingShares = split(Math.max(0.0, shippingTotal), groups.stream()
+                .mapToDouble(g -> g.stream().mapToDouble(i -> ShippingService.unitWeightKg(i) * i.getQuantity()).sum())
+                .toArray());
+        double[] discountShares = split(discountTotal, groups.stream()
+                .mapToDouble(g -> g.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum())
+                .toArray());
+        String appliedCode = discountTotal > 0 ? promoCode.trim().toUpperCase() : null;
         List<Order> orders = new ArrayList<>();
         for (int i = 0; i < groups.size(); i++) {
-            orders.add(createOrder(user, address, paymentMethod, groups.get(i),
-                    privacyAccepted, termsAccepted, marketingConsent, courierName, shippingShares[i], deliveryArea));
+            Order o = createOrder(user, address, paymentMethod, groups.get(i),
+                    privacyAccepted, termsAccepted, marketingConsent, courierName, shippingShares[i], deliveryArea,
+                    discountShares[i], appliedCode);
+            orders.add(o);
         }
         cartRepository.deleteAll(cartItems);
         for (Order o : orders) {
@@ -156,30 +178,32 @@ public class OrderService {
         }
         return orders;
     }
-    /** Splits one shipping charge across vendor orders by weight; the last order absorbs rounding. */
-    static double[] splitShipping(List<List<CartItem>> groups, double shippingTotal) {
-        double[] shares = new double[groups.size()];
-        if (shippingTotal <= 0 || groups.isEmpty()) return shares;
-        double[] weights = groups.stream()
-                .mapToDouble(g -> g.stream().mapToDouble(i -> ShippingService.unitWeightKg(i) * i.getQuantity()).sum())
-                .toArray();
+    /**
+     * Splits one amount (shipping by weight, discount by item value) across vendor orders in
+     * proportion to the weights; the last order absorbs rounding so the shares add up exactly.
+     */
+    static double[] split(double amount, double[] weights) {
+        double[] shares = new double[weights.length];
         double totalWeight = java.util.Arrays.stream(weights).sum();
+        if (amount <= 0 || weights.length == 0 || totalWeight <= 0) return shares;
         double allocated = 0;
         for (int i = 0; i < shares.length - 1; i++) {
-            shares[i] = Math.round(shippingTotal * weights[i] / totalWeight * 100.0) / 100.0;
+            shares[i] = Math.round(amount * weights[i] / totalWeight * 100.0) / 100.0;
             allocated += shares[i];
         }
-        shares[shares.length - 1] = Math.round((shippingTotal - allocated) * 100.0) / 100.0;
+        shares[shares.length - 1] = Math.round((amount - allocated) * 100.0) / 100.0;
         return shares;
     }
     private Order createOrder(User user, String address, String paymentMethod,
                               List<CartItem> items,
                               boolean privacyAccepted, boolean termsAccepted, boolean marketingConsent,
-                              String courierName, double shippingCost, String deliveryArea) {
+                              String courierName, double shippingCost, String deliveryArea,
+                              double discount, String promoCode) {
         double itemsTotal = items.stream().mapToDouble(i -> i.getPrice() * i.getQuantity()).sum();
         double shipping   = shippingCost;
-        double total      = itemsTotal + shipping;
-        double commission = itemsTotal * 0.10;
+        double total      = itemsTotal + shipping - discount;
+        // Lumoo funds promo discounts: they come out of the commission, the vendor is paid in full.
+        double commission = itemsTotal * 0.10 - discount;
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address.trim());
@@ -198,6 +222,10 @@ public class OrderService {
         order.setMarketingConsent(marketingConsent);
         if (courierName != null && !courierName.isBlank() && !courierName.equalsIgnoreCase("none")) order.setCourierName(courierName);
         if (shippingCost > 0) order.setShippingCost(shippingCost);
+        if (discount > 0) {
+            order.setDiscountAmount(discount);
+            order.setPromoCode(promoCode);
+        }
         if (deliveryArea != null && !deliveryArea.isBlank()) order.setDeliveryArea(deliveryArea);
         Order saved = orderRepository.save(order);
         for (CartItem ci : items) {

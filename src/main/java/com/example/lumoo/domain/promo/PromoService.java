@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +21,30 @@ public class PromoService {
                 .filter(p -> p.isValid(orderTotal));
     }
 
-    public void markUsed(PromoCode promo) {
-        promo.setUsedCount(promo.getUsedCount() + 1);
-        repo.save(promo);
-        log.info("[Promo] Code '{}' used — total uses: {}", promo.getCode(), promo.getUsedCount());
+    /** Discount the code would give on this items total, without using it (checkout preview). */
+    public Optional<Double> quote(String code, double itemsTotal) {
+        if (code == null || code.isBlank()) return Optional.empty();
+        return validate(code.trim(), itemsTotal).map(p -> cappedDiscount(p, itemsTotal));
+    }
+
+    /**
+     * Validates on the server and takes one use atomically. Runs inside the order-placement
+     * transaction, so a failed checkout gives the use back. Empty if invalid or used up.
+     */
+    @Transactional
+    public Optional<Double> redeem(String code, double itemsTotal) {
+        if (code == null || code.isBlank()) return Optional.empty();
+        return validate(code.trim(), itemsTotal)
+                .filter(p -> repo.incrementUsage(p.getId()) == 1)
+                .map(p -> {
+                    log.info("[Promo] Code '{}' redeemed", p.getCode());
+                    return cappedDiscount(p, itemsTotal);
+                });
+    }
+
+    /** Never more than the items total (e.g. a 150% or oversized fixed discount). */
+    private static double cappedDiscount(PromoCode p, double itemsTotal) {
+        return Math.min(itemsTotal, Math.max(0, p.discountAmount(itemsTotal)));
     }
 
     public List<PromoCode> getAll() {
