@@ -43,6 +43,7 @@ class WebControllerTest {
     @MockitoBean SubscriberService subscriberService;
     @MockitoBean SiteSettingsService siteSettingsService;
     @MockitoBean ModemPayService modemPayService;
+    @MockitoBean com.example.lumoo.domain.order.RefundService refundService;
     @Test
     void home_returns200() throws Exception {
         when(productService.getAllApproved(any())).thenReturn(new PageImpl<>(List.of()));

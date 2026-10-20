@@ -3,6 +3,7 @@ import java.time.Duration;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderItem;
 import com.example.lumoo.domain.order.OrderRepository;
+import com.example.lumoo.domain.order.RefundService;
 import com.example.lumoo.domain.user.User;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,7 @@ public class PayoutService {
     private String apiUrl;
     @Autowired private OrderRepository orderRepository;
     @Autowired private ObjectMapper objectMapper;
+    @Autowired private RefundService refundService;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -56,7 +58,17 @@ public class PayoutService {
             orderRepository.save(order);
             return;
         }
-        long amountGmd = Math.round(order.getVendorEarnings());
+        // Refunds on orders this vendor was already paid for are recovered from their next payouts.
+        double deduction = Math.min(refundService.outstandingVendorDebt(vendor.getId()), order.getVendorEarnings());
+        deduction = Math.max(0, Math.round(deduction * 100.0) / 100.0);
+        order.setPayoutDeduction(deduction);
+        long amountGmd = Math.round(order.getVendorEarnings() - deduction);
+        if (amountGmd < 1 && deduction > 0) {
+            log.info("[Payout] Order #{} fully offset against vendor {}'s refund debt ({}GMD)", order.getId(), vendor.getId(), deduction);
+            order.setPayoutStatus("OFFSET");
+            orderRepository.save(order);
+            return;
+        }
         if (amountGmd < 1) {
             log.warn("[Payout] Skipped — vendor earnings too small ({}GMD) for order #{}", amountGmd, order.getId());
             order.setPayoutStatus("SKIPPED");
@@ -70,7 +82,8 @@ public class PayoutService {
                     "network",          payoutNetwork,
                     "account_number",   payoutPhone,
                     "beneficiary_name", vendor.getFullName() != null ? vendor.getFullName() : vendor.getUsername(),
-                    "narration",        "LUMOO vendor payout — Order #" + order.getId(),
+                    "narration",        "LUMOO vendor payout — Order #" + order.getId()
+                                            + (deduction > 0 ? " (less GMD " + deduction + " refunds)" : ""),
                     "metadata",         Map.of("order_id", order.getId().toString(), "vendor_id", vendor.getId().toString())
             );
             String idempotencyKey = "payout-order-" + order.getId();

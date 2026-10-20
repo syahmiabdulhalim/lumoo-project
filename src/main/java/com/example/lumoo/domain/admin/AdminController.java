@@ -193,11 +193,11 @@ public class AdminController {
     @PostMapping("/delete-order/{id}")
     public String deleteOrder(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {
         // Orders are kept for the financial record; "delete" now cancels and releases stock.
-        OrderService.AdminCancelResult result = orderService.adminCancel(id);
+        OrderService.AdminCancelResult result = orderService.adminCancel(id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : null);
         if (result == OrderService.AdminCancelResult.CANCELLED) {
             auditService.log("ORDER_CANCELLED", "Order", String.valueOf(id), req);
             log.warn("[Admin] Order #{} cancelled by {}", id, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
-            ra.addFlashAttribute("flashMsg", "Order cancelled. It stays in the records.");
+            ra.addFlashAttribute("flashMsg", "Order cancelled. It stays in the records. If it was paid, a refund is now pending under Refunds.");
             ra.addFlashAttribute("flashType", "red");
         } else {
             ra.addFlashAttribute("flashMsg", "This order can't be cancelled in its current status.");

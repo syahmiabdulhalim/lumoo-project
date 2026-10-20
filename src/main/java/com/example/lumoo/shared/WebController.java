@@ -8,6 +8,7 @@ import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.product.ProductService;
 import com.example.lumoo.domain.product.ReviewService;
 import com.example.lumoo.domain.order.OrderService;
+import com.example.lumoo.domain.order.RefundService;
 import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.user.UserService;
 import com.example.lumoo.domain.vendor.VendorApplicationService;
@@ -39,6 +40,7 @@ public class WebController {
     @Autowired private SubscriberService subscriberService;
     @Autowired private SiteSettingsService siteSettingsService;
     @Autowired private ModemPayService modemPayService;
+    @Autowired private RefundService refundService;
     @GetMapping("/stores")
     public String stores(Model model) {
         List<User> vendors = productService.getVendorsWithProducts();
@@ -211,6 +213,7 @@ public class WebController {
             return "redirect:/buyer/dashboard?error=unauthorized";
         }
         model.addAttribute("order", order);
+        model.addAttribute("refunds", refundService.getForOrder(id));
         return "buyer/order-details";
     }
     @GetMapping("/settings")

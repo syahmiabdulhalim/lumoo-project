@@ -55,6 +55,7 @@ class OrderServiceTest {
     @Mock private com.example.lumoo.infrastructure.email.EmailService emailService;
     @Mock private com.example.lumoo.domain.user.UserService userService;
     @Mock private com.example.lumoo.domain.promo.PromoService promoService;
+    @Mock private com.example.lumoo.domain.order.RefundService refundService;
     @InjectMocks private OrderService orderService;
     private User buyer;
     private User vendor;
@@ -389,9 +390,11 @@ class OrderServiceTest {
     void adminCancel_keepsRow_andReturnsStock() {
         Order o = orderWithItem("PAID", 2);
         when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
-        assertEquals(OrderService.AdminCancelResult.CANCELLED, orderService.adminCancel(1L));
+        when(refundService.isRefundable(o)).thenReturn(true);
+        assertEquals(OrderService.AdminCancelResult.CANCELLED, orderService.adminCancel(1L, "admin@lumoo.my"));
         assertEquals("CANCELLED", o.getStatus());
         verify(productService).returnStock(77L, 2);
+        verify(refundService).createFull(o, "Order cancelled by admin", "admin@lumoo.my");
         verify(orderRepository, never()).delete(any());
         verify(orderRepository, never()).deleteById(any());
     }
@@ -399,7 +402,7 @@ class OrderServiceTest {
     void adminCancel_refusesDeliveredOrders() {
         Order o = orderWithItem("DELIVERED", 1);
         when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
-        assertEquals(OrderService.AdminCancelResult.NOT_ALLOWED, orderService.adminCancel(1L));
+        assertEquals(OrderService.AdminCancelResult.NOT_ALLOWED, orderService.adminCancel(1L, "admin"));
         assertEquals("DELIVERED", o.getStatus());
         verify(productService, never()).returnStock(anyLong(), anyInt());
     }

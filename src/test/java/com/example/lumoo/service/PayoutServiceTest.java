@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 class PayoutServiceTest {
     @InjectMocks PayoutService payoutService;
     @Mock OrderRepository orderRepository;
+    @Mock com.example.lumoo.domain.order.RefundService refundService;
     @Mock HttpClient mockHttpClient;
     @Mock @SuppressWarnings("rawtypes") HttpResponse mockResponse;
     @BeforeEach
@@ -137,6 +138,29 @@ class PayoutServiceTest {
         payoutService.tryPayoutVendor(o);
         assertEquals("PENDING", o.getPayoutStatus());
         assertEquals("transfer-abc", o.getPayoutTransferId());
+        verify(orderRepository).save(o);
+    }
+    @Test
+    @SuppressWarnings("unchecked")
+    void tryPayoutVendor_keepsBackRefundDebt() throws Exception {
+        when(refundService.outstandingVendorDebt(100L)).thenReturn(30.0);
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(mockResponse.body()).thenReturn("{\"id\":\"transfer-abc\"}");
+        when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(mockResponse);
+        Order o = orderWithVendor(1L, 90.0, "7000001", "afrimoney");
+        payoutService.tryPayoutVendor(o);
+        assertEquals("PENDING", o.getPayoutStatus());
+        assertEquals(30.0, o.getPayoutDeduction(), 0.001);
+    }
+    @Test
+    void tryPayoutVendor_fullyOffsetByDebt_sendsNothing() throws Exception {
+        when(refundService.outstandingVendorDebt(100L)).thenReturn(500.0);
+        Order o = orderWithVendor(1L, 90.0, "7000001", "afrimoney");
+        payoutService.tryPayoutVendor(o);
+        assertEquals("OFFSET", o.getPayoutStatus());
+        assertEquals(90.0, o.getPayoutDeduction(), 0.001);
+        verifyNoInteractions(mockHttpClient);
         verify(orderRepository).save(o);
     }
     @Test

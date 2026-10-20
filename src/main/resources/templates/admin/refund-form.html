@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Refund Order</title>
+    <th:block th:replace="~{fragments/layout :: assets}"/>
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav th:replace="~{fragments/layout :: adminHeader(~{::.hdr-title}, null)}"><span class="hdr-title text-sm font-bold">Refund Order</span></nav>
+
+<main class="max-w-4xl mx-auto px-6 py-12 space-y-8">
+
+    <th:block th:replace="~{fragments/layout :: flash}"/>
+    <a href="/admin/refunds" class="text-xs text-[#4d78c0] font-bold">← All refunds</a>
+
+    <section class="bg-white border border-slate-200 rounded-xl p-6 space-y-1 text-sm">
+        <h2 class="text-sm font-black uppercase tracking-widest mb-3" th:text="${'Order #LMO-' + order.id}"></h2>
+        <p><span class="text-slate-400">Buyer:</span> <span th:text="${order.user != null ? order.user.email : '—'}"></span></p>
+        <p><span class="text-slate-400">Status:</span> <span th:text="${order.status}"></span>
+           · <span class="text-slate-400">Payment:</span> <span th:text="${order.paymentMethod}"></span>
+           · <span class="text-slate-400">Payout:</span> <span th:text="${order.payoutStatus != null ? order.payoutStatus : 'not started'}"></span></p>
+        <p><span class="text-slate-400">Paid:</span> <span class="font-mono" th:text="${'GMD ' + #numbers.formatDecimal(order.totalAmount, 1, 2)}"></span>
+           <span th:if="${order.discountAmount > 0}" class="text-slate-400" th:text="${'(incl. promo −GMD ' + #numbers.formatDecimal(order.discountAmount, 1, 2) + ')'}"></span>
+           · <span class="text-slate-400">Already refunded:</span> <span class="font-mono" th:text="${'GMD ' + #numbers.formatDecimal(order.refundedAmount, 1, 2)}"></span></p>
+    </section>
+
+    <section th:if="${!refundable}" class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-sm text-yellow-800">
+        This order can't be refunded: it is not paid yet (COD orders must be delivered first), or it has been refunded in full.
+    </section>
+
+    <section th:if="${refundable}" class="bg-white border border-slate-200 rounded-xl p-6">
+        <h2 class="text-sm font-black uppercase tracking-widest mb-4">What to refund</h2>
+        <form th:action="@{/admin/refunds}" method="post" class="space-y-4"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="orderId" th:value="${order.id}">
+            <table class="w-full text-xs">
+                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider"><tr>
+                    <th class="p-2 text-left">Item</th><th class="p-2 text-right">Price</th><th class="p-2 text-right">Bought</th>
+                    <th class="p-2 text-right">Refunded</th><th class="p-2 text-right">Refund now</th></tr></thead>
+                <tbody>
+                <tr th:each="i : ${order.items}" class="border-t">
+                    <td class="p-2" th:text="${i.productName}"></td>
+                    <td class="p-2 text-right font-mono" th:text="${#numbers.formatDecimal(i.price, 1, 2)}"></td>
+                    <td class="p-2 text-right" th:text="${i.quantity}"></td>
+                    <td class="p-2 text-right" th:text="${i.refundedQuantity}"></td>
+                    <td class="p-2 text-right">
+                        <input type="number" min="0" th:max="${i.quantity - i.refundedQuantity}" th:name="${'qty_' + i.id}"
+                               th:value="${qty[i.id] != null ? qty[i.id] : 0}"
+                               th:disabled="${i.quantity - i.refundedQuantity <= 0}"
+                               class="border rounded p-1 w-16 text-right">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <label th:if="${order.shippingCost != null and order.shippingCost > 0 and !order.shippingRefunded}" class="flex items-center gap-2 text-xs font-bold">
+                <input type="checkbox" name="shipping" value="true" th:checked="${shipping}">
+                Refund shipping (<span th:text="${'GMD ' + #numbers.formatDecimal(order.shippingCost, 1, 2)}"></span>) — e.g. damaged, wrong or missing item
+            </label>
+            <label class="block text-xs font-bold">Reason *
+                <input name="reason" required maxlength="255" th:value="${reason}" placeholder="e.g. Item arrived damaged"
+                       class="mt-1 w-full border rounded p-2 text-sm"></label>
+
+            <div th:if="${error != null}" class="text-xs text-red-600 font-bold" th:text="${error}"></div>
+            <div th:if="${quote != null and !quote.empty}" class="bg-slate-50 border rounded p-4 text-xs space-y-1">
+                <p><span class="text-slate-400">Items:</span> <span th:text="${quote.itemsSummary}"></span></p>
+                <p th:if="${quote.discountShare > 0}"><span class="text-slate-400">Promo share removed:</span>
+                    <span class="font-mono" th:text="${'−GMD ' + #numbers.formatDecimal(quote.discountShare, 1, 2)}"></span></p>
+                <p class="text-sm"><span class="text-slate-400">Buyer gets back:</span>
+                    <b class="font-mono" th:text="${'GMD ' + #numbers.formatDecimal(quote.amount, 1, 2)}"></b></p>
+                <p><span class="text-slate-400">Recovered from vendor:</span>
+                    <span class="font-mono" th:text="${'GMD ' + #numbers.formatDecimal(quote.vendorShare, 1, 2)}"></span>
+                    · <span class="text-slate-400">Lumoo commission returned:</span>
+                    <span class="font-mono" th:text="${'GMD ' + #numbers.formatDecimal(quote.lumooShare, 1, 2)}"></span></p>
+            </div>
+            <div th:if="${quote != null and quote.empty}" class="text-xs text-slate-500">Nothing selected to refund.</div>
+
+            <div class="flex gap-2">
+                <button type="submit" formmethod="get" th:formaction="@{/admin/refunds/new}" name="preview" value="1"
+                        formnovalidate class="border border-slate-300 text-slate-700 text-xs font-bold uppercase tracking-widest px-5 py-3 rounded">Preview amounts</button>
+                <button type="submit" class="bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-5 py-3 rounded"
+                        onclick="return confirm('Approve this refund? Lumoo will owe the buyer this amount.');">Approve refund</button>
+            </div>
+        </form>
+    </section>
+
+    <section th:if="${!#lists.isEmpty(history)}" class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100"><h2 class="text-sm font-black uppercase tracking-widest">Refunds on this order</h2></div>
+        <table class="w-full text-xs">
+            <tbody>
+            <tr th:each="r : ${history}" class="border-t">
+                <td class="p-3" th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd')}"></td>
+                <td class="p-3" th:text="${r.itemsSummary}"></td>
+                <td class="p-3 text-right font-mono" th:text="${'GMD ' + #numbers.formatDecimal(r.amount, 1, 2)}"></td>
+                <td class="p-3" th:text="${r.status}"></td>
+                <td class="p-3 font-mono" th:text="${r.reference}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

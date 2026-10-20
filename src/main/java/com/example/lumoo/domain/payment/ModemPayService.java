@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Locale;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderService;
+import com.example.lumoo.domain.order.RefundService;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
 import com.example.lumoo.domain.order.OrderRepository;
@@ -49,6 +50,7 @@ public class ModemPayService {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private EmailService emailService;
     @Autowired private UserService userService;
+    @Autowired private RefundService refundService;
     @Autowired private TransactionTemplate transactionTemplate;
     /** Statuses where a successful charge can't be applied automatically and an admin must act. */
     private static final Set<String> CLOSED_STATUSES = Set.of("CANCELLED", "PAYMENT_FAILED", "PAYMENT_EXPIRED");
@@ -217,10 +219,11 @@ public class ModemPayService {
                     log.info("[ModemPay] Order #{} marked PAID via {} (paid={}GMD)", order.getId(), source, paidAmount);
                 }
             } else if (CLOSED_STATUSES.contains(status)) {
-                log.error("[ModemPay] Payment received for order #{} which is {} ({}) — needs refund or manual restore",
+                log.error("[ModemPay] Payment received for order #{} which is {} ({}) — full refund created",
                         order.getId(), status, source);
+                refundService.refundLatePayment(order.getId(), "Payment arrived after the order was " + status);
                 userService.notifyAdmins("⚠ Payment received for order #LMO-" + order.getId() + " but it is " + status
-                        + ". Refund the buyer or restore the order manually.");
+                        + ". A full refund is pending under Refunds (or restore the order manually).");
             } else {
                 log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", order.getId(), status);
             }

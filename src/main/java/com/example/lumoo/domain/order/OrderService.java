@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+    /** Lumoo's commission on item value (shipping goes to the vendor in full). */
+    static final double COMMISSION_RATE = 0.10;
 
     @Autowired private OrderRepository orderRepository;
     @Autowired private ShippingRateRepository shippingRateRepository;
@@ -39,6 +41,7 @@ public class OrderService {
     @Autowired private PromoService promoService;
     @Autowired private EmailService emailService;
     @Autowired private UserService userService;
+    @Autowired private RefundService refundService;
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
     public List<Order> getUserOrders(User user) {
@@ -178,7 +181,7 @@ public class OrderService {
         double shipping   = shippingCost;
         double total      = itemsTotal + shipping - discount;
         // Lumoo funds promo discounts: they come out of the commission, the vendor is paid in full.
-        double commission = itemsTotal * 0.10 - discount;
+        double commission = itemsTotal * COMMISSION_RATE - discount;
         Order order = new Order();
         order.setUser(user);
         order.setAddress(address.trim());
@@ -335,14 +338,16 @@ public class OrderService {
                         String.valueOf(o.getId()), o.getTotalAmount()));
     }
     public enum AdminCancelResult { CANCELLED, NOT_FOUND, NOT_ALLOWED }
-    /** Replaces the old hard delete: the row stays, stock is released, status becomes CANCELLED. */
+    /**
+     * Replaces the old hard delete: the row stays, stock is released, status becomes CANCELLED.
+     * A paid (or shipped) order gets a full pending refund for the admin to pay out.
+     */
     @Transactional
-    public AdminCancelResult adminCancel(Long orderId) {
+    public AdminCancelResult adminCancel(Long orderId, String actor) {
         Order o = orderRepository.findByIdWithItems(orderId).orElse(null);
         if (o == null) return AdminCancelResult.NOT_FOUND;
         if (NOT_CANCELLABLE.contains(o.getStatus())) return AdminCancelResult.NOT_ALLOWED;
-        if ("PAID".equals(o.getStatus()))
-            log.warn("[Order] Paid order #{} cancelled by admin — buyer needs a refund", o.getId());
+        if (refundService.isRefundable(o)) refundService.createFull(o, "Order cancelled by admin", actor);
         cancelAndRelease(o);
         orderRepository.save(o);
         return AdminCancelResult.CANCELLED;
@@ -355,6 +360,8 @@ public class OrderService {
     @Transactional
     public void updateStatus(Long orderId, String status, String trackingNumber, LocalDate estimatedDelivery) {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
+            if ("CANCELLED".equals(status) && !"CANCELLED".equals(o.getStatus()) && refundService.isRefundable(o))
+                refundService.createFull(o, "Order cancelled by admin", "admin");
             if ("CANCELLED".equals(status) && STOCK_RESERVED.contains(o.getStatus())) returnStockForOrder(o);
             o.setStatus(status);
             if ("SHIPPED".equals(status)) {

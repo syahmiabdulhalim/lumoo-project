@@ -28,6 +28,7 @@ class ModemPayServiceTest {
     @Mock private OrderService orderService;
     @Mock private EmailService emailService;
     @Mock private UserService userService;
+    @Mock private com.example.lumoo.domain.order.RefundService refundService;
     @Spy private ObjectMapper objectMapper = new ObjectMapper();
     @InjectMocks private ModemPayService service;
     @BeforeEach
@@ -64,10 +65,11 @@ class ModemPayServiceTest {
         verify(orderService).returnStockForOrder(b);
     }
     @Test
-    void latePaymentOnCancelledOrder_alertsAdmins_andDoesNotMarkPaid() {
+    void latePaymentOnCancelledOrder_createsRefund_alertsAdmins_andDoesNotMarkPaid() {
         Order cancelled = order(5, "CANCELLED", 100);
         service.applySuccessfulCharge(List.of(cancelled), 100, "webhook");
         verify(orderService, never()).markPaid(any());
+        verify(refundService).refundLatePayment(eq(5L), contains("CANCELLED"));
         verify(userService).notifyAdmins(contains("#LMO-5"));
         assertEquals("CANCELLED", cancelled.getStatus());
     }

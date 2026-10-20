@@ -14,6 +14,8 @@ public class OrderItem {
     private String productName;
     private Integer quantity;
     private Double price;
+    @Column(nullable = false)
+    private int refundedQuantity;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;

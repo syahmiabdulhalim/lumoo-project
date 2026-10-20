@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>LUMOO Admin | Refunds</title>
+    <th:block th:replace="~{fragments/layout :: assets}"/>
+</head>
+<body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
+
+<nav th:replace="~{fragments/layout :: adminHeader(~{::.hdr-title}, null)}"><span class="hdr-title text-sm font-bold">Refunds</span></nav>
+
+<main class="max-w-6xl mx-auto px-6 py-12 space-y-8">
+
+    <th:block th:replace="~{fragments/layout :: flash}"/>
+    <p class="text-xs text-slate-500">Lumoo pays the buyer back to their original payment method within <b>14 business days</b>,
+        then records the transfer reference here. The vendor's share comes off that order's payout if it is still held,
+        otherwise it is kept back from the vendor's next payouts. To start a refund, open the order from
+        <a href="/admin/dashboard#orders" class="text-[#4d78c0] font-bold">Orders</a> and click <b>Refund</b>.</p>
+
+    <section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-black uppercase tracking-widest">To pay</h2>
+            <span class="bg-slate-100 text-slate-600 text-xs font-mono px-2 py-1 rounded-md" th:text="${#lists.size(pending)} + ' pending'">0 pending</span>
+        </div>
+        <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+            <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider"><tr>
+                <th class="p-3 text-left">Order</th><th class="p-3 text-left">Buyer</th><th class="p-3 text-left">Pay via</th>
+                <th class="p-3 text-right">Amount</th><th class="p-3 text-left">Items</th><th class="p-3 text-left">Due</th>
+                <th class="p-3 text-left">Record payment</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${pending}" class="border-t align-top">
+                <td class="p-3 font-mono"><a th:href="@{/admin/refunds/new(orderId=${r.order.id})}" class="text-[#4d78c0] font-bold" th:text="${'#LMO-' + r.order.id}"></a></td>
+                <td class="p-3" th:text="${r.order.user != null ? r.order.user.email : '—'}"></td>
+                <td class="p-3" th:text="${r.order.paymentMethod}"></td>
+                <td class="p-3 text-right font-mono font-bold" th:text="${'GMD ' + #numbers.formatDecimal(r.amount, 1, 2)}"></td>
+                <td class="p-3">
+                    <span th:text="${r.itemsSummary}"></span>
+                    <p class="text-slate-400 italic" th:text="${r.reason}"></p>
+                    <p th:if="${r.vendorDebt > 0}" class="text-orange-600" th:text="${'Vendor already paid — GMD ' + #numbers.formatDecimal(r.vendorDebt, 1, 2) + ' kept from next payouts'}"></p>
+                </td>
+                <td class="p-3" th:classappend="${r.overdue} ? 'text-red-600 font-black'"
+                    th:text="${(r.overdue ? 'OVERDUE ' : '') + r.dueBy}"></td>
+                <td class="p-3">
+                    <form th:action="@{/admin/refunds/{id}/complete(id=${r.id})}" method="post" class="flex flex-col gap-1.5"
+                          onsubmit="return confirm('Confirm the money has been sent to the buyer?');"><input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <select name="method" class="border rounded p-1.5 text-xs">
+                            <option value="ModemPay">ModemPay</option>
+                            <option value="Afrimoney">Afrimoney</option>
+                            <option value="QMoney">QMoney</option>
+                            <option value="Wave">Wave</option>
+                            <option value="Bank transfer">Bank transfer</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                        <input name="reference" required maxlength="100" placeholder="Transfer reference *" class="border rounded p-1.5 text-xs w-44">
+                        <button class="bg-slate-800 hover:bg-[#4d78c0] text-white text-xs font-bold px-3 py-1.5 rounded">Mark sent</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pending)}"><td colspan="7" class="p-6 text-center text-slate-400">No refunds waiting to be paid.</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100"><h2 class="text-sm font-black uppercase tracking-widest">Completed</h2></div>
+        <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+            <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider"><tr>
+                <th class="p-3 text-left">Order</th><th class="p-3 text-right">Amount</th><th class="p-3 text-left">Method</th>
+                <th class="p-3 text-left">Reference</th><th class="p-3 text-left">Sent</th><th class="p-3 text-left">By</th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${completed}" class="border-t">
+                <td class="p-3 font-mono" th:text="${'#LMO-' + r.order.id}"></td>
+                <td class="p-3 text-right font-mono" th:text="${'GMD ' + #numbers.formatDecimal(r.amount, 1, 2)}"></td>
+                <td class="p-3" th:text="${r.method}"></td>
+                <td class="p-3 font-mono" th:text="${r.reference}"></td>
+                <td class="p-3" th:text="${#temporals.format(r.completedAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td class="p-3" th:text="${r.completedBy}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(completed)}"><td colspan="6" class="p-6 text-center text-slate-400">No completed refunds yet.</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

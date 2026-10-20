@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.Optional;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -105,10 +106,10 @@ class AdminControllerTest {
     }
     @Test
     void deleteOrder_cancelsInsteadOfDeleting() throws Exception {
-        when(orderService.adminCancel(9L)).thenReturn(OrderService.AdminCancelResult.CANCELLED);
+        when(orderService.adminCancel(eq(9L), any())).thenReturn(OrderService.AdminCancelResult.CANCELLED);
         mvc.perform(post("/admin/delete-order/9"))
                 .andExpect(status().is3xxRedirection());
-        verify(orderService).adminCancel(9L);
+        verify(orderService).adminCancel(eq(9L), any());
     }
     @Test
     void deleteInquiry_redirects() throws Exception {

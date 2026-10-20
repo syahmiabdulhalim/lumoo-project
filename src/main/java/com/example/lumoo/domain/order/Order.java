@@ -35,6 +35,11 @@ public class Order {
     /** This order's share of the promo discount (items only, never shipping). Funded by Lumoo's commission. */
     @Column(nullable = false)
     private double discountAmount;
+    /** Sum of all refunds approved for this order (totalAmount itself never changes). */
+    @Column(nullable = false)
+    private double refundedAmount;
+    @Column(nullable = false)
+    private boolean shippingRefunded;
     private String shippingTrackingUrl;
     private Long riderId;
     private String riderName;
@@ -45,6 +50,9 @@ public class Order {
     private String modempayPaymentId;
     private String payoutStatus;
     private String payoutTransferId;
+    /** Kept back from this order's payout to cover the vendor's earlier refund debt. */
+    @Column(nullable = false)
+    private double payoutDeduction;
     private LocalDateTime deliveredAt;
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -24,6 +24,7 @@ class OrderRepositoryQueriesTest {
     @Autowired UserRepository users;
     @Autowired ProductRepository products;
     @Autowired EntityManager em;
+    @Autowired com.example.lumoo.domain.order.RefundRepository refunds;
     private User vendor() {
         User v = new User();
         v.setEmail("v" + System.nanoTime() + "@test.com");
@@ -84,5 +85,29 @@ class OrderRepositoryQueriesTest {
         orders.saveAndFlush(copy2);
         copy1.setStatus("PAYMENT_FAILED");
         assertThrows(OptimisticLockingFailureException.class, () -> orders.saveAndFlush(copy1));
+    }
+    @Test
+    void refundDebt_andPayoutDeductions_perVendor_andRevenueIsNetOfRefunds() {
+        User v = vendor();
+        Order paidOut = order("DELIVERED", 100, v, 1);
+        paidOut.setRefundedAmount(40);
+        com.example.lumoo.domain.order.Refund r = new com.example.lumoo.domain.order.Refund();
+        r.setOrder(paidOut);
+        r.setVendor(v);
+        r.setAmount(40);
+        r.setVendorDebt(36);
+        r.setReason("Damaged");
+        refunds.save(r);
+        Order offset = order("DELIVERED", 20, v, 2);
+        offset.setPayoutStatus("PAID");
+        offset.setPayoutDeduction(20);
+        Order failed = order("DELIVERED", 20, v, 1);
+        failed.setPayoutStatus("FAILED");     // money never left: doesn't count as recovered
+        failed.setPayoutDeduction(20);
+        order("DELIVERED", 20, vendor(), 1).setPayoutDeduction(99); // other vendor
+        em.flush();
+        assertEquals(36.0, refunds.sumVendorDebt(v.getId()), 0.001);
+        assertEquals(20.0, orders.sumPayoutDeductions(v.getId()), 0.001);
+        assertEquals(100.0, orders.sumVendorRevenue(v.getId()), 0.001); // 100 − 40 + 20 + 20
     }
 }

@@ -74,6 +74,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <span class="mono text-sm font-semibold text-slate-800" th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}">GMD 0.00</span>
+                                <span th:if="${o.refundedAmount > 0}" class="block text-[10px] text-red-500 font-semibold"
+                                      th:text="${'−GMD ' + #numbers.formatDecimal(o.refundedAmount, 1, 2) + ' refunded'}"></span>
                             </td>
                             <td class="px-6 py-4">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -123,6 +125,9 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
+                                    <a th:if="${#lists.contains({'PAID','SHIPPED','DELIVERED','RETURN_REQUESTED','RETURNED','CANCELLED'}, o.status)}"
+                                       th:href="@{/admin/refunds/new(orderId=${o.id})}"
+                                       class="text-xs border border-red-200 text-red-600 hover:bg-red-50 px-2.5 py-1.5 rounded-lg font-medium transition-colors">Refund</a>
                                     <form th:if="${o.status == 'RETURN_REQUESTED'}"
                                           th:action="@{/admin/order/{id}/resolve-return(id=${o.id})}" method="post">
                                         <button type="submit"

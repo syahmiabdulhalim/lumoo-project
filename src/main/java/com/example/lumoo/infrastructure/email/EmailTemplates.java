@@ -1,5 +1,7 @@
 package com.example.lumoo.infrastructure.email;
 
+import org.springframework.web.util.HtmlUtils;
+
 public final class EmailTemplates {
 
     private EmailTemplates() {}
@@ -246,5 +248,23 @@ public final class EmailTemplates {
                 returnRequests > 0 ? "#dc2626" : "#166534", returnRequests,
                 pendingVendorApps > 0 ? "#d97706" : "#166534", pendingVendorApps,
                 newSubscribers, dashboardUrl));
+    }
+
+    public static String refundApproved(String name, String orderId, double amount, String dueBy) {
+        return wrap("Refund Approved", """
+            <p style="color:#444;font-size:14px">Hi <strong>%s</strong>,</p>
+            <p style="color:#444;font-size:14px">A refund of <strong>GMD %.2f</strong> for order <strong>#LMO-%s</strong> has been approved.</p>
+            <p style="color:#444;font-size:13px">It will be sent to your original payment method by <strong>%s</strong> (within 14 business days). We'll email you once it has been sent.</p>
+            """.formatted(name, amount, orderId, dueBy));
+    }
+
+    public static String refundSent(String name, String orderId, double amount, String method, String reference) {
+        String via = method != null ? " via " + HtmlUtils.htmlEscape(method) : "";
+        return wrap("Refund Sent", """
+            <p style="color:#444;font-size:14px">Hi <strong>%s</strong>,</p>
+            <p style="color:#444;font-size:14px">Your refund of <strong>GMD %.2f</strong> for order <strong>#LMO-%s</strong> has been sent%s.</p>
+            <p style="color:#444;font-size:13px">Reference: <strong>%s</strong></p>
+            <p style="color:#444;font-size:13px">If it hasn't arrived within 3 days, contact our support team with this reference.</p>
+            """.formatted(name, amount, orderId, via, HtmlUtils.htmlEscape(reference)));
     }
 }

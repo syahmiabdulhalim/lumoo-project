@@ -23,13 +23,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByIdWithItems(@Param("id") Long id);
     @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     List<Order> findVendorOrdersWithItems(@Param("vendorId") Long vendorId);
-    // Revenue = money actually received: paid or later, never failed/cancelled/awaiting orders.
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED')")
+    // Revenue = money actually received and kept: paid or later, minus refunds; never failed/cancelled/awaiting orders.
+    @Query("SELECT COALESCE(SUM(o.totalAmount - o.refundedAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED')")
     double sumTotalRevenue();
     // EXISTS instead of JOIN: a join counted the order total once per item.
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId)")
+    @Query("SELECT COALESCE(SUM(o.totalAmount - o.refundedAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId)")
     double sumVendorRevenue(@Param("vendorId") Long vendorId);
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId) AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
+    @Query("SELECT COALESCE(SUM(o.totalAmount - o.refundedAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId) AND MONTH(o.createdAt) = MONTH(CURRENT_DATE) AND YEAR(o.createdAt) = YEAR(CURRENT_DATE)")
     double sumVendorMonthlySales(@Param("vendorId") Long vendorId);
     @Query("SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId")
     long countVendorOrders(@Param("vendorId") Long vendorId);
@@ -51,7 +51,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findStaleShipped(@Param("cutoff") LocalDateTime cutoff);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = :status")
     long countByStatus(@Param("status") String status);
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND o.orderDate >= :since")
+    @Query("SELECT COALESCE(SUM(o.totalAmount - o.refundedAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED') AND o.orderDate >= :since")
     double sumRevenueSince(@Param("since") LocalDateTime since);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :since")
     long countOrdersSince(@Param("since") LocalDateTime since);
@@ -62,4 +62,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findVendorOrdersPagedByStatus(@Param("vendorId") Long vendorId, @Param("status") String status, Pageable pageable);
     @Query("SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status")
     long countVendorOrdersByStatus(@Param("vendorId") Long vendorId, @Param("status") String status);
+    /** Refund debt already recovered from this vendor's payouts (only payouts that went out, or were fully offset). */
+    @Query("SELECT COALESCE(SUM(o.payoutDeduction), 0) FROM Order o WHERE o.payoutStatus IN ('PENDING', 'PAID', 'OFFSET') AND EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND i.product.vendor.id = :vendorId)")
+    double sumPayoutDeductions(@Param("vendorId") Long vendorId);
 }
