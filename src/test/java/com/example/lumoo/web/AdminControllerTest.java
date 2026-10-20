@@ -118,9 +118,10 @@ class AdminControllerTest {
         verify(inquiryService).delete(10L);
     }
     @Test
-    void resolveReturn_redirects() throws Exception {
+    void resolveReturn_goesToRefundForm() throws Exception {
+        when(orderService.resolveReturn(11L)).thenReturn(true);
         mvc.perform(post("/admin/order/11/resolve-return"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(redirectedUrl("/admin/refunds/new?orderId=11"));
         verify(orderService).resolveReturn(11L);
     }
     @Test

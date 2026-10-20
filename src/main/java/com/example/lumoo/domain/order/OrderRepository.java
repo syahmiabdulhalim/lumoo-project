@@ -55,7 +55,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     double sumRevenueSince(@Param("since") LocalDateTime since);
     @Query("SELECT COUNT(o) FROM Order o WHERE o.orderDate >= :since")
     long countOrdersSince(@Param("since") LocalDateTime since);
-    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.payoutStatus = 'HELD' AND o.deliveredAt <= :cutoff")
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.product WHERE o.payoutStatus = 'HELD' AND o.deliveredAt <= :cutoff AND o.status <> 'RETURN_REQUESTED'")
+    // An open return request freezes the payout until the admin resolves it (and refunds, if needed).
     List<Order> findHeldPayoutsReadyForRelease(@Param("cutoff") LocalDateTime cutoff);
     @Query(value = "SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status",
            countQuery = "SELECT COUNT(DISTINCT o) FROM Order o JOIN o.items i WHERE i.product IS NOT NULL AND i.product.vendor.id = :vendorId AND o.status = :status")

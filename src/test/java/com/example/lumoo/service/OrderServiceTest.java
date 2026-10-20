@@ -426,13 +426,13 @@ class OrderServiceTest {
         assertEquals("PAID", proof.getStatus());
     }
     @Test
-    void resolveReturn_cancelsHeldPayout() {
+    void resolveReturn_onlyChangesStatus_payoutIsAdjustedByTheRefund() {
         Order o = orderWithStatus("RETURN_REQUESTED", buyer);
         o.setPayoutStatus("HELD");
         when(orderRepository.findById(1L)).thenReturn(Optional.of(o));
         assertTrue(orderService.resolveReturn(1L));
         assertEquals("RETURNED", o.getStatus());
-        assertEquals("CANCELLED", o.getPayoutStatus());
+        assertEquals("HELD", o.getPayoutStatus());
     }
     @Test
     void resolveReturn_requiresOpenReturnRequest() {

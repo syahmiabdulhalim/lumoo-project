@@ -73,8 +73,12 @@
                     </td>
                     <td class="px-6 py-4 text-[10px] text-slate-400 whitespace-nowrap"
                         th:text="${o.orderDate != null ? #temporals.format(o.orderDate, 'dd MMM yyyy') : '—'}"></td>
-                    <td class="px-6 py-4 text-xs font-black text-[#4d78c0] whitespace-nowrap"
-                        th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}"></td>
+                    <td class="px-6 py-4 text-xs font-black text-[#4d78c0] whitespace-nowrap">
+                        <span th:text="${'GMD ' + #numbers.formatDecimal(o.totalAmount, 1, 2)}"></span>
+                        <span th:if="${o.refundedAmount > 0}" class="block text-[10px] text-red-500 font-semibold"
+                              th:text="${'−GMD ' + #numbers.formatDecimal(o.refundedAmount, 1, 2) + ' refunded'}"></span>
+                        <span th:if="${o.payoutDeduction > 0}" class="block text-[10px] text-orange-600 font-semibold"
+                              th:text="${'GMD ' + #numbers.formatDecimal(o.payoutDeduction, 1, 2) + ' kept for refunds'}"></span></td>
                     <td class="px-6 py-4">
                         <span class="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full"
                               th:text="${o.status}"

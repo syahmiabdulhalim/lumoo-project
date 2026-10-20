@@ -32,6 +32,9 @@ public class SiteSettings {
     private String socialTwitter;
     private boolean cookieConsentEnabled = true;
     private int dataRetentionDays = 365;
+    /** Extra holidays (yyyy-MM-dd, one per line or comma-separated) skipped when counting refund business days. */
+    @Column(columnDefinition = "TEXT")
+    private String publicHolidays;
     private int payoutHoldDays = 3;
     private String pdpaRegistrationNumber;
     private String dataControllerName;

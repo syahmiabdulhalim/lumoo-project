@@ -302,13 +302,15 @@ public class OrderService {
         userService.notifyAdmins("↩ Return requested — #LMO-" + orderId + " by " + order.getUser().getDisplayName());
         return ReturnResult.REQUESTED;
     }
-    /** Completes a requested return. A payout still on hold is cancelled — the vendor isn't paid for returned goods. */
+    /**
+     * Completes a requested return (status only). The money side — buyer refund and the vendor's share,
+     * full or partial — goes through RefundService, which also cancels a held payout once nothing is left.
+     */
     @Transactional
     public boolean resolveReturn(Long orderId) {
         Order o = orderRepository.findById(orderId).orElse(null);
         if (o == null || !"RETURN_REQUESTED".equals(o.getStatus())) return false;
         o.setStatus("RETURNED");
-        if ("HELD".equals(o.getPayoutStatus())) o.setPayoutStatus("CANCELLED");
         orderRepository.save(o);
         return true;
     }

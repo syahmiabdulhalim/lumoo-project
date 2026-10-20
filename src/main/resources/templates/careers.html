@@ -42,8 +42,8 @@
         <div th:if="${postings == null or #lists.isEmpty(postings)}" class="text-center py-32">
             <p class="text-[8px] text-gray-300 uppercase tracking-[0.4em] font-black mb-4">No open positions at the moment</p>
             <p class="text-xs text-gray-400">Check back soon or send your CV to
-                <a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.gm'} + '?subject=Spontaneous Application'"
-                   class="text-[#4d78c0] hover:underline" th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}">info@lumoo.gm</a>
+                <a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.my'} + '?subject=Spontaneous Application'"
+                   class="text-[#4d78c0] hover:underline" th:text="${siteSettings?.businessEmail ?: 'info@lumoo.my'}">info@lumoo.my</a>
             </p>
         </div>
     </main>

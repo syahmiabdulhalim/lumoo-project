@@ -14,7 +14,7 @@ import java.util.List;
 public class SitemapController {
     @Autowired private BlogService blogService;
     @Autowired private ProductService productService;
-    private static final String BASE = "https://lumoo.gm";
+    private static final String BASE = "https://lumoo.my";
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     @GetMapping(value = "/sitemap.xml", produces = MediaType.APPLICATION_XML_VALUE)
     @ResponseBody

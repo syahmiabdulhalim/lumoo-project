@@ -169,6 +169,14 @@
                           class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
                           placeholder="Enter your returns &amp; refunds policy here..."
                           th:text="${settings.returnsText}"></textarea>
+                <label class="label mt-6 block">Public holidays (refund due dates)</label>
+                <p class="text-[9px] text-gray-400 mb-2">Refunds are due within 14 business days. Weekends, New Year, Independence Day,
+                    Good Friday, Easter Monday, 1 May, 25 May, 15 Aug and Christmas are already skipped. Add the Islamic holidays
+                    (Koriteh, Tobaski, Maulud, Ashura) once announced — one date per line, <code class="bg-gray-100 px-1">yyyy-MM-dd</code>.</p>
+                <textarea name="publicHolidays" rows="4"
+                          class="w-full border border-gray-200 p-4 text-xs font-mono focus:border-[#4d78c0] outline-none resize-y"
+                          placeholder="2026-03-20&#10;2026-05-27"
+                          th:text="${settings.publicHolidays}"></textarea>
             </div>
             <div class="bg-white border border-gray-100 shadow-sm p-8 mb-6">
                 <h2 class="text-[9px] font-black uppercase tracking-[0.4em] text-gray-400 border-b border-gray-100 pb-4 mb-6">Cookie Policy</h2>

@@ -193,7 +193,7 @@ public final class EmailTemplates {
             <p style="color:#444;font-size:14px">Hi <strong>%s</strong>,</p>
             <p style="color:#444;font-size:14px">We've reviewed your vendor application and unfortunately it was <strong style="color:#991b1b">not approved</strong> at this time.</p>
             %s
-            <p style="color:#444;font-size:13px">You may re-apply after 12 hours. If you have any questions, please contact us at <a href="mailto:info@lumoo.gm">info@lumoo.gm</a>.</p>
+            <p style="color:#444;font-size:13px">You may re-apply after 12 hours. If you have any questions, please contact us at <a href="mailto:info@lumoo.my">info@lumoo.my</a>.</p>
             """.formatted(name, reasonLine));
     }
 

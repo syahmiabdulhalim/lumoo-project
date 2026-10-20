@@ -28,6 +28,7 @@ class VendorControllerTest {
     @Autowired MockMvc mvc;
     @MockitoBean ProductService productService;
     @MockitoBean OrderService orderService;
+    @MockitoBean com.example.lumoo.domain.order.RefundService refundService;
     @MockitoBean UserService userService;
     @MockitoBean CustomUserDetailsService customUserDetailsService;
     @MockitoBean CustomSuccessHandler customSuccessHandler;
@@ -49,6 +50,28 @@ class VendorControllerTest {
         when(orderService.getVendorOrdersPage(eq(1L), anyInt(), anyInt())).thenReturn(new PageImpl<>(List.of()));
         mvc.perform(get("/vendor/dashboard"))
                 .andExpect(status().isOk());
+    }
+    @Test
+    @WithMockUser(username = "vendor@test.com", roles = "VENDOR")
+    void dashboard_showsRefundsAndDebt() throws Exception {
+        User v = vendor(1L, "vendor@test.com");
+        when(userService.findByEmail("vendor@test.com")).thenReturn(Optional.of(v));
+        when(productService.getByVendor(v)).thenReturn(List.of());
+        com.example.lumoo.domain.order.Order o = new com.example.lumoo.domain.order.Order();
+        o.setId(42L);
+        com.example.lumoo.domain.order.Refund r = new com.example.lumoo.domain.order.Refund();
+        r.setOrder(o);
+        r.setVendorDeduction(90);
+        r.setVendorDebt(90);
+        r.setItemsSummary("1× Shirt");
+        r.setReason("Damaged");
+        r.setCreatedAt(java.time.LocalDateTime.now());
+        when(refundService.outstandingVendorDebt(1L)).thenReturn(90.0);
+        when(refundService.getRecentForVendor(1L)).thenReturn(List.of(r));
+        mvc.perform(get("/vendor/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("GMD 90.00 to be kept from next payouts")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("#LMO-42")));
     }
     @Test
     void dashboard_blocksAccess_whenUnauthenticated() throws Exception {

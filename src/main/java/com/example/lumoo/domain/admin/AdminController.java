@@ -221,9 +221,9 @@ public class AdminController {
             return "redirect:/admin/dashboard#orders";
         }
         auditService.log("RETURN_RESOLVED", "Order", String.valueOf(id), req);
-        ra.addFlashAttribute("flashMsg", "Return resolved.");
+        ra.addFlashAttribute("flashMsg", "Return resolved. Now approve the refund for the returned items — the vendor's payout is only reduced through a refund.");
         ra.addFlashAttribute("flashType", "green");
-        return "redirect:/admin/dashboard#orders";
+        return "redirect:/admin/refunds/new?orderId=" + id;
     }
     @PostMapping("/order/{id}/verify-payment")
     public String verifyPayment(@PathVariable Long id, HttpServletRequest req, RedirectAttributes ra) {

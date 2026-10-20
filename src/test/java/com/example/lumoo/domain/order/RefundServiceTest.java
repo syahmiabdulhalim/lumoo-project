@@ -24,6 +24,7 @@ class RefundServiceTest {
     @Mock private OrderRepository orderRepository;
     @Mock private EmailService emailService;
     @Mock private UserService userService;
+    @Mock private com.example.lumoo.domain.admin.SiteSettingsService siteSettingsService;
     @InjectMocks private RefundService refundService;
 
     private static OrderItem item(long id, double price, int qty) {
@@ -57,6 +58,10 @@ class RefundServiceTest {
         buyer.setUsername("buyer");
         o.setUser(buyer);
         return o;
+    }
+    @org.junit.jupiter.api.BeforeEach
+    void settings() {
+        lenient().when(siteSettingsService.get()).thenReturn(new com.example.lumoo.domain.admin.SiteSettings());
     }
     private void stub(Order o) {
         when(orderRepository.findByIdWithItems(1L)).thenReturn(Optional.of(o));
@@ -190,8 +195,21 @@ class RefundServiceTest {
     @Test
     void addBusinessDays_skipsWeekends() {
         LocalDate friday = LocalDate.of(2026, 10, 23);
-        assertEquals(LocalDate.of(2026, 10, 26), RefundService.addBusinessDays(friday, 1));
-        assertEquals(LocalDate.of(2026, 11, 12), RefundService.addBusinessDays(friday, 14));
+        assertEquals(LocalDate.of(2026, 10, 26), RefundService.addBusinessDays(friday, 1, java.util.Set.of()));
+        assertEquals(LocalDate.of(2026, 11, 12), RefundService.addBusinessDays(friday, 14, java.util.Set.of()));
+    }
+    @Test
+    void addBusinessDays_skipsFixedHolidays_easter_andAdminDates() {
+        assertEquals(LocalDate.of(2026, 4, 5), RefundService.easterSunday(2026));
+        assertEquals(LocalDate.of(2025, 4, 20), RefundService.easterSunday(2025));
+        // Thu 2 Apr 2026 + 1 → skips Good Friday 3 Apr, weekend, Easter Monday 6 Apr → Tue 7 Apr
+        assertEquals(LocalDate.of(2026, 4, 7), RefundService.addBusinessDays(LocalDate.of(2026, 4, 2), 1, java.util.Set.of()));
+        // Thu 24 Dec + 1 → skips Christmas → Mon 28 Dec
+        assertEquals(LocalDate.of(2026, 12, 28), RefundService.addBusinessDays(LocalDate.of(2026, 12, 24), 1, java.util.Set.of()));
+        // Admin-entered Tobaski date is skipped; junk lines are ignored
+        var extra = RefundService.parseHolidays("2026-05-27\nnot-a-date, 2026-05-28");
+        assertEquals(2, extra.size());
+        assertEquals(LocalDate.of(2026, 5, 29), RefundService.addBusinessDays(LocalDate.of(2026, 5, 26), 1, extra));
     }
     @Test
     void underpaidCharge_refundsWhatWasPaid_splitByOrderTotal_vendorUntouched() {

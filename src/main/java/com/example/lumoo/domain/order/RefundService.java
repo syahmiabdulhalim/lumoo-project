@@ -1,4 +1,5 @@
 package com.example.lumoo.domain.order;
+import com.example.lumoo.domain.admin.SiteSettingsService;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.UserService;
 import com.example.lumoo.infrastructure.email.EmailService;
@@ -39,6 +40,7 @@ public class RefundService {
     @Autowired private OrderRepository orderRepository;
     @Autowired private EmailService emailService;
     @Autowired private UserService userService;
+    @Autowired private SiteSettingsService siteSettingsService;
 
     /** How a refund splits between buyer, vendor and Lumoo. Computed server-side only. */
     public record Breakdown(double itemsGross, double discountShare, double shipping, double amount,
@@ -53,6 +55,9 @@ public class RefundService {
     public List<Refund> getPending() { return refundRepository.findByStatusWithOrder(Refund.Status.PENDING); }
     public List<Refund> getCompleted() { return refundRepository.findByStatusWithOrder(Refund.Status.COMPLETED); }
     public List<Refund> getForOrder(Long orderId) { return refundRepository.findByOrderId(orderId); }
+    public List<Refund> getRecentForVendor(Long vendorId) {
+        return refundRepository.findRecentForVendor(vendorId, org.springframework.data.domain.PageRequest.of(0, 10));
+    }
     public long countPending() { return refundRepository.countByStatus(Refund.Status.PENDING); }
 
     public boolean isRefundable(Order o) {
@@ -131,7 +136,7 @@ public class RefundService {
         r.setReason(truncate(reason, 255));
         r.setCreatedBy("system");
         r.setCreatedAt(LocalDateTime.now());
-        r.setDueBy(addBusinessDays(LocalDate.now(), REFUND_BUSINESS_DAYS));
+        r.setDueBy(dueDate());
         o.setRefundedAmount(round2(o.getRefundedAmount() + amount));
         orderRepository.save(o);
         refundRepository.save(r);
@@ -153,7 +158,7 @@ public class RefundService {
         r.setReason(reason.length() > 255 ? reason.substring(0, 255) : reason);
         r.setCreatedBy(actor);
         r.setCreatedAt(LocalDateTime.now());
-        r.setDueBy(addBusinessDays(LocalDate.now(), REFUND_BUSINESS_DAYS));
+        r.setDueBy(dueDate());
         applyVendorShare(o, r, b.vendorShare());
 
         if (o.getItems() != null)
@@ -263,14 +268,48 @@ public class RefundService {
                 truncate(summary.toString(), 500));
     }
 
-    static LocalDate addBusinessDays(LocalDate from, int days) {
+    private LocalDate dueDate() {
+        String extra = siteSettingsService.get().getPublicHolidays();
+        return addBusinessDays(LocalDate.now(), REFUND_BUSINESS_DAYS, parseHolidays(extra));
+    }
+
+    /** Skips weekends, Gambia's fixed-date holidays, Good Friday/Easter Monday and the given extra dates. */
+    static LocalDate addBusinessDays(LocalDate from, int days, Set<LocalDate> extraHolidays) {
         LocalDate d = from;
         int added = 0;
         while (added < days) {
             d = d.plusDays(1);
-            if (d.getDayOfWeek() != DayOfWeek.SATURDAY && d.getDayOfWeek() != DayOfWeek.SUNDAY) added++;
+            boolean weekend = d.getDayOfWeek() == DayOfWeek.SATURDAY || d.getDayOfWeek() == DayOfWeek.SUNDAY;
+            if (!weekend && !isFixedHoliday(d) && !extraHolidays.contains(d)) added++;
         }
         return d;
+    }
+
+    static boolean isFixedHoliday(LocalDate d) {
+        int m = d.getMonthValue(), day = d.getDayOfMonth();
+        if ((m == 1 && day == 1) || (m == 2 && day == 18) || (m == 5 && day == 1) || (m == 5 && day == 25)
+                || (m == 8 && day == 15) || (m == 12 && day == 25)) return true;
+        LocalDate easter = easterSunday(d.getYear());
+        return d.equals(easter.minusDays(2)) || d.equals(easter.plusDays(1));
+    }
+
+    /** Anonymous Gregorian algorithm. */
+    static LocalDate easterSunday(int y) {
+        int a = y % 19, b = y / 100, c = y % 100, d = b / 4, e = b % 4, f = (b + 8) / 25, g = (b - f + 1) / 3;
+        int h = (19 * a + b - d - g + 15) % 30, i = c / 4, k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+        int m = (a + 11 * h + 22 * l) / 451;
+        int month = (h + l - 7 * m + 114) / 31, day = ((h + l - 7 * m + 114) % 31) + 1;
+        return LocalDate.of(y, month, day);
+    }
+
+    /** Admin-entered dates; anything that isn't yyyy-MM-dd is ignored. */
+    static Set<LocalDate> parseHolidays(String text) {
+        if (text == null || text.isBlank()) return Set.of();
+        Set<LocalDate> out = new java.util.HashSet<>();
+        for (String part : text.split("[,\\s]+")) {
+            try { out.add(LocalDate.parse(part.trim())); } catch (Exception ignored) {}
+        }
+        return out;
     }
 
     /** Parses the admin form's qty_&lt;itemId&gt; fields. */

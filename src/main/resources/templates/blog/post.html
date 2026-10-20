@@ -8,11 +8,11 @@
     <meta name="author" th:content="${post.author}">
     <meta name="robots" content="index, follow">
     <meta th:if="${post.tags != null}" name="keywords" th:content="${post.tags}">
-    <link rel="canonical" th:href="${'https://lumoo.gm/blog/' + post.slug}">
+    <link rel="canonical" th:href="${'https://lumoo.my/blog/' + post.slug}">
     <meta property="og:type" content="article">
     <meta property="og:title" th:content="${post.effectiveMetaTitle}">
     <meta property="og:description" th:content="${post.effectiveMetaDescription}">
-    <meta property="og:url" th:content="${'https://lumoo.gm/blog/' + post.slug}">
+    <meta property="og:url" th:content="${'https://lumoo.my/blog/' + post.slug}">
     <meta property="og:site_name" content="LUMOO Gambia">
     <meta th:if="${post.featuredImageUrl != null}" property="og:image" th:content="${post.featuredImageUrl}">
     <meta th:if="${post.publishedAt != null}" property="article:published_time"
@@ -30,7 +30,7 @@
       "@type": "Article",
       "headline": /*[[${post.title}]]*/ "Title",
       "description": /*[[${post.effectiveMetaDescription}]]*/ "",
-      "image": /*[[${post.featuredImageUrl != null ? post.featuredImageUrl : 'https://lumoo.gm/images/logo.jpg'}]]*/ "",
+      "image": /*[[${post.featuredImageUrl != null ? post.featuredImageUrl : 'https://lumoo.my/images/logo.jpg'}]]*/ "",
       "author": {
         "@type": "Person",
         "name": /*[[${post.author}]]*/ "LUMOO Team"
@@ -40,14 +40,14 @@
         "name": "LUMOO Gambia",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://lumoo.gm/images/logo.jpg"
+          "url": "https://lumoo.my/images/logo.jpg"
         }
       },
       "datePublished": /*[[${post.publishedAt != null ? #temporals.format(post.publishedAt, 'yyyy-MM-dd') : ''}]]*/ "",
-      "url": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ "",
+      "url": /*[[${'https://lumoo.my/blog/' + post.slug}]]*/ "",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ ""
+        "@id": /*[[${'https://lumoo.my/blog/' + post.slug}]]*/ ""
       }
     }
     </script>
@@ -56,9 +56,9 @@
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
-        {"@type":"ListItem","position":1,"name":"Home","item":"https://lumoo.gm"},
-        {"@type":"ListItem","position":2,"name":"Blog","item":"https://lumoo.gm/blog"},
-        {"@type":"ListItem","position":3,"name": /*[[${post.title}]]*/ "Post","item": /*[[${'https://lumoo.gm/blog/' + post.slug}]]*/ ""}
+        {"@type":"ListItem","position":1,"name":"Home","item":"https://lumoo.my"},
+        {"@type":"ListItem","position":2,"name":"Blog","item":"https://lumoo.my/blog"},
+        {"@type":"ListItem","position":3,"name": /*[[${post.title}]]*/ "Post","item": /*[[${'https://lumoo.my/blog/' + post.slug}]]*/ ""}
       ]
     }
     </script>
@@ -137,17 +137,17 @@
         <div class="mt-10 pt-8 border-t border-gray-100">
             <p class="text-[8px] font-black uppercase tracking-[0.4em] text-gray-400 mb-4">Share this article</p>
             <div class="flex gap-4">
-                <a th:href="${'https://www.facebook.com/sharer/sharer.php?u=https://lumoo.gm/blog/' + post.slug}"
+                <a th:href="${'https://www.facebook.com/sharer/sharer.php?u=https://lumoo.my/blog/' + post.slug}"
                    target="_blank" rel="noopener"
                    class="text-[9px] font-black uppercase tracking-widest bg-[#4d78c0] text-white px-5 py-2 hover:bg-[#3d68b0] transition">
                     Facebook
                 </a>
-                <a th:href="${'https://wa.me/?text=' + post.title + ' — https://lumoo.gm/blog/' + post.slug}"
+                <a th:href="${'https://wa.me/?text=' + post.title + ' — https://lumoo.my/blog/' + post.slug}"
                    target="_blank" rel="noopener"
                    class="text-[9px] font-black uppercase tracking-widest bg-green-500 text-white px-5 py-2 hover:bg-green-600 transition">
                     WhatsApp
                 </a>
-                <a th:href="${'https://twitter.com/intent/tweet?text=' + post.title + '&url=https://lumoo.gm/blog/' + post.slug}"
+                <a th:href="${'https://twitter.com/intent/tweet?text=' + post.title + '&url=https://lumoo.my/blog/' + post.slug}"
                    target="_blank" rel="noopener"
                    class="text-[9px] font-black uppercase tracking-widest bg-gray-900 text-white px-5 py-2 hover:bg-[#1a2336] transition">
                     X / Twitter

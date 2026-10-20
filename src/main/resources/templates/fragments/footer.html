@@ -63,7 +63,7 @@
                         </li>
                         <li class="flex items-start gap-2">
                             <svg class="w-3.5 h-3.5 mt-0.5 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.gm'}" th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}" class="hover:text-white transition">info@lumoo.gm</a>
+                            <a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.my'}" th:text="${siteSettings?.businessEmail ?: 'info@lumoo.my'}" class="hover:text-white transition">info@lumoo.my</a>
                         </li>
                         <li class="flex items-start gap-2">
                             <svg class="w-3.5 h-3.5 mt-0.5 shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -94,7 +94,7 @@
                         <li><a href="/profile"          class="text-gray-400 hover:text-white transition">My Profile</a></li>
                         <li><a href="/settings"         class="text-gray-400 hover:text-white transition">Account Settings</a></li>
                         <li><a href="/stores"           class="text-gray-400 hover:text-white transition">Find a Store</a></li>
-                        <li><a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.gm'}" class="text-gray-400 hover:text-white transition">Contact Us</a></li>
+                        <li><a th:href="'mailto:' + ${siteSettings?.businessEmail ?: 'info@lumoo.my'}" class="text-gray-400 hover:text-white transition">Contact Us</a></li>
                     </ul>
                 </div>
                 <div>

@@ -3,6 +3,7 @@ import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.order.OrderService;
+import com.example.lumoo.domain.order.RefundService;
 import com.example.lumoo.domain.product.ProductService;
 import com.example.lumoo.domain.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class VendorController {
     @Autowired private ProductService productService;
     @Autowired private OrderService orderService;
     @Autowired private UserService userService;
+    @Autowired private RefundService refundService;
     private static final int VENDOR_PAGE_SIZE = 20;
     @GetMapping("/dashboard")
     public String vendorDashboard(Model model, @AuthenticationPrincipal UserDetails currentUser) {
@@ -39,6 +41,8 @@ public class VendorController {
         model.addAttribute("returnCount",     returnCount);
         model.addAttribute("totalProducts",   productService.getByVendor(vendor).size());
         model.addAttribute("vendorName",      vendor.getDisplayName());
+        model.addAttribute("refundDebt",      refundService.outstandingVendorDebt(vendorId));
+        model.addAttribute("vendorRefunds",   refundService.getRecentForVendor(vendorId));
         return "vendor/dashboard";
     }
     @GetMapping("/sections/orders")
