@@ -1,9 +1,6 @@
 package com.example.lumoo.domain.product;
-import com.example.lumoo.domain.product.Product;
-import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.order.OrderItemRepository;
-import com.example.lumoo.domain.product.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;

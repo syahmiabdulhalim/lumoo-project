@@ -1,9 +1,6 @@
 package com.example.lumoo.domain.order;
-import com.example.lumoo.domain.order.CartItem;
-import com.example.lumoo.domain.order.Order;
+import com.example.lumoo.domain.promo.PromoService;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.order.CartService;
-import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.shipping.ShippingService;
 import com.example.lumoo.domain.user.UserService;
@@ -32,7 +29,7 @@ public class OrderController {
     @Autowired private UserService userService;
     @Autowired private ModemPayService modemPayService;
     @Autowired private ShippingService shippingService;
-    @Autowired private com.example.lumoo.domain.promo.PromoService promoService;
+    @Autowired private PromoService promoService;
     /** Only what checkout.html's JS needs — never the CartItem entity (it carries User objects). */
     public record CheckoutLine(String name, int quantity, double price, double weightKg) {}
     @Value("${app.upload.dir:/app/uploads/products}")

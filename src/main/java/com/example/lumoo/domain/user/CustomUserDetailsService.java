@@ -1,6 +1,5 @@
 package com.example.lumoo.domain.user;
-import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.UserRepository;
+import com.example.lumoo.infrastructure.security.LoginAttemptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -11,7 +10,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private com.example.lumoo.infrastructure.security.LoginAttemptService loginAttemptService;
+    private LoginAttemptService loginAttemptService;
  @Override
 public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     User user = userRepository.findByEmail(username)

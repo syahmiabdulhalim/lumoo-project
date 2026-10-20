@@ -51,9 +51,6 @@ public class CareerService {
     public List<CareerApplication> getApplicationsForPosting(CareerPosting posting) {
         return applicationRepo.findByPostingOrderByAppliedAtDesc(posting);
     }
-    public Optional<CareerApplication> findApplicationById(Long id) {
-        return applicationRepo.findById(id);
-    }
     public void updateApplicationStatus(Long id, CareerApplication.Status status) {
         applicationRepo.findById(id).ifPresent(app -> {
             app.setStatus(status);

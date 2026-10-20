@@ -1,6 +1,4 @@
 package com.example.lumoo.domain.subscriber;
-import com.example.lumoo.domain.subscriber.Subscriber;
-import com.example.lumoo.domain.subscriber.SubscriberRepository;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,4 @@
 package com.example.lumoo.domain.admin;
-import com.example.lumoo.domain.admin.SiteSettings;
-import com.example.lumoo.domain.admin.SiteSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service

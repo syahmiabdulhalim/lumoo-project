@@ -1,0 +1,4 @@
+/* Input for scripts/build-css.sh. Site-specific styles stay in static/css/lumoo.css. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

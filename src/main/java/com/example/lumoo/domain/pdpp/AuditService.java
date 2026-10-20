@@ -1,6 +1,4 @@
 package com.example.lumoo.domain.pdpp;
-import com.example.lumoo.domain.pdpp.AuditLog;
-import com.example.lumoo.domain.pdpp.AuditLogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

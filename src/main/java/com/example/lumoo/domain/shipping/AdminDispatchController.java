@@ -1,4 +1,5 @@
 package com.example.lumoo.domain.shipping;
+import java.time.LocalDateTime;
 
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderRepository;
@@ -65,7 +66,7 @@ public class AdminDispatchController {
                 ? trackingNumber.trim()
                 : "LMO-" + orderId + "-" + rider.getId();
         order.setTrackingNumber(tn);
-        order.setShippedAt(java.time.LocalDateTime.now());
+        order.setShippedAt(LocalDateTime.now());
         order.setStatus("SHIPPED");
 
         if (estimatedDeliveryDate != null && !estimatedDeliveryDate.isBlank()) {

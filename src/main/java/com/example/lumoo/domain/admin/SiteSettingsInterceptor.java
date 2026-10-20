@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.admin;
-import com.example.lumoo.domain.admin.SiteSettingsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

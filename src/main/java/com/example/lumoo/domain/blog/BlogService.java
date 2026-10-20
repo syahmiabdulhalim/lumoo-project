@@ -1,6 +1,5 @@
 package com.example.lumoo.domain.blog;
-import com.example.lumoo.domain.blog.BlogPost;
-import com.example.lumoo.domain.blog.BlogPostRepository;
+import org.springframework.data.domain.Sort;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -40,7 +39,7 @@ public class BlogService {
     }
     public Page<BlogPost> getAllPage(int page, int size) {
         return repo.findAll(PageRequest.of(page, size,
-            org.springframework.data.domain.Sort.by("createdAt").descending()));
+            Sort.by("createdAt").descending()));
     }
     public Optional<BlogPost> findById(Long id) {
         return repo.findById(id);

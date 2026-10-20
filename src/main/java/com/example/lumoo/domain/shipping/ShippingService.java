@@ -1,4 +1,6 @@
 package com.example.lumoo.domain.shipping;
+import java.util.Comparator;
+import org.springframework.data.domain.Sort;
 
 import com.example.lumoo.domain.order.CartItem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class ShippingService {
                         r.getDescription(),
                         r.getTrackingUrlTemplate() != null && !r.getTrackingUrlTemplate().isBlank()
                 ))
-                .sorted(java.util.Comparator.comparingDouble(ShippingQuote::rateGmd))
+                .sorted(Comparator.comparingDouble(ShippingQuote::rateGmd))
                 .collect(Collectors.toList());
     }
 
@@ -60,7 +62,7 @@ public class ShippingService {
     }
 
     public List<ShippingRate> getAll() {
-        return repo.findAll(org.springframework.data.domain.Sort.by("displayOrder", "courierName"));
+        return repo.findAll(Sort.by("displayOrder", "courierName"));
     }
 
     public ShippingRate save(ShippingRate rate) {
@@ -75,7 +77,7 @@ public class ShippingService {
         repo.findById(id).ifPresent(r -> { r.setActive(!r.isActive()); repo.save(r); });
     }
 
-    public java.util.Optional<ShippingRate> findById(Long id) {
+    public Optional<ShippingRate> findById(Long id) {
         return repo.findById(id);
     }
 

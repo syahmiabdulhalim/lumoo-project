@@ -1,4 +1,5 @@
 package com.example.lumoo.domain.payment;
+import java.time.Duration;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderItem;
 import com.example.lumoo.domain.order.OrderRepository;
@@ -28,7 +29,7 @@ public class PayoutService {
     @Autowired private OrderRepository orderRepository;
     @Autowired private ObjectMapper objectMapper;
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(java.time.Duration.ofSeconds(10))
+            .connectTimeout(Duration.ofSeconds(10))
             .build();
     public boolean isConfigured() {
         return apiKey != null && !apiKey.isBlank();

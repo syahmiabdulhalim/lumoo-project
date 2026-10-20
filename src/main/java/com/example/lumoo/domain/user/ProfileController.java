@@ -1,6 +1,5 @@
 package com.example.lumoo.domain.user;
-import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.UserService;
+import com.example.lumoo.infrastructure.security.PasswordPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -68,7 +67,7 @@ public class ProfileController {
                 yield "redirect:/profile";
             }
             case TOO_SHORT -> {
-                redirectAttributes.addFlashAttribute("passwordError", com.example.lumoo.infrastructure.security.PasswordPolicy.REQUIREMENT);
+                redirectAttributes.addFlashAttribute("passwordError", PasswordPolicy.REQUIREMENT);
                 yield "redirect:/profile";
             }
         };

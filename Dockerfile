@@ -11,6 +11,8 @@ RUN mvn dependency:go-offline -q
  
 # Copy source code & build
 COPY src ./src
+COPY tailwind.config.js ./
+COPY scripts/build-css.sh ./scripts/
 RUN mvn clean package -DskipTests -q
  
 # ================================

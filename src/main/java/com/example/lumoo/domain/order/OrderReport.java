@@ -1,4 +1,6 @@
 package com.example.lumoo.domain.order;
+import lombok.Getter;
+import lombok.Setter;
 
 import com.example.lumoo.domain.user.User;
 import jakarta.persistence.*;
@@ -6,6 +8,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "order_reports")
+@Getter
+@Setter
 public class OrderReport {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,18 +33,4 @@ public class OrderReport {
     private boolean resolved = false;
     private String adminNote;
 
-    public Long getId() { return id; }
-    public Order getOrder() { return order; }
-    public void setOrder(Order order) { this.order = order; }
-    public User getReporter() { return reporter; }
-    public void setReporter(User reporter) { this.reporter = reporter; }
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
-    public String getDetails() { return details; }
-    public void setDetails(String details) { this.details = details; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public boolean isResolved() { return resolved; }
-    public void setResolved(boolean resolved) { this.resolved = resolved; }
-    public String getAdminNote() { return adminNote; }
-    public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 }

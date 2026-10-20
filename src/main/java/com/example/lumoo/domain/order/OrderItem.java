@@ -1,8 +1,12 @@
 package com.example.lumoo.domain.order;
+import lombok.Getter;
+import lombok.Setter;
 import com.example.lumoo.domain.product.Product;
 import jakarta.persistence.*;
 @Entity 
 @Table(name = "order_items")
+@Getter
+@Setter
 public class OrderItem {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,16 +20,4 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
-    public Long getId() { return id; }
-    public String getProductName() { return productName; }
-    public Integer getQuantity() { return quantity; }
-    public Double getPrice() { return price; }
-    public Order getOrder() { return order; }
-public Product getProduct() { return product; }
-public void setProduct(Product product) { this.product = product; }
-    public void setId(Long id) { this.id = id; }
-    public void setProductName(String productName) { this.productName = productName; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-    public void setPrice(Double price) { this.price = price; }
-    public void setOrder(Order order) { this.order = order; }
 }

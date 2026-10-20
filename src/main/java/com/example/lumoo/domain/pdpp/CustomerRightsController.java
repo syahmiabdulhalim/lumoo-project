@@ -1,6 +1,5 @@
 package com.example.lumoo.domain.pdpp;
 import com.example.lumoo.shared.dto.ApiResponse;
-import com.example.lumoo.domain.pdpp.CustomerRightsService;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;

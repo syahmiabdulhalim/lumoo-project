@@ -8,6 +8,7 @@
 target/
 logs/
 scripts/
+!scripts/build-css.sh
 *.md
 *.log
 *.gz

@@ -1,6 +1,4 @@
 package com.example.lumoo.domain.product;
-import com.example.lumoo.domain.product.Product;
-import com.example.lumoo.domain.product.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

@@ -1,4 +1,7 @@
 package com.example.lumoo.domain.order;
+import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.infrastructure.security.EncryptedStringConverter;
 import jakarta.persistence.*;
@@ -13,6 +16,8 @@ import java.time.LocalDateTime;
     @Index(name = "idx_order_payout_transfer", columnList = "payoutTransferId"),
     @Index(name = "idx_order_created_at", columnList = "createdAt")
 })
+@Getter
+@Setter
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,7 +27,7 @@ public class Order {
     private String paymentMethod;
     private String trackingNumber;
     private LocalDateTime shippedAt;
-    private java.time.LocalDate estimatedDeliveryDate;
+    private LocalDate estimatedDeliveryDate;
     private String courierName;
     private Double shippingCost;
     @Column(length = 50)
@@ -65,78 +70,10 @@ private LocalDateTime createdAt;
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-    public String getTrackingNumber() { return trackingNumber; }
-    public void setTrackingNumber(String trackingNumber) { this.trackingNumber = trackingNumber; }
-    public LocalDateTime getShippedAt() { return shippedAt; }
-    public void setShippedAt(LocalDateTime shippedAt) { this.shippedAt = shippedAt; }
-    public String getCourierName() { return courierName; }
-    public void setCourierName(String courierName) { this.courierName = courierName; }
-    public String getPromoCode() { return promoCode; }
-    public void setPromoCode(String promoCode) { this.promoCode = promoCode; }
-    public double getDiscountAmount() { return discountAmount; }
-    public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
-    public Double getShippingCost() { return shippingCost; }
-    public void setShippingCost(Double shippingCost) { this.shippingCost = shippingCost; }
-    public String getShippingTrackingUrl() { return shippingTrackingUrl; }
-    public void setShippingTrackingUrl(String shippingTrackingUrl) { this.shippingTrackingUrl = shippingTrackingUrl; }
-    public Long getRiderId() { return riderId; }
-    public void setRiderId(Long riderId) { this.riderId = riderId; }
-    public String getRiderName() { return riderName; }
-    public void setRiderName(String riderName) { this.riderName = riderName; }
-    public String getRiderPhone() { return riderPhone; }
-    public void setRiderPhone(String riderPhone) { this.riderPhone = riderPhone; }
-    public String getDeliveryArea() { return deliveryArea; }
-    public void setDeliveryArea(String deliveryArea) { this.deliveryArea = deliveryArea; }
-    public java.time.LocalDate getEstimatedDeliveryDate() { return estimatedDeliveryDate; }
-    public void setEstimatedDeliveryDate(java.time.LocalDate estimatedDeliveryDate) { this.estimatedDeliveryDate = estimatedDeliveryDate; }
-    public String getReturnReason() { return returnReason; }
-    public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
-    public String getPaymentProofUrl() { return paymentProofUrl; }
-    public void setPaymentProofUrl(String paymentProofUrl) { this.paymentProofUrl = paymentProofUrl; }
-    public User getUser() { return user; } 
-    public void setUser(User user) { this.user = user; }
-    public double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(double totalAmount) { this.totalAmount = totalAmount; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public LocalDateTime getOrderDate() { return orderDate; }
-    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
-    public List<OrderItem> getItems() { return items; }
-    public void setItems(List<OrderItem> items) { this.items = items; }
-    public double getAdminCommission() { return adminCommission; }
-    public void setAdminCommission(double adminCommission) { this.adminCommission = adminCommission; }
-    public double getVendorEarnings() { return vendorEarnings; }
-    public void setVendorEarnings(double vendorEarnings) { this.vendorEarnings = vendorEarnings; }
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    public String getModempayPaymentId() { return modempayPaymentId; }
-    public void setModempayPaymentId(String modempayPaymentId) { this.modempayPaymentId = modempayPaymentId; }
-    public String getPayoutStatus() { return payoutStatus; }
-    public void setPayoutStatus(String payoutStatus) { this.payoutStatus = payoutStatus; }
-    public String getPayoutTransferId() { return payoutTransferId; }
-    public void setPayoutTransferId(String payoutTransferId) { this.payoutTransferId = payoutTransferId; }
-    public LocalDateTime getDeliveredAt() { return deliveredAt; }
-    public void setDeliveredAt(LocalDateTime deliveredAt) { this.deliveredAt = deliveredAt; }
-    public boolean isPrivacyAccepted() { return privacyAccepted; }
-    public void setPrivacyAccepted(boolean privacyAccepted) { this.privacyAccepted = privacyAccepted; }
-    public boolean isTermsAccepted() { return termsAccepted; }
-    public void setTermsAccepted(boolean termsAccepted) { this.termsAccepted = termsAccepted; }
-    public boolean isMarketingConsent() { return marketingConsent; }
-    public void setMarketingConsent(boolean marketingConsent) { this.marketingConsent = marketingConsent; }
-    public LocalDateTime getConsentTimestamp() { return consentTimestamp; }
-    public void setConsentTimestamp(LocalDateTime consentTimestamp) { this.consentTimestamp = consentTimestamp; }
-    public String getConsentIp() { return consentIp; }
-    public void setConsentIp(String consentIp) { this.consentIp = consentIp; }
 }

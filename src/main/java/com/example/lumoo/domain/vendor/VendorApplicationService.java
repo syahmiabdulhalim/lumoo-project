@@ -1,11 +1,10 @@
 package com.example.lumoo.domain.vendor;
+import java.util.Optional;
 import com.example.lumoo.domain.user.Notification;
 import com.example.lumoo.domain.user.Role;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.vendor.VendorApplication;
 import com.example.lumoo.domain.user.NotificationRepository;
 import com.example.lumoo.domain.user.UserRepository;
-import com.example.lumoo.domain.vendor.VendorApplicationRepository;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class VendorApplicationService {
     @Autowired private UserRepository userRepository;
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private EmailService emailService;
-    public java.util.Optional<VendorApplication> findById(Long id) {
+    public Optional<VendorApplication> findById(Long id) {
         return applicationRepository.findById(id);
     }
     public List<VendorApplication> getByUser(User user) {

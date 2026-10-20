@@ -1,23 +1,18 @@
 package com.example.lumoo.domain.admin;
+import com.example.lumoo.domain.order.OrderReportRepository;
+import com.example.lumoo.domain.pdpp.AuditLogRepository;
+import java.time.LocalDate;
+import java.util.Map;
+import org.springframework.data.domain.PageRequest;
 import com.example.lumoo.domain.order.Order;
-import com.example.lumoo.domain.admin.SiteSettings;
 import com.example.lumoo.domain.vendor.VendorApplication;
 import com.example.lumoo.domain.product.ProductService;
-import com.example.lumoo.domain.product.ReviewService;
 import com.example.lumoo.domain.order.OrderService;
-import com.example.lumoo.domain.order.CartService;
-import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.user.UserService;
-import com.example.lumoo.domain.user.CustomUserDetailsService;
 import com.example.lumoo.domain.vendor.VendorApplicationService;
-import com.example.lumoo.domain.blog.BlogService;
-import com.example.lumoo.domain.admin.SiteSettingsService;
 import com.example.lumoo.domain.inquiry.InquiryService;
 import com.example.lumoo.domain.subscriber.SubscriberService;
 import com.example.lumoo.domain.pdpp.AuditService;
-import com.example.lumoo.domain.pdpp.CustomerRightsService;
-import com.example.lumoo.domain.pdpp.DataBreachService;
-import com.example.lumoo.domain.pdpp.DataRetentionService;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.domain.pdpp.AuditService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +23,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.List;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -41,13 +35,13 @@ public class AdminController {
     @Autowired private SiteSettingsService siteSettingsService;
     @Autowired private SubscriberService subscriberService;
     @Autowired private AuditService auditService;
-    @Autowired private com.example.lumoo.domain.pdpp.AuditLogRepository auditLogRepository;
-    @Autowired private com.example.lumoo.infrastructure.email.EmailService emailService;
-    @Autowired private com.example.lumoo.domain.order.OrderReportRepository orderReportRepository;
+    @Autowired private AuditLogRepository auditLogRepository;
+    @Autowired private EmailService emailService;
+    @Autowired private OrderReportRepository orderReportRepository;
     @GetMapping("/audit-logs")
     public String auditLogs(@RequestParam(defaultValue = "0") int page, Model model) {
         var logsPage = auditLogRepository.findAllByOrderByCreatedAtDesc(
-                org.springframework.data.domain.PageRequest.of(page, 50));
+                PageRequest.of(page, 50));
         model.addAttribute("logs", logsPage.getContent());
         model.addAttribute("currentPage", logsPage.getNumber());
         model.addAttribute("totalPages", logsPage.getTotalPages());
@@ -187,12 +181,12 @@ public class AdminController {
                                     @RequestParam(required = false) String trackingNumber,
                                     @RequestParam(required = false) String estimatedDeliveryDate,
                                     HttpServletRequest req) {
-        java.time.LocalDate eta = null;
+        LocalDate eta = null;
         if (estimatedDeliveryDate != null && !estimatedDeliveryDate.isBlank()) {
-            try { eta = java.time.LocalDate.parse(estimatedDeliveryDate); } catch (Exception ignored) {}
+            try { eta = LocalDate.parse(estimatedDeliveryDate); } catch (Exception ignored) {}
         }
         orderService.updateStatus(orderId, status, trackingNumber, eta);
-        auditService.log("ORDER_STATUS_UPDATED", "Order", String.valueOf(orderId), null, java.util.Map.of("status", status), req);
+        auditService.log("ORDER_STATUS_UPDATED", "Order", String.valueOf(orderId), null, Map.of("status", status), req);
         log.info("[Admin] Order #{} status set to {} by {}", orderId, status, req.getUserPrincipal() != null ? req.getUserPrincipal().getName() : "?");
         return "redirect:/admin/dashboard#orders";
     }

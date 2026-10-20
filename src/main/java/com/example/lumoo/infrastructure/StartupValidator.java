@@ -1,4 +1,5 @@
 package com.example.lumoo.infrastructure;
+import java.util.Base64;
 
 import com.example.lumoo.domain.user.UserRepository;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public class StartupValidator implements ApplicationRunner {
 
     static boolean isValidAesKey(String base64) {
         try {
-            return java.util.Base64.getDecoder().decode(base64.trim()).length == 32;
+            return Base64.getDecoder().decode(base64.trim()).length == 32;
         } catch (IllegalArgumentException e) {
             return false;
         }

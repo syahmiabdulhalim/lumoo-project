@@ -1,9 +1,9 @@
 package com.example.lumoo.domain.user;
-import com.example.lumoo.domain.user.Notification;
-import com.example.lumoo.domain.user.Role;
-import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.NotificationRepository;
-import com.example.lumoo.domain.user.UserRepository;
+import com.example.lumoo.infrastructure.email.EmailService;
+import com.example.lumoo.infrastructure.email.EmailTemplates;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +35,7 @@ public class UserService {
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private SessionRevoker sessionRevoker;
     @Autowired private NotificationRepository notificationRepository;
-    @Autowired private com.example.lumoo.infrastructure.email.EmailService emailService;
+    @Autowired private EmailService emailService;
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -49,10 +49,10 @@ public class UserService {
         return userRepository.findAll();
     }
     public long countAll() { return userRepository.count(); }
-    public org.springframework.data.domain.Page<User> getPage(int page, int size) {
+    public Page<User> getPage(int page, int size) {
         return userRepository.findAll(
-            org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("id").descending()));
+            PageRequest.of(page, size,
+                Sort.by("id").descending()));
     }
     public void save(User user) {
         userRepository.save(user);
@@ -76,7 +76,7 @@ public class UserService {
         userRepository.save(user);
         String link = baseUrl + "/verify-email?token=" + token;
         emailService.sendEmail(email, "Verify your LUMOO account",
-            com.example.lumoo.infrastructure.email.EmailTemplates.emailVerification(email.split("@")[0], link));
+            EmailTemplates.emailVerification(email.split("@")[0], link));
         return true;
     }
     public boolean verifyEmail(String token) {
@@ -96,7 +96,7 @@ public class UserService {
             userRepository.save(user);
             String link = baseUrl + "/verify-email?token=" + token;
             emailService.sendEmail(email, "Verify your LUMOO account",
-                com.example.lumoo.infrastructure.email.EmailTemplates.emailVerification(email.split("@")[0], link));
+                EmailTemplates.emailVerification(email.split("@")[0], link));
         });
     }
     public void updateProfile(User user, String fullName, String phone, String address) {

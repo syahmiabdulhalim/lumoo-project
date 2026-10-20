@@ -1,11 +1,12 @@
 package com.example.lumoo.domain.payment;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Locale;
 import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
-import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.domain.order.OrderRepository;
-import com.example.lumoo.domain.payment.WebhookEventRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class ModemPayService {
     /** Statuses where a successful charge can't be applied automatically and an admin must act. */
     private static final Set<String> CLOSED_STATUSES = Set.of("CANCELLED", "PAYMENT_FAILED", "PAYMENT_EXPIRED");
     private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(java.time.Duration.ofSeconds(10))
+            .connectTimeout(Duration.ofSeconds(10))
             .build();
     public boolean isConfigured() {
         return !apiKey.isBlank() && !webhookSecret.isBlank();
@@ -137,13 +138,13 @@ public class ModemPayService {
         if (webhookSecret.isBlank() || receivedSignature == null) return false;
         try {
             Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(new SecretKeySpec(webhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8), "HmacSHA512"));
-            byte[] computed = mac.doFinal(rawPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            mac.init(new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+            byte[] computed = mac.doFinal(rawPayload.getBytes(StandardCharsets.UTF_8));
             String computedHex = HexFormat.of().formatHex(computed);
             // constant-time comparison so the signature can't be guessed byte by byte
             return MessageDigest.isEqual(
-                    computedHex.getBytes(java.nio.charset.StandardCharsets.US_ASCII),
-                    receivedSignature.trim().toLowerCase(java.util.Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+                    computedHex.getBytes(StandardCharsets.US_ASCII),
+                    receivedSignature.trim().toLowerCase(Locale.ROOT).getBytes(StandardCharsets.US_ASCII));
         } catch (Exception e) {
             log.error("[ModemPay] Signature verification failed", e);
             return false;

@@ -2,24 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>LUMOO | About Us</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/lumoo.css">
+    <th:block th:replace="~{fragments/layout :: assets}"/>
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-sans">
 
-<div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-    <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
-    <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
-</div>
+<div th:replace="~{fragments/layout :: topbar}"></div>
 
-<nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
-    <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
-    <div class="space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-        <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
-        <a href="/careers" class="hover:text-[#4d78c0] transition">Careers</a>
-        <a href="/partnerships" class="hover:text-[#4d78c0] transition">Partnerships</a>
-    </div>
-</nav>
+<nav th:replace="~{fragments/layout :: navbar('')}"></nav>
 
 <main>
 

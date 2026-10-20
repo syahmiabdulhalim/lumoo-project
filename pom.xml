@@ -27,6 +27,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<tailwind.skip>false</tailwind.skip>
 		<!-- Pin Tomcat and Netty to patch releases that address 2026 CVEs -->
 		<tomcat.version>10.1.55</tomcat.version>
 		<netty.version>4.1.133.Final</netty.version>
@@ -130,15 +131,28 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.8</version>
-        </dependency>
     </dependencies>
 
 	<build>
 		<plugins>
+			<!-- Builds static/css/tailwind.css from the templates (scripts/build-css.sh). -Dtailwind.skip to skip. -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>build-tailwind-css</id>
+						<phase>generate-resources</phase>
+						<goals><goal>exec</goal></goals>
+						<configuration>
+							<executable>bash</executable>
+							<arguments><argument>${project.basedir}/scripts/build-css.sh</argument></arguments>
+							<skip>${tailwind.skip}</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

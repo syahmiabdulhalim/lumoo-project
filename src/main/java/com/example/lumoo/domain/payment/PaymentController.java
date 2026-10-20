@@ -1,7 +1,7 @@
 package com.example.lumoo.domain.payment;
+import java.util.List;
 import com.example.lumoo.shared.dto.ApiResponse;
 import com.example.lumoo.domain.order.Order;
-import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.order.OrderService;
 import com.example.lumoo.domain.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +35,7 @@ public class PaymentController {
         if (!"AWAITING_PAYMENT".equals(order.getStatus()) && !"AWAITING_PROOF".equals(order.getStatus()))
             return ResponseEntity.badRequest().body(ApiResponse.error("Order is not awaiting payment."));
         try {
-            String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));
+            String paymentUrl = modemPayService.createPaymentIntent(List.of(order));
             return ResponseEntity.ok(ApiResponse.ok("Payment initiated.", paymentUrl));
         } catch (Exception e) {
             log.error("[Payment] Failed to create intent for order {}", orderId, e);

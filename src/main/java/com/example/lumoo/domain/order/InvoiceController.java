@@ -1,7 +1,5 @@
 package com.example.lumoo.domain.order;
-import com.example.lumoo.domain.order.Order;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.order.OrderRepository;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import jakarta.servlet.http.HttpServletResponse;

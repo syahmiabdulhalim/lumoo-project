@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--/* Shared page components. Change site-wide chrome here, not in individual pages. */-->
+<body>
+
+<!--/* Inside <head>: <th:block th:replace="~{fragments/layout :: assets}"/>.
+     tailwind.css is generated at build time by scripts/build-css.sh (run it with watch while editing templates). */-->
+<th:block th:fragment="assets">
+    <link rel="stylesheet" th:href="@{/css/tailwind.css}">
+    <link rel="stylesheet" href="/css/lumoo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</th:block>
+
+<div th:fragment="topbar" class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
+    <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
+    <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
+</div>
+
+<!--/* Public navbar. active: 'home' | 'stores' | 'blog' | '' — highlights that link. */-->
+<nav th:fragment="navbar(active)" class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-0 z-50">
+    <a href="/" class="transition hover:opacity-80">
+        <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
+    </a>
+    <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <a href="/" th:class="${active == 'home'} ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'hover:text-[#4d78c0] transition'">Home</a>
+        <a href="/stores" th:class="${active == 'stores'} ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'hover:text-[#4d78c0] transition'">Stores</a>
+        <a href="/blog" th:class="${active == 'blog'} ? 'text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1' : 'hover:text-[#4d78c0] transition'">Blog</a>
+        <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
+            <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
+            <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
+            <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
+            <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
+            <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
+            <div th:replace="~{fragments/bell :: bell}"></div>
+            <form th:action="@{/logout}" method="post" class="inline">
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
+            </form>
+        </div>
+        <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
+            <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
+            <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
+        </div>
+    </div>
+</nav>
+
+<!--/* Admin page header. title / actions are markup fragments from the calling page (actions may be null). */-->
+<nav th:fragment="adminHeader(title, actions)" class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-6">
+        <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
+        <span class="text-slate-600">|</span>
+        <th:block th:replace="${title}"/>
+    </div>
+    <div class="flex items-center gap-3">
+        <th:block th:replace="${actions} ?: ~{}"/>
+        <div th:replace="~{fragments/bell :: bell}"></div>
+    </div>
+</nav>
+
+<!--/* Admin flash toast for flashMsg / flashType ('green' | 'red' | other). */-->
+<th:block th:fragment="flash">
+    <div th:if="${flashMsg != null}" id="flash-toast"
+         class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest"
+         th:classappend="${flashType == 'green'} ? 'bg-green-600' : (${flashType == 'red'} ? 'bg-red-500' : 'bg-[#4d78c0]')">
+        <span th:text="${flashMsg}"></span>
+        <button onclick="document.getElementById('flash-toast').remove()" class="ml-2 opacity-70 hover:opacity-100">✕</button>
+    </div>
+    <script th:if="${flashMsg != null}">
+        setTimeout(() => { const t = document.getElementById('flash-toast'); if (t) { t.style.opacity='0'; setTimeout(()=>t.remove(),500); }}, 3000);
+    </script>
+</th:block>
+
+</body>
+</html>

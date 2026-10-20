@@ -1,20 +1,21 @@
 package com.example.lumoo.domain.user;
-import com.example.lumoo.domain.user.RegisterRequest;
-import com.example.lumoo.domain.user.UserService;
+import com.example.lumoo.infrastructure.security.PasswordPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 @Controller
 public class AuthController {
     @Autowired private UserService userService;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     @GetMapping("/login")
     public String loginPage() { return "login"; }
     @GetMapping("/register")
     public String registerPage() { return "register"; }
     @PostMapping("/register")
     public String processRegister(@ModelAttribute RegisterRequest req) {
-        if (!com.example.lumoo.infrastructure.security.PasswordPolicy.isAcceptable(req.password()))
+        if (!PasswordPolicy.isAcceptable(req.password()))
             return "redirect:/register?weak_password";
         try {
             boolean registered = userService.register(req.email(), req.password());

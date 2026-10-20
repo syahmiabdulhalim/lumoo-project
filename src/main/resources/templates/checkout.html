@@ -2,15 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>LUMOO | Checkout</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/lumoo.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <th:block th:replace="~{fragments/layout :: assets}"/>
 </head>
 <body class="bg-[#f9f9f9] font-['Nunito_Sans']">
-    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span>📞 <span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; ✉ <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
-        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
-    </div>
+    <div th:replace="~{fragments/layout :: topbar}"></div>
     <nav class="flex justify-between items-center px-12 py-5 bg-white shadow-sm">
         <a href="/"><img th:src="@{/images/logo.jpg}" alt="LUMOO" class="h-10 w-auto object-contain"></a>
         <div class="flex items-center gap-8 text-[10px] uppercase font-bold tracking-widest">

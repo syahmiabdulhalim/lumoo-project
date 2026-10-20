@@ -1,5 +1,4 @@
 package com.example.lumoo.domain.subscriber;
-import com.example.lumoo.domain.subscriber.Subscriber;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

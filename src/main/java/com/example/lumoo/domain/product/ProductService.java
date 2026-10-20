@@ -1,14 +1,13 @@
 package com.example.lumoo.domain.product;
-import com.example.lumoo.domain.product.Product;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import com.example.lumoo.domain.user.User;
 import com.example.lumoo.domain.user.NotificationRepository;
 import com.example.lumoo.domain.user.Notification;
-import com.example.lumoo.domain.product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -32,10 +31,10 @@ public class ProductService {
     public List<Product> getAll() {
         return productRepository.findAllWithVendor();
     }
-    public org.springframework.data.domain.Page<Product> getAllPage(int page, int size) {
+    public Page<Product> getAllPage(int page, int size) {
         return productRepository.findAll(
-            org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("id").descending()));
+            PageRequest.of(page, size,
+                Sort.by("id").descending()));
     }
     @Cacheable(value = "products", key = "'all-approved'")
     public List<Product> getAllApprovedList() {
@@ -54,9 +53,6 @@ public class ProductService {
         } catch (Exception ignored) {
         }
         return productRepository.findByApprovedTrueAndNameContainingIgnoreCasePaged(keyword, pageable);
-    }
-    public List<Product> searchByName(String keyword) {
-        return productRepository.findByNameContainingIgnoreCase(keyword);
     }
     public List<Product> getByCategory(String category) {
         return productRepository.findByCategory(category);

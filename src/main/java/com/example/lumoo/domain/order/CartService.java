@@ -1,8 +1,6 @@
 package com.example.lumoo.domain.order;
-import com.example.lumoo.domain.order.CartItem;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.order.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

@@ -1,6 +1,4 @@
 package com.example.lumoo.domain.user;
-import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.UserRepository;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.security.PasswordPolicy;
 import com.example.lumoo.infrastructure.security.SessionRevoker;

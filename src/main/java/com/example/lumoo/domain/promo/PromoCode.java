@@ -1,4 +1,6 @@
 package com.example.lumoo.domain.promo;
+import lombok.Getter;
+import lombok.Setter;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -7,6 +9,8 @@ import java.time.LocalDateTime;
 @Table(name = "promo_codes", indexes = {
     @Index(name = "idx_promo_code", columnList = "code", unique = true)
 })
+@Getter
+@Setter
 public class PromoCode {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,23 +54,5 @@ public class PromoCode {
         return Math.round((orderTotal - apply(orderTotal)) * 100.0) / 100.0;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getCode() { return code; }
     public void setCode(String code) { this.code = code != null ? code.toUpperCase().trim() : null; }
-    public DiscountType getDiscountType() { return discountType; }
-    public void setDiscountType(DiscountType discountType) { this.discountType = discountType; }
-    public double getDiscountValue() { return discountValue; }
-    public void setDiscountValue(double discountValue) { this.discountValue = discountValue; }
-    public double getMinimumOrder() { return minimumOrder; }
-    public void setMinimumOrder(double minimumOrder) { this.minimumOrder = minimumOrder; }
-    public Integer getUsageLimit() { return usageLimit; }
-    public void setUsageLimit(Integer usageLimit) { this.usageLimit = usageLimit; }
-    public int getUsedCount() { return usedCount; }
-    public void setUsedCount(int usedCount) { this.usedCount = usedCount; }
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
-    public LocalDateTime getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
 }

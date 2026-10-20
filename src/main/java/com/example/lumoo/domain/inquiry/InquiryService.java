@@ -1,7 +1,5 @@
 package com.example.lumoo.domain.inquiry;
-import com.example.lumoo.domain.inquiry.Inquiry;
 import com.example.lumoo.domain.product.Product;
-import com.example.lumoo.domain.inquiry.InquiryRepository;
 import com.example.lumoo.domain.product.ProductRepository;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;

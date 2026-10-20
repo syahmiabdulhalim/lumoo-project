@@ -1,4 +1,5 @@
 package com.example.lumoo.infrastructure.security;
+import java.nio.charset.StandardCharsets;
 
 /** Server-side password rule shared by register, reset and change-password. */
 public final class PasswordPolicy {
@@ -14,6 +15,6 @@ public final class PasswordPolicy {
         return password != null
                 && !password.isBlank()
                 && password.length() >= MIN_LENGTH
-                && password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= MAX_BYTES;
+                && password.getBytes(StandardCharsets.UTF_8).length <= MAX_BYTES;
     }
 }

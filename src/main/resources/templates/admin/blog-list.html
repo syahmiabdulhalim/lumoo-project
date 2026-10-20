@@ -2,25 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>LUMOO Admin | Blog Posts</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/lumoo.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <th:block th:replace="~{fragments/layout :: assets}"/>
 </head>
 <body class="bg-slate-50 text-slate-900 font-['Nunito_Sans']">
-    <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-6">
-            <a href="/admin/dashboard" class="text-slate-400 hover:text-white transition text-xs font-bold uppercase tracking-widest">← Dashboard</a>
-            <span class="text-slate-600">|</span>
-            <span class="text-sm font-bold">Blog Management</span>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="/admin/blog/new"
+    <nav th:replace="~{fragments/layout :: adminHeader(~{::.hdr-title}, ~{::.hdr-actions})}"><span class="hdr-title text-sm font-bold">Blog Management</span><div class="hdr-actions contents"><a href="/admin/blog/new"
                class="bg-[#4d78c0] hover:bg-[#3d68b0] text-white px-5 py-2 text-xs font-bold uppercase tracking-widest transition rounded-lg">
                 + New Post
-            </a>
-            <div th:replace="~{fragments/bell :: bell}"></div>
-        </div>
-    </nav>
+            </a></div></nav>
     <main class="max-w-6xl mx-auto px-6 py-12">
         <div th:if="${flashMsg != null}" id="flash-toast"
              class="fixed top-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-lg shadow-lg text-white text-xs font-bold uppercase tracking-widest transition-all duration-500"

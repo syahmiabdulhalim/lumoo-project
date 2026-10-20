@@ -1,6 +1,5 @@
 package com.example.lumoo.domain.pdpp;
 import com.example.lumoo.domain.order.Order;
-import com.example.lumoo.domain.pdpp.AuditLogRepository;
 import com.example.lumoo.domain.order.OrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

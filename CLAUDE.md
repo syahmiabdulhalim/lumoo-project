@@ -7,6 +7,9 @@ Redis cache (prod), ModemPay payments (GMD), Resend email. Single DigitalOcean d
 - Build + all tests (what CI runs): `./mvnw -B verify`
 - One test class while working: `./mvnw -q -o test -Dtest=OrderServiceTest` (use `-o` once deps are cached)
 - Migrations against real MySQL (needs Docker): `./scripts/verify-mysql-migrations.sh`
+- CSS: Tailwind v3 is compiled at build time (no CDN) into `static/css/tailwind.css` (gitignored) by
+  `./scripts/build-css.sh`; Maven runs it in `generate-resources`. Use `./scripts/build-css.sh --watch` while
+  editing templates. Never build class names dynamically (`'bg-' + color`) — the scanner can't see them.
 - Tests need no MySQL/Redis: `src/test/resources/application.properties` = H2 (MySQL mode) + Flyway + `ddl-auto=validate`.
 
 ## Layout (`src/main/java/com/example/lumoo/`)

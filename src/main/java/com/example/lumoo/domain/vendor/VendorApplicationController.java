@@ -1,9 +1,7 @@
 package com.example.lumoo.domain.vendor;
 import com.example.lumoo.domain.user.Role;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.vendor.VendorApplication;
 import com.example.lumoo.domain.user.UserService;
-import com.example.lumoo.domain.vendor.VendorApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

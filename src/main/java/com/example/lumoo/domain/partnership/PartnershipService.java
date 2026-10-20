@@ -44,7 +44,4 @@ public class PartnershipService {
             repo.save(app);
         });
     }
-    public long countNew() {
-        return repo.countByStatus(PartnershipApplication.Status.NEW);
-    }
 }

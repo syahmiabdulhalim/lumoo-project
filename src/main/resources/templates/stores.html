@@ -2,39 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>LUMOO | Browse Stores</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/lumoo.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <th:block th:replace="~{fragments/layout :: assets}"/>
 </head>
 <body class="bg-[#f9f9f9] text-gray-900 font-['Nunito_Sans']">
-    <div class="bg-[#1a2336] text-white text-[9px] uppercase tracking-[0.2em] font-bold px-12 py-2 flex justify-between items-center">
-        <span><span th:text="${siteSettings?.businessPhone ?: '+220 XXX XXXX'}"></span> &nbsp;|&nbsp; <span th:text="${siteSettings?.businessEmail ?: 'info@lumoo.gm'}"></span></span>
-        <span>Mon–Fri 8am–6pm | Sat 9am–3pm</span>
-    </div>
-    <nav class="flex justify-between items-center px-12 py-6 bg-white shadow-sm sticky top-8 z-50">
-        <a href="/" class="transition hover:opacity-80">
-            <img th:src="@{/images/logo.jpg}" alt="LUMOO Logo" class="h-14 w-auto object-contain">
-        </a>
-        <div class="flex items-center space-x-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-            <a href="/" class="hover:text-[#4d78c0] transition">Home</a>
-            <a href="/stores" class="text-[#4d78c0] border-b-2 border-[#4d78c0] pb-1">Stores</a>
-            <div sec:authorize="isAuthenticated()" class="flex items-center space-x-8">
-                <a href="/cart" class="hover:text-[#4d78c0] transition">Cart</a>
-                <a sec:authorize="hasRole('ADMIN')" href="/admin/dashboard" class="text-red-600">Admin Panel</a>
-                <a sec:authorize="hasRole('VENDOR')" href="/vendor/dashboard">Vendor Hub</a>
-                <a sec:authorize="hasRole('USER')" href="/buyer/dashboard">My Orders</a>
-                <a href="/profile" class="hover:text-[#4d78c0] transition">Profile</a>
-                <form th:action="@{/logout}" method="post" class="inline">
-                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                    <button type="submit" class="text-gray-400 hover:text-red-600 font-bold uppercase">Logout</button>
-                </form>
-            </div>
-            <div sec:authorize="isAnonymous()" class="flex items-center space-x-8">
-                <a href="/login" class="hover:text-[#4d78c0] transition">Login</a>
-                <a href="/register" class="bg-[#1a2336] text-white px-4 py-2 hover:bg-gray-800 transition">Join Us</a>
-            </div>
-        </div>
-    </nav>
+    <div th:replace="~{fragments/layout :: topbar}"></div>
+    <nav th:replace="~{fragments/layout :: navbar('stores')}"></nav>
     <div class="bg-[#1a2336] text-white px-12 py-24 relative overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
         <div class="relative max-w-7xl mx-auto">

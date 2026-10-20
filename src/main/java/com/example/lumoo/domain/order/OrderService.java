@@ -1,44 +1,19 @@
 package com.example.lumoo.domain.order;
-import com.example.lumoo.domain.product.Product;
+import com.example.lumoo.domain.promo.PromoService;
+import com.example.lumoo.domain.shipping.ShippingRateRepository;
+import com.example.lumoo.domain.user.UserService;
+import java.time.LocalDate;
+import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import com.example.lumoo.domain.product.ProductService;
-import com.example.lumoo.domain.product.Review;
-import com.example.lumoo.domain.order.Order;
-import com.example.lumoo.domain.order.OrderItem;
-import com.example.lumoo.domain.order.CartItem;
 import com.example.lumoo.domain.payment.PayoutService;
 import com.example.lumoo.domain.shipping.ShippingService;
-import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.infrastructure.email.EmailService;
 import com.example.lumoo.infrastructure.email.EmailTemplates;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.Role;
-import com.example.lumoo.domain.user.Notification;
-import com.example.lumoo.domain.vendor.VendorApplication;
-import com.example.lumoo.domain.blog.BlogPost;
-import com.example.lumoo.domain.admin.SiteSettings;
-import com.example.lumoo.domain.inquiry.Inquiry;
-import com.example.lumoo.domain.subscriber.Subscriber;
-import com.example.lumoo.domain.pdpp.AuditLog;
-import com.example.lumoo.domain.pdpp.ErasureRequest;
-import com.example.lumoo.domain.pdpp.DataAccessRequest;
-import com.example.lumoo.domain.pdpp.BreachIncident;
-import com.example.lumoo.domain.product.ProductRepository;
-import com.example.lumoo.domain.product.ReviewRepository;
-import com.example.lumoo.domain.order.OrderRepository;
-import com.example.lumoo.domain.order.OrderItemRepository;
-import com.example.lumoo.domain.order.CartRepository;
-import com.example.lumoo.domain.payment.WebhookEventRepository;
-import com.example.lumoo.domain.user.UserRepository;
-import com.example.lumoo.domain.user.NotificationRepository;
-import com.example.lumoo.domain.vendor.VendorApplicationRepository;
-import com.example.lumoo.domain.blog.BlogPostRepository;
-import com.example.lumoo.domain.admin.SiteSettingsRepository;
-import com.example.lumoo.domain.inquiry.InquiryRepository;
-import com.example.lumoo.domain.subscriber.SubscriberRepository;
-import com.example.lumoo.domain.pdpp.AuditLogRepository;
-import com.example.lumoo.domain.pdpp.ErasureRequestRepository;
-import com.example.lumoo.domain.pdpp.DataAccessRequestRepository;
-import com.example.lumoo.domain.pdpp.BreachIncidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,23 +31,23 @@ public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired private OrderRepository orderRepository;
-    @Autowired private com.example.lumoo.domain.shipping.ShippingRateRepository shippingRateRepository;
+    @Autowired private ShippingRateRepository shippingRateRepository;
     @Autowired private OrderItemRepository orderItemRepository;
     @Autowired private CartRepository cartRepository;
     @Autowired private PayoutService payoutService;
     @Autowired private ProductService productService;
-    @Autowired private com.example.lumoo.domain.promo.PromoService promoService;
+    @Autowired private PromoService promoService;
     @Autowired private EmailService emailService;
-    @Autowired private com.example.lumoo.domain.user.UserService userService;
-    @org.springframework.beans.factory.annotation.Value("${app.base-url:http://localhost:8080}")
+    @Autowired private UserService userService;
+    @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
     public List<Order> getUserOrders(User user) {
         return orderRepository.findByUserWithItems(user);
     }
-    public org.springframework.data.domain.Page<Order> getUserOrdersPage(User user, int page, int size) {
+    public Page<Order> getUserOrdersPage(User user, int page, int size) {
         return orderRepository.findByUserPaged(user,
-            org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("orderDate").descending()));
+            PageRequest.of(page, size,
+                Sort.by("orderDate").descending()));
     }
     public List<Order> getVendorOrders(Long vendorId) {
         return orderRepository.findVendorOrdersWithItems(vendorId);
@@ -81,24 +56,24 @@ public class OrderService {
         return orderRepository.findAll();
     }
     public long countAll() { return orderRepository.count(); }
-    public org.springframework.data.domain.Page<Order> getPage(int page, int size) {
+    public Page<Order> getPage(int page, int size) {
         return orderRepository.findAll(
-            org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("createdAt").descending()));
+            PageRequest.of(page, size,
+                Sort.by("createdAt").descending()));
     }
     public double sumTotalRevenue() { return orderRepository.sumTotalRevenue(); }
     public double sumTotalCommission() { return orderRepository.sumTotalCommission(); }
     public double sumVendorRevenue(Long vendorId) { return orderRepository.sumVendorRevenue(vendorId); }
     public double sumVendorMonthlySales(Long vendorId) { return orderRepository.sumVendorMonthlySales(vendorId); }
     public long countVendorOrders(Long vendorId) { return orderRepository.countVendorOrders(vendorId); }
-    public org.springframework.data.domain.Page<Order> getVendorOrdersPage(Long vendorId, int page, int size) {
+    public Page<Order> getVendorOrdersPage(Long vendorId, int page, int size) {
         return orderRepository.findVendorOrdersPaged(vendorId,
-            org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("createdAt").descending()));
+            PageRequest.of(page, size,
+                Sort.by("createdAt").descending()));
     }
-    public org.springframework.data.domain.Page<Order> getVendorOrdersPageFiltered(Long vendorId, String status, int page, int size) {
-        var pageable = org.springframework.data.domain.PageRequest.of(page, size,
-                org.springframework.data.domain.Sort.by("createdAt").descending());
+    public Page<Order> getVendorOrdersPageFiltered(Long vendorId, String status, int page, int size) {
+        var pageable = PageRequest.of(page, size,
+                Sort.by("createdAt").descending());
         if (status == null || status.isBlank() || "ALL".equals(status))
             return orderRepository.findVendorOrdersPaged(vendorId, pageable);
         return orderRepository.findVendorOrdersPagedByStatus(vendorId, status, pageable);
@@ -184,7 +159,7 @@ public class OrderService {
      */
     static double[] split(double amount, double[] weights) {
         double[] shares = new double[weights.length];
-        double totalWeight = java.util.Arrays.stream(weights).sum();
+        double totalWeight = Arrays.stream(weights).sum();
         if (amount <= 0 || weights.length == 0 || totalWeight <= 0) return shares;
         double allocated = 0;
         for (int i = 0; i < shares.length - 1; i++) {
@@ -378,7 +353,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateStatus(Long orderId, String status, String trackingNumber, java.time.LocalDate estimatedDelivery) {
+    public void updateStatus(Long orderId, String status, String trackingNumber, LocalDate estimatedDelivery) {
         orderRepository.findByIdWithItems(orderId).ifPresent(o -> {
             if ("CANCELLED".equals(status) && STOCK_RESERVED.contains(o.getStatus())) returnStockForOrder(o);
             o.setStatus(status);

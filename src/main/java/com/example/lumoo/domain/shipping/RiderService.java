@@ -1,4 +1,5 @@
 package com.example.lumoo.domain.shipping;
+import org.springframework.data.domain.Sort;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ public class RiderService {
     @Autowired private RiderRepository repo;
 
     public List<Rider> getAll() {
-        return repo.findAll(org.springframework.data.domain.Sort.by("name"));
+        return repo.findAll(Sort.by("name"));
     }
 
     public List<Rider> getActive() {

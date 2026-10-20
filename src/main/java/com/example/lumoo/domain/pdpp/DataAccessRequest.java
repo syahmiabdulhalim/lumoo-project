@@ -1,10 +1,14 @@
 package com.example.lumoo.domain.pdpp;
+import lombok.Getter;
+import lombok.Setter;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "data_access_requests", indexes = {
     @Index(name = "idx_dar_email", columnList = "email")
 })
+@Getter
+@Setter
 public class DataAccessRequest {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,12 +20,4 @@ public class DataAccessRequest {
     private String referenceId;
     @PrePersist
     protected void onCreate() { this.requestedAt = LocalDateTime.now(); }
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public LocalDateTime getRequestedAt() { return requestedAt; }
-    public LocalDateTime getFulfilledAt() { return fulfilledAt; }
-    public void setFulfilledAt(LocalDateTime fulfilledAt) { this.fulfilledAt = fulfilledAt; }
-    public String getReferenceId() { return referenceId; }
-    public void setReferenceId(String referenceId) { this.referenceId = referenceId; }
 }

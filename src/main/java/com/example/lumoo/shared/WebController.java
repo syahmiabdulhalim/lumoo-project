@@ -1,39 +1,19 @@
 package com.example.lumoo.shared;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import com.example.lumoo.domain.product.Product;
 import com.example.lumoo.domain.product.Review;
 import com.example.lumoo.domain.order.Order;
-import com.example.lumoo.domain.order.OrderItem;
-import com.example.lumoo.domain.order.CartItem;
-import com.example.lumoo.domain.payment.WebhookEvent;
 import com.example.lumoo.domain.user.User;
-import com.example.lumoo.domain.user.Role;
-import com.example.lumoo.domain.user.Notification;
-import com.example.lumoo.domain.vendor.VendorApplication;
-import com.example.lumoo.domain.blog.BlogPost;
-import com.example.lumoo.domain.admin.SiteSettings;
-import com.example.lumoo.domain.inquiry.Inquiry;
-import com.example.lumoo.domain.subscriber.Subscriber;
-import com.example.lumoo.domain.pdpp.AuditLog;
-import com.example.lumoo.domain.pdpp.ErasureRequest;
-import com.example.lumoo.domain.pdpp.DataAccessRequest;
-import com.example.lumoo.domain.pdpp.BreachIncident;
 import com.example.lumoo.domain.product.ProductService;
 import com.example.lumoo.domain.product.ReviewService;
 import com.example.lumoo.domain.order.OrderService;
-import com.example.lumoo.domain.order.CartService;
 import com.example.lumoo.domain.payment.ModemPayService;
 import com.example.lumoo.domain.user.UserService;
-import com.example.lumoo.domain.user.CustomUserDetailsService;
 import com.example.lumoo.domain.vendor.VendorApplicationService;
 import com.example.lumoo.domain.blog.BlogService;
 import com.example.lumoo.domain.admin.SiteSettingsService;
-import com.example.lumoo.domain.inquiry.InquiryService;
 import com.example.lumoo.domain.subscriber.SubscriberService;
-import com.example.lumoo.domain.pdpp.AuditService;
-import com.example.lumoo.domain.pdpp.CustomerRightsService;
-import com.example.lumoo.domain.pdpp.DataBreachService;
-import com.example.lumoo.domain.pdpp.DataRetentionService;
-import com.example.lumoo.infrastructure.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -48,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 @Controller
 public class WebController {
     @Autowired private ProductService productService;
@@ -215,12 +194,12 @@ public class WebController {
         if (!modemPayService.isConfigured())
             return "redirect:/buyer/dashboard?error=payment_unavailable";
         try {
-            String paymentUrl = modemPayService.createPaymentIntent(java.util.List.of(order));
+            String paymentUrl = modemPayService.createPaymentIntent(List.of(order));
             return "redirect:" + paymentUrl;
         } catch (IllegalArgumentException e) {
-            return "redirect:/buyer/dashboard?payment_error=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            return "redirect:/buyer/dashboard?payment_error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return "redirect:/buyer/dashboard?payment_error=" + java.net.URLEncoder.encode("Payment initiation failed. Please try again.", java.nio.charset.StandardCharsets.UTF_8);
+            return "redirect:/buyer/dashboard?payment_error=" + URLEncoder.encode("Payment initiation failed. Please try again.", StandardCharsets.UTF_8);
         }
     }
     @GetMapping("/buyer/order/{id}")

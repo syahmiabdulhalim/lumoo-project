@@ -1,4 +1,5 @@
 package com.example.lumoo.domain.pdpp;
+import java.util.Optional;
 import com.example.lumoo.infrastructure.email.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class DataBreachService {
     public List<BreachIncident> getAll() {
         return breachIncidentRepository.findAllByOrderByDetectedAtDesc();
     }
-    public java.util.Optional<BreachIncident> findById(Long id) {
+    public Optional<BreachIncident> findById(Long id) {
         return breachIncidentRepository.findById(id);
     }
     public boolean isRegulatorSendingEnabled() { return dpaEnabled; }

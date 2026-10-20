@@ -1,4 +1,8 @@
 package com.example.lumoo.shared.dto;
+import lombok.Getter;
+import lombok.Setter;
+@Getter
+@Setter
 public class ApiResponse<T> {
     private boolean success;
     private String message;
@@ -17,7 +21,4 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(String message) {
         return new ApiResponse<>(false, message, null);
     }
-    public boolean isSuccess() { return success; }
-    public String getMessage() { return message; }
-    public T getData() { return data; }
 }

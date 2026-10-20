@@ -1,4 +1,7 @@
 package com.example.lumoo.domain.blog;
+import com.example.lumoo.infrastructure.web.HtmlSanitizer;
+import lombok.Getter;
+import lombok.Setter;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 @Entity
@@ -6,6 +9,8 @@ import java.time.LocalDateTime;
     @Index(name = "idx_blog_published_at", columnList = "published,publishedAt"),
     @Index(name = "idx_blog_category", columnList = "category,published")
 })
+@Getter
+@Setter
 public class BlogPost {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,38 +36,8 @@ public class BlogPost {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getSlug() { return slug; }
-    public void setSlug(String slug) { this.slug = slug; }
-    public String getExcerpt() { return excerpt; }
-    public void setExcerpt(String excerpt) { this.excerpt = excerpt; }
-    public String getContent() { return content; }
     /** Sanitised HTML for th:utext; also covers posts saved before sanitising on save existed. */
-    public String getSafeContent() { return com.example.lumoo.infrastructure.web.HtmlSanitizer.sanitize(content); }
-    public void setContent(String content) { this.content = content; }
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
-    public String getTags() { return tags; }
-    public void setTags(String tags) { this.tags = tags; }
-    public String getFeaturedImageUrl() { return featuredImageUrl; }
-    public void setFeaturedImageUrl(String featuredImageUrl) { this.featuredImageUrl = featuredImageUrl; }
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
-    public boolean isPublished() { return published; }
-    public void setPublished(boolean published) { this.published = published; }
-    public LocalDateTime getPublishedAt() { return publishedAt; }
-    public void setPublishedAt(LocalDateTime publishedAt) { this.publishedAt = publishedAt; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public String getMetaTitle() { return metaTitle; }
-    public void setMetaTitle(String metaTitle) { this.metaTitle = metaTitle; }
-    public String getMetaDescription() { return metaDescription; }
-    public void setMetaDescription(String metaDescription) { this.metaDescription = metaDescription; }
-    public Integer getReadingTimeMinutes() { return readingTimeMinutes; }
-    public void setReadingTimeMinutes(Integer readingTimeMinutes) { this.readingTimeMinutes = readingTimeMinutes; }
+    public String getSafeContent() { return HtmlSanitizer.sanitize(content); }
     public String getEffectiveMetaTitle() {
         return (metaTitle != null && !metaTitle.isBlank()) ? metaTitle : title;
     }
