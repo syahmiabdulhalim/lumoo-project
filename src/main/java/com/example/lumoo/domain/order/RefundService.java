@@ -94,10 +94,50 @@ public class RefundService {
         return Optional.of(apply(o, all, true, reason, actor));
     }
 
-    /** ModemPay money for an order that is already closed: refund all of it (no-op if already refunded). */
+    /**
+     * ModemPay took money that won't buy anything: the charge was short (order marked PAYMENT_FAILED)
+     * or arrived after the order closed. One charge can cover several vendor orders, so the paid
+     * amount is split across all of them by order total and each order in refundIds gets its share.
+     * The vendor was never involved, so nothing is charged to them and no commission changes.
+     *
+     * @param paidAmount GMD actually charged; negative = unknown, then each order's total is assumed
+     */
     @Transactional
-    public Optional<Refund> refundLatePayment(Long orderId, String reason) {
-        return orderRepository.findByIdWithItems(orderId).flatMap(o -> createFull(o, reason, "system"));
+    public List<Refund> refundChargedPayment(List<Order> chargeOrders, long paidAmount, Set<Long> refundIds, String reason) {
+        double[] totals = chargeOrders.stream().mapToDouble(Order::getTotalAmount).toArray();
+        double[] shares = paidAmount >= 0 ? OrderService.split(paidAmount, totals) : totals;
+        List<Refund> created = new java.util.ArrayList<>();
+        for (int i = 0; i < chargeOrders.size(); i++) {
+            Order o = chargeOrders.get(i);
+            if (refundIds.contains(o.getId()))
+                refundPayment(o, shares[i], reason).ifPresent(created::add);
+        }
+        return created;
+    }
+
+    private Optional<Refund> refundPayment(Order o, double paid, String reason) {
+        // Webhook and polling can both report the same charge: an order is refunded for it only once.
+        if (!refundRepository.findByOrderId(o.getId()).isEmpty()) {
+            log.info("[Refund] Order #{} already has a refund — payment refund skipped", o.getId());
+            return Optional.empty();
+        }
+        double amount = Math.min(round2(paid), round2(o.getTotalAmount() - o.getRefundedAmount()));
+        if (amount <= 0) return Optional.empty();
+        Refund r = new Refund();
+        r.setOrder(o);
+        r.setVendor(resolveVendor(o));
+        r.setAmount(amount);
+        r.setItemsSummary("ModemPay payment");
+        r.setReason(truncate(reason, 255));
+        r.setCreatedBy("system");
+        r.setCreatedAt(LocalDateTime.now());
+        r.setDueBy(addBusinessDays(LocalDate.now(), REFUND_BUSINESS_DAYS));
+        o.setRefundedAmount(round2(o.getRefundedAmount() + amount));
+        orderRepository.save(o);
+        refundRepository.save(r);
+        log.warn("[Refund] Payment refund of GMD {} for order #{} — {}", amount, o.getId(), reason);
+        notifyApproved(o, r);
+        return Optional.of(r);
     }
 
     private Refund apply(Order o, Map<Long, Integer> quantities, boolean includeShipping, String reason, String actor) {
@@ -129,13 +169,17 @@ public class RefundService {
 
         log.info("[Refund] #{} approved for order #{} — buyer GMD {} (vendor share {}, debt {}) by {}",
                 r.getId(), o.getId(), r.getAmount(), r.getVendorDeduction(), r.getVendorDebt(), actor);
+        notifyApproved(o, r);
+        return r;
+    }
+
+    private void notifyApproved(Order o, Refund r) {
         if (o.getUser() != null)
             emailService.sendEmail(o.getUser().getEmail(), "Refund approved for order #LMO-" + o.getId(),
                     EmailTemplates.refundApproved(o.getUser().getUsername(), String.valueOf(o.getId()),
                             r.getAmount(), r.getDueBy().toString()));
         userService.notifyAdmins("💸 Refund of GMD " + String.format("%.2f", r.getAmount()) + " owed for order #LMO-"
                 + o.getId() + " — pay it by " + r.getDueBy() + " and record the reference.");
-        return r;
     }
 
     /**

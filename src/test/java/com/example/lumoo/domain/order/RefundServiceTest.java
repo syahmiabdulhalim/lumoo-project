@@ -193,4 +193,37 @@ class RefundServiceTest {
         assertEquals(LocalDate.of(2026, 10, 26), RefundService.addBusinessDays(friday, 1));
         assertEquals(LocalDate.of(2026, 11, 12), RefundService.addBusinessDays(friday, 14));
     }
+    @Test
+    void underpaidCharge_refundsWhatWasPaid_splitByOrderTotal_vendorUntouched() {
+        Order a = order("PAYMENT_FAILED", null, 0);  // total 270
+        Order b = order("PAYMENT_FAILED", null, 0);
+        b.setId(2L);
+        b.setTotalAmount(130);
+        double earningsBefore = a.getVendorEarnings(), commissionBefore = a.getAdminCommission();
+        List<Refund> made = refundService.refundChargedPayment(List.of(a, b), 200, java.util.Set.of(1L, 2L), "short");
+        assertEquals(2, made.size());
+        assertEquals(135, made.get(0).getAmount(), 0.001);
+        assertEquals(65, made.get(1).getAmount(), 0.001);
+        assertEquals(0, made.get(0).getVendorDeduction(), 0.001);
+        assertEquals(earningsBefore, a.getVendorEarnings(), 0.001);
+        assertEquals(commissionBefore, a.getAdminCommission(), 0.001);
+        assertEquals(135, a.getRefundedAmount(), 0.001);
+    }
+    @Test
+    void sameChargeReportedTwice_refundsOnce() {
+        Order a = order("PAYMENT_FAILED", null, 0);
+        when(refundRepository.findByOrderId(1L)).thenReturn(List.of(new Refund()));
+        assertTrue(refundService.refundChargedPayment(List.of(a), 100, java.util.Set.of(1L), "short").isEmpty());
+        verify(refundRepository, never()).save(any());
+    }
+    @Test
+    void unknownPaidAmount_refundsOrderTotal_onlyForListedOrders() {
+        Order a = order("CANCELLED", null, 0);
+        Order b = order("PAID", null, 0);
+        b.setId(2L);
+        List<Refund> made = refundService.refundChargedPayment(List.of(a, b), -1, java.util.Set.of(1L), "late");
+        assertEquals(1, made.size());
+        assertEquals(270, made.get(0).getAmount(), 0.001);
+        assertEquals(0, b.getRefundedAmount(), 0.001);
+    }
 }

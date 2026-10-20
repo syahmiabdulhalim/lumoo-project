@@ -63,13 +63,14 @@ class ModemPayServiceTest {
         assertEquals("PAYMENT_FAILED", b.getStatus());
         verify(orderService).returnStockForOrder(a);
         verify(orderService).returnStockForOrder(b);
+        verify(refundService).refundChargedPayment(eq(List.of(a, b)), eq(450L), eq(java.util.Set.of(1L, 2L)), contains("short"));
     }
     @Test
     void latePaymentOnCancelledOrder_createsRefund_alertsAdmins_andDoesNotMarkPaid() {
         Order cancelled = order(5, "CANCELLED", 100);
         service.applySuccessfulCharge(List.of(cancelled), 100, "webhook");
         verify(orderService, never()).markPaid(any());
-        verify(refundService).refundLatePayment(eq(5L), contains("CANCELLED"));
+        verify(refundService).refundChargedPayment(eq(List.of(cancelled)), eq(100L), eq(java.util.Set.of(5L)), contains("closed"));
         verify(userService).notifyAdmins(contains("#LMO-5"));
         assertEquals("CANCELLED", cancelled.getStatus());
     }

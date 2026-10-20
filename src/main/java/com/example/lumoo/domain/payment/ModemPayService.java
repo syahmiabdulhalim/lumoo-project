@@ -205,6 +205,7 @@ public class ModemPayService {
         if (orders.isEmpty()) return;
         long expected = orders.stream().mapToLong(o -> Math.round(o.getTotalAmount())).sum();
         boolean underpaid = paidAmount >= 0 && paidAmount < expected;
+        Set<Long> toRefund = new java.util.HashSet<>();
         for (Order order : orders) {
             String status = order.getStatus();
             if ("AWAITING_PAYMENT".equals(status)) {
@@ -214,20 +215,25 @@ public class ModemPayService {
                     order.setStatus("PAYMENT_FAILED");
                     orderRepository.save(order);
                     orderService.returnStockForOrder(order);
+                    toRefund.add(order.getId());
                 } else {
                     orderService.markPaid(order);
                     log.info("[ModemPay] Order #{} marked PAID via {} (paid={}GMD)", order.getId(), source, paidAmount);
                 }
             } else if (CLOSED_STATUSES.contains(status)) {
-                log.error("[ModemPay] Payment received for order #{} which is {} ({}) — full refund created",
+                log.error("[ModemPay] Payment received for order #{} which is {} ({}) — refund created",
                         order.getId(), status, source);
-                refundService.refundLatePayment(order.getId(), "Payment arrived after the order was " + status);
+                toRefund.add(order.getId());
                 userService.notifyAdmins("⚠ Payment received for order #LMO-" + order.getId() + " but it is " + status
-                        + ". A full refund is pending under Refunds (or restore the order manually).");
+                        + ". A refund is pending under Refunds (or restore the order manually).");
             } else {
                 log.info("[ModemPay] Order #{} already in status {} — skipping PAID transition", order.getId(), status);
             }
         }
+        if (!toRefund.isEmpty())
+            refundService.refundChargedPayment(orders, paidAmount, toRefund,
+                    underpaid ? "ModemPay charge was short (paid " + paidAmount + " of " + expected + " GMD)"
+                              : "Payment arrived after the order was closed");
     }
     private void handlePaymentFailed(Long orderId) {
         orderRepository.findById(orderId).ifPresent(order -> {
